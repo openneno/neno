@@ -1,0 +1,22 @@
+{
+  "name": "Svelte PWA Tailwind starter",
+  "short_name": "SveltePWAStarter",
+  "theme_color": "#5bd1d7",
+  "background_color": "#f6f5f5",
+  "display": "standalone",
+  "Scope": "/",
+  "start_url": "/index.html",
+  "icons": [
+    {
+      "src": "/assets/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "splash_pages": null
+}

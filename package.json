@@ -1,0 +1,58 @@
+{
+  "name": "svelte-starter-postcss",
+  "version": "1.0.0",
+  "description": "A starter for bulding Svelte web apps, with PostCSS support.",
+  "main": " ",
+  "scripts": {
+    "build": "rollup -c",
+    "build:auto": "rollup -c -w",
+    "serve": "sirv dist",
+    "serve:dev": "sirv dist --dev",
+    "dev": "run-p build:auto serve:dev",
+    "now-build": "rollup -c",
+    "test": "cypress open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noprodev/svelte-starter-postcss.git"
+  },
+  "keywords": [
+    "Svelte",
+    "starter",
+    "PostCSS"
+  ],
+  "author": "noprodev",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/noprodev/svelte-starter-postcss/issues"
+  },
+  "homepage": "https://github.com/noprodev/svelte-starter-postcss#readme",
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^1.2.0",
+    "chokidar": "^3.0.0",
+    "cssnano": "^4.1.10",
+    "cypress": "^3.4.1",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^7.0.16",
+    "postcss-color-mod-function": "^3.0.3",
+    "postcss-import": "^12.0.1",
+    "postcss-preset-env": "^6.6.0",
+    "postcss-url": "^8.0.0",
+    "rollup": "^1.12.1",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-copy-assets": "^2.0.1",
+    "rollup-plugin-livereload": "^1.0.1",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^5.0.0",
+    "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-svelte": "^5.0.3",
+    "rollup-plugin-terser": "^4.0.4",
+    "sirv-cli": "^0.4.2",
+    "svelte": "^3.4.0",
+    "svelte-preprocess": "^2.9.0",
+    "svelte-preprocess-postcss": "^1.0.0",
+    "tailwindcss": "^1.0.1"
+  },
+  "dependencies": {}
+}
