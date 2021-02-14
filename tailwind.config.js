@@ -7,8 +7,9 @@ module.exports = {
         secondaryColor: "#248ea9",
         accentColor: "#556fb5"
       },
-    
+
     },
+
     screens: {
       'lt': '456px',
       'sm': '640px',
@@ -28,5 +29,6 @@ module.exports = {
     },
   },
   variants: {},
-  plugins: []
+  plugins: [],
+
 };

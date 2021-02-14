@@ -7,7 +7,7 @@
   // }
 </script>
 
-<main class="overflow-hidden">
+<main class="overflow-y-hidden f h-screen">
   <Router />
   <HelloWorld />
 </main>
