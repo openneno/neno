@@ -98,7 +98,7 @@
             on:update={(event) => {
                 console.log(event.detail);
 
-                content = event.detail;
+                content = event.detail.content;
             }}
         />
     {:else}

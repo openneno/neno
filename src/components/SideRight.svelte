@@ -129,7 +129,12 @@
         </div>
     </div>
     <div class="p-4">
-        <QuillEditor />
+        <QuillEditor
+            on:update={(event) => {
+                flomoItems = [event.detail, ...flomoItems];
+                console.log(flomoItems);
+            }}
+        />
     </div>
     {#if isLoding}
         <div transition:fly={{ y: -20, duration: 1000 }} class="w-full ">

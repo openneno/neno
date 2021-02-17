@@ -1,9 +1,8 @@
 <script context="module">
-    let doShowParent = null;
-
+    let showDetailss = null;
     export function showFmolo(fmoloId, isHidden) {
         console.log("showFmolo", fmoloId, isHidden);
-        doShowParent(fmoloId, isHidden);
+        showDetailss(fmoloId, isHidden);
     }
 </script>
 
@@ -20,13 +19,11 @@
     let fmoloDetail = { children: [], _id: "" };
 
     onMount(() => {
-        doShowParent = showParent;
-        return doShowParent;
+        showDetailss = showDetail;
     });
-    let flomoItems = [];
 
     let _id = "";
-    function showParent(newFmoloId) {
+    function showDetail(newFmoloId) {
         _id = newFmoloId;
         show = true;
         getDetail(_id);
@@ -37,6 +34,7 @@
             .then(async (respone) => {
                 let re = await respone.json();
                 fmoloDetail = re.body;
+
                 console.log(fmoloDetail);
                 isLoding = false;
             })
@@ -48,7 +46,7 @@
     function hidden(params) {
         isLoding = false;
         show = false;
-        flomoItems = [];
+        fmoloDetail = { children: [], _id: "" };
     }
 </script>
 
@@ -89,12 +87,26 @@
             />
 
             <div class=" pl-6 ">
-                {#each fmoloDetail.children as item}
+                {#each fmoloDetail.children as item (item._id)}
                     <!-- content here -->
-                    <FmoloItem {...item} />
+                    <FmoloItem
+                        _id={item._id}
+                        created_at={item.created_at}
+                        content={item.content}
+                        children={[]}
+                        images={[]}
+                    />
                 {/each}
             </div>
-            <QuillEditor parentId={fmoloDetail._id} />
+            <QuillEditor
+                parentId={fmoloDetail._id}
+                on:update={(event) => {
+                    fmoloDetail.children = [
+                        ...fmoloDetail.children,
+                        event.detail,
+                    ];
+                }}
+            />
         </div>
     </div>
 {/if}

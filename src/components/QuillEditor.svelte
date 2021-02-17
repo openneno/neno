@@ -3,6 +3,8 @@
     import Quill from "quill";
     import { addFmolo } from "../request/fetchApi";
     import { createEventDispatcher } from "svelte";
+    import ProgressLine from "./ProgressLine.svelte";
+    import { ifError } from "assert";
     export let content = "";
     export let _id = "";
     export let parentId = "";
@@ -18,7 +20,8 @@
     let uploadimageNode = "";
     let uploadimagefiles = [];
     let imageFiles = [];
-    let isContentEmpty = false;
+    let isContentEmpty = true;
+    let isSending = false;
 
     onMount(() => {
         var options = {
@@ -36,6 +39,7 @@
             isContentEmpty = quillEditor.getText().length == 1;
             console.log();
         });
+        quillEditor.setSelection(quillEditor.getText().length);
     });
     $: {
         console.log("parentId", parentId);
@@ -142,17 +146,20 @@
     }
     function sendBiu() {
         let sContent = editor.childNodes[0].innerHTML;
+        isSending = true;
         addFmolo({ content: sContent, _id: _id, parentId: parentId })
             .then(async (respone) => {
                 let re = await respone.json();
                 console.log(re);
+                isSending = false;
                 if (re.errorMessage == undefined) {
                     quillEditor.setContents([]);
-                    dispatch("update", sContent);
+                    dispatch("update", re.body);
                     cancelInput();
                 }
             })
             .catch((reason) => {
+                isSending = false;
                 console.log(reason);
             });
     }
@@ -267,10 +274,16 @@
                 >
             {/if}
             <button
-                class="rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50"
+                class="rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16"
                 disabled={isContentEmpty}
-                on:click={sendBiu}>发送</button
+                on:click={sendBiu}
             >
+                {#if isSending}
+                    <ProgressLine dotSize={5} leftSize={6} bgColor={"white"} />
+                {:else}
+                    发送
+                {/if}
+            </button>
         </div>
     </div>
 </div>

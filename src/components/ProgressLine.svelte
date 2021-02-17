@@ -1,9 +1,42 @@
+<script>
+    export let dotSize = 13;
+    export let leftSize = 8;
+    export let bgColor = "#a0aec0";
+</script>
+
 <div class="w-full flex items-center justify-center">
-    <div class="lds-ellipsis">
-        <div />
-        <div />
-        <div />
-        <div />
+    <div
+        class="lds-ellipsis"
+        style=" --t-size: {leftSize * 3 + 'px'};--bg-color:{bgColor}"
+    >
+        <div
+            style="   width: {dotSize}px;
+        height:  {dotSize}px; 
+        left: {leftSize}px;
+        "
+        />
+        <div
+            style="   
+           
+            width: {dotSize}px;
+        height:  {dotSize}px;      
+        left:  {leftSize}px;
+        "
+        />
+        <div
+            style="   width: {dotSize}px;
+        height:  {dotSize}px;
+        left:  {leftSize *
+                4}px;
+        "
+        />
+        <div
+            style="   width: {dotSize}px;
+        height:  {dotSize}px;
+        left:  {leftSize *
+                7}px;
+        "
+        />
     </div>
 </div>
 
@@ -11,30 +44,24 @@
     .lds-ellipsis {
         display: inline-block;
         position: relative;
-        width: 80px;
+        width: 60px;
     }
     .lds-ellipsis div {
         position: absolute;
-        width: 13px;
-        height: 13px;
         border-radius: 50%;
-        background: #a0aec0;
+        background: var(--bg-color);
         animation-timing-function: cubic-bezier(0, 1, 1, 0);
     }
     .lds-ellipsis div:nth-child(1) {
-        left: 8px;
         animation: lds-ellipsis1 0.6s infinite;
     }
     .lds-ellipsis div:nth-child(2) {
-        left: 8px;
         animation: lds-ellipsis2 0.6s infinite;
     }
     .lds-ellipsis div:nth-child(3) {
-        left: 32px;
         animation: lds-ellipsis2 0.6s infinite;
     }
     .lds-ellipsis div:nth-child(4) {
-        left: 56px;
         animation: lds-ellipsis3 0.6s infinite;
     }
     @keyframes lds-ellipsis1 {
@@ -58,7 +85,7 @@
             transform: translate(0, 0);
         }
         100% {
-            transform: translate(24px, 0);
+            transform: translate(var(--t-size), 0);
         }
     }
 </style>
