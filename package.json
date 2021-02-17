@@ -55,6 +55,7 @@
     "tailwindcss": "^1.9.6"
   },
   "dependencies": {
+    "dayjs": "^1.10.4",
     "prosemirror-example-setup": "^1.1.2",
     "prosemirror-model": "^1.13.3",
     "prosemirror-schema-basic": "^1.1.2",

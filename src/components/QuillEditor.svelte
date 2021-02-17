@@ -1,22 +1,61 @@
 <script>
     import { onMount } from "svelte";
     import Quill from "quill";
-    import { getAllFmolo } from "../request/fetchApi";
+    import { addFmolo } from "../request/fetchApi";
+    import { createEventDispatcher } from "svelte";
+    export let content = "";
+    export let _id = "";
+    export let parentId = "";
+    export let canCancle = false;
+
+    const dispatch = createEventDispatcher();
 
     let editor = "";
     let toolbar = "";
 
-    export let content = "";
-    export let canCancle = false;
+    let quillEditor;
 
     let uploadimageNode = "";
     let uploadimagefiles = [];
     let imageFiles = [];
+    let isContentEmpty = false;
+
+    onMount(() => {
+        var options = {
+            // debug: "info",
+            modules: {
+                toolbar: toolbar,
+            },
+            placeholder: "现在的想法是...",
+        };
+        quillEditor = new Quill(editor, options);
+        const delta = quillEditor.clipboard.convert(content);
+        quillEditor.setContents(delta, "silent");
+        quillEditor.focus();
+        quillEditor.on("text-change", function (delta, oldDelta, source) {
+            isContentEmpty = quillEditor.getText().length == 1;
+            console.log();
+        });
+    });
+    $: {
+        console.log("parentId", parentId);
+    }
     $: imageFiles = joinFile(uploadimagefiles);
+
+    $: {
+        for (let index = 0; index < imageFiles.length; index++) {
+            const element = imageFiles[index];
+            console.log(index, element);
+            if (element.uploadingstatus == "未上传") {
+                element.uploadingstatus = "上传中";
+                uploadPic(element, index);
+            }
+        }
+    }
+
     function joinFile(uploadimagefiles) {
         let filelist = Array.from(uploadimagefiles);
         let indexcount = 0;
-        console.log(uploadimagefiles);
         let tempfiles = imageFiles;
         filelist.forEach((element) => {
             tempfiles = [
@@ -32,30 +71,9 @@
         });
         return tempfiles;
     }
-    $: {
-        for (let index = 0; index < imageFiles.length; index++) {
-            const element = imageFiles[index];
-            console.log(index, element);
-            if (element.uploadingstatus == "未上传") {
-                element.uploadingstatus = "上传中";
-                uploadPic(element, index);
-            }
-        }
+    function cancelInput() {
+        dispatch("cancle", {});
     }
-    onMount(() => {
-        var options = {
-            // debug: "info",
-            modules: {
-                toolbar: toolbar,
-            },
-            placeholder: "现在的想法是...",
-            // theme: "snow",
-        };
-        editor = new Quill(editor, options);
-        const delta = editor.clipboard.convert(content);
-        editor.setContents(delta, "silent");
-        editor.focus();
-    });
     function selectImages(params) {
         uploadimageNode.click();
     }
@@ -68,7 +86,6 @@
     function insertHashTag() {
         editor.insertText(0, "#", {
             color: "#000",
-            italic: true,
         });
     }
     function getObjectURL(file) {
@@ -124,10 +141,16 @@
         request.send(formData);
     }
     function sendBiu() {
-        getAllFmolo([])
+        let sContent = editor.childNodes[0].innerHTML;
+        addFmolo({ content: sContent, _id: _id, parentId: parentId })
             .then(async (respone) => {
                 let re = await respone.json();
                 console.log(re);
+                if (re.errorMessage == undefined) {
+                    quillEditor.setContents([]);
+                    dispatch("update", sContent);
+                    cancelInput();
+                }
             })
             .catch((reason) => {
                 console.log(reason);
@@ -239,12 +262,13 @@
         <div class="flex space-x-2">
             {#if canCancle}
                 <button
-                    class="rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none"
-                    on:click={sendBiu}>取消</button
+                    class="rounded-sm bg-white border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm"
+                    on:click={cancelInput}>取消</button
                 >
             {/if}
             <button
-                class="rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none"
+                class="rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50"
+                disabled={isContentEmpty}
                 on:click={sendBiu}>发送</button
             >
         </div>

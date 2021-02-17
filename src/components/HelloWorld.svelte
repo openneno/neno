@@ -1,8 +1,7 @@
 <script>
   import SideLeft from "./SideLeft.svelte";
   import SideRight from "./SideRight.svelte";
-  import SideInRight from "./SideInRight.svelte";
-
+  import FmoloDetail from "./FmoloDetail.svelte";
 </script>
 
 <div
@@ -12,5 +11,5 @@
     <SideLeft />
     <SideRight />
   </div>
-  <SideInRight />
+  <FmoloDetail />
 </div>

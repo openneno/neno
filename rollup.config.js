@@ -28,7 +28,8 @@ export default {
       },
       css: css => {
         css.write("dist/components.css");
-      }
+      },
+      emitCss: true
     }),
     resolve(),
     commonjs(),

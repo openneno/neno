@@ -3,10 +3,11 @@
 </script>
 
 <script>
-    import { showFmolo } from "./SideInRight.svelte";
+    import { showFmolo } from "./FmoloDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
-
-    export let createTime = "2021-02-01 11:12:24";
+    import dayjs from "dayjs";
+    export let _id = "";
+    export let created_at = "2021-02-01 11:12:24";
     export let content = "";
     export let images = [];
     export let parent = null;
@@ -36,15 +37,17 @@
         openMore = !openMore;
     }
     function toggleEditMode(params) {
-        console.log("toggleEditMode", params);
         editMode = !editMode;
+        console.log("toggleEditMode", params);
     }
 </script>
 
 <!-- <svelte:window on:click={() => toggleMoreWindow(2)} /> -->
 <div class="w-full p-4 rounded-lg bg-white mb-4 shadow-sm  hover:shadow-lg">
     <div class="flex justify-between">
-        <div class="text-sm text-gray-500">{createTime}</div>
+        <div class="text-sm text-gray-500">
+            {dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")}
+        </div>
         <div class="relative">
             <button on:click={() => toggleMore(1)} class="focus:outline-none ">
                 <i class="ri-more-line" />
@@ -71,8 +74,11 @@
                             toggleEditMode();
                         }}>编辑</button
                     >
-                    <button class="focus:outline-none hover:bg-gray-300"
-                        >批注</button
+                    <button
+                        class="focus:outline-none hover:bg-gray-300"
+                        on:click={() => {
+                            showFmolo(_id, false);
+                        }}>批注</button
                     >
                     <button class="focus:outline-none hover:bg-gray-300"
                         >删除</button
@@ -82,7 +88,19 @@
         </div>
     </div>
     {#if editMode}
-        <QuillEditor {content} canCancle={true} />
+        <QuillEditor
+            {content}
+            {_id}
+            canCancle={true}
+            on:cancle={() => {
+                editMode = false;
+            }}
+            on:update={(event) => {
+                console.log(event.detail);
+
+                content = event.detail;
+            }}
+        />
     {:else}
         <div class="list-decimal text-sm text-red-300">
             <p>{@html content}</p>
@@ -98,10 +116,12 @@
             />
         {/each}
     </div>
-    {#if parent != null}
+    {#if parent != undefined && parent != null}
         <button
             class="flex items-center space-x-1  hover:shadow-sm focus:outline-none"
-            on:click={showFmolo}
+            on:click={() => {
+                showFmolo(parent._id, false);
+            }}
         >
             <i
                 class="ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500"
@@ -122,7 +142,9 @@
     {#each children as item}
         <button
             class="flex items-center  space-x-1   hover:shadow-sm focus:outline-none"
-            on:click={showFmolo}
+            on:click={() => {
+                showFmolo(item._id, false);
+            }}
         >
             <i
                 class="ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500"
