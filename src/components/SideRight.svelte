@@ -100,7 +100,6 @@
                 throw new Error("Network response was not ok.");
             })
             .then(async (respone) => {
-                console.log(respone);
                 let re = await respone.json();
                 if (re.body.length == 0) {
                     isEnd = true;
@@ -132,7 +131,6 @@
         <QuillEditor
             on:update={(event) => {
                 flomoItems = [event.detail, ...flomoItems];
-                console.log(flomoItems);
             }}
         />
     </div>
@@ -157,8 +155,14 @@
         style="height:{innerHeight - flowClientTop}px"
     >
         {#each flomoItems as item, index (index)}
-            <!-- content here -->
-            <FmoloItem {...item} />
+            <FmoloItem
+                {...item}
+                on:deleteOne={(event) => {
+                    flomoItems = flomoItems.filter((item) => {
+                        return item._id != event.detail._id;
+                    });
+                }}
+            />
         {/each}
     </div>
 </div>

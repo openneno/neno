@@ -31,3 +31,11 @@ export const detail = (data) => {
         mode: "cors",
     })
 }
+export const deleteOne = (data) => {
+
+    return fetch(`${baseurl}/delete`, {
+        body: JSON.stringify(data),
+        method: "post",
+        mode: "cors",
+    })
+}

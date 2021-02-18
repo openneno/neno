@@ -5,6 +5,11 @@
 <script>
     import { showFmolo } from "./FmoloDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
+    import { deleteOne } from "../request/fetchApi";
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher();
+
     import dayjs from "dayjs";
     export let _id = "";
     export let created_at = "2021-02-01 11:12:24";
@@ -12,6 +17,8 @@
     export let images = [];
     export let parent = null;
     export let children = [];
+    export let tags = [];
+
     function plainContent(content) {
         let aa = document.createElement("div");
         aa.insertAdjacentHTML("afterbegin", content);
@@ -39,6 +46,43 @@
     function toggleEditMode(params) {
         editMode = !editMode;
         console.log("toggleEditMode", params);
+    }
+    function deleteNeno(_id) {
+        deleteOne({ _id: _id })
+            .then(async (respone) => {
+                let re = await respone.json();
+                let code = re.code;
+                if (code == 200) {
+                    dispatch("deleteOne", { _id: _id });
+                }
+            })
+            .catch((reason) => {
+                console.log(reason);
+            });
+    }
+    document.tagClick = (tag) => {
+        console.log("tagClick", tag);
+    };
+    function praseTag(rawContent, tags) {
+        let pContent = "";
+        let pIndex = 0;
+        let copyRawContent = rawContent;
+        if (tags != null) {
+            for (let index = 0; index < tags.length; index++) {
+                let rawtag = tags[index];
+                let breakIndex = rawContent.indexOf(rawtag);
+                //截取前段的字符
+                pContent += rawContent.substring(0, breakIndex);
+                //加上替换的内容
+                pContent += `<span  class=" cursor-pointer rounded-sm bg-green-500 text-white text-sm pl-1 pr-1" id="tagtag" onclick="tagClick('${tags[index]}')">
+	${rawtag}
+	</span>`;
+                rawContent = rawContent.substring(breakIndex + rawtag.length);
+                pIndex += breakIndex + rawtag.length;
+            }
+        }
+        pContent += copyRawContent.substring(pIndex);
+        return pContent;
     }
 </script>
 
@@ -80,8 +124,11 @@
                             showFmolo(_id, false);
                         }}>批注</button
                     >
-                    <button class="focus:outline-none hover:bg-gray-300"
-                        >删除</button
+                    <button
+                        class="focus:outline-none hover:bg-gray-300"
+                        on:click={() => {
+                            deleteNeno(_id);
+                        }}>删除</button
                     >
                 </div>
             {/if}
@@ -103,7 +150,7 @@
         />
     {:else}
         <div class="list-decimal text-sm text-red-300">
-            <p>{@html content}</p>
+            <p>{@html praseTag(content, tags)}</p>
         </div>
     {/if}
 

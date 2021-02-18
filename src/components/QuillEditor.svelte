@@ -4,7 +4,6 @@
     import { addFmolo } from "../request/fetchApi";
     import { createEventDispatcher } from "svelte";
     import ProgressLine from "./ProgressLine.svelte";
-    import { ifError } from "assert";
     export let content = "";
     export let _id = "";
     export let parentId = "";
@@ -88,9 +87,16 @@
         });
     }
     function insertHashTag() {
-        editor.insertText(0, "#", {
-            color: "#000",
-        });
+        var range = quillEditor.getSelection(true);
+        let index = 0;
+        if (range) {
+            if (range.length == 0) {
+                index = range.index;
+            } else {
+                index = range.index + range.length;
+            }
+        }
+        quillEditor.insertText(index, "#");
     }
     function getObjectURL(file) {
         var url = null;
@@ -147,10 +153,27 @@
     function sendBiu() {
         let sContent = editor.childNodes[0].innerHTML;
         isSending = true;
-        addFmolo({ content: sContent, _id: _id, parentId: parentId })
+        let cc = quillEditor.getContents();
+        console.log(cc.ops);
+        let tags = [];
+
+        for (let index = 0; index < cc.ops.length; index++) {
+            let item = cc.ops[index];
+            let mt = item.insert.match(/#\S*/g);
+            if (mt != null) {
+                tags = [...tags, ...mt];
+            }
+        }
+        console.log(tags);
+        addFmolo({
+            content: sContent,
+            _id: _id,
+            parentId: parentId,
+            source: "web",
+            tags: tags,
+        })
             .then(async (respone) => {
                 let re = await respone.json();
-                console.log(re);
                 isSending = false;
                 if (re.errorMessage == undefined) {
                     quillEditor.setContents([]);
@@ -275,8 +298,10 @@
             {/if}
             <button
                 class="rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16"
-                disabled={isContentEmpty}
-                on:click={sendBiu}
+                disabled={isContentEmpty || isSending}
+                on:click={() => {
+                    sendBiu();
+                }}
             >
                 {#if isSending}
                     <ProgressLine dotSize={5} leftSize={6} bgColor={"white"} />
