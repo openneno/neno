@@ -82,14 +82,24 @@
                 _id={fmoloDetail._id}
                 created_at={fmoloDetail.created_at}
                 content={fmoloDetail.content}
+                parentId={fmoloDetail.parentId}
                 parent={fmoloDetail.parent}
-                images={[]}
+                images={fmoloDetail.images}
             />
 
             <div class=" pl-6 ">
                 {#each fmoloDetail.children as item (item._id)}
                     <!-- content here -->
-                    <FmoloItem {...item} images={[]} />
+                    <FmoloItem
+                        {...item}
+                        on:deleteOne={(event) => {
+                            fmoloDetail.children = fmoloDetail.children.filter(
+                                (item) => {
+                                    return item._id != event.detail._id;
+                                }
+                            );
+                        }}
+                    />
                 {/each}
             </div>
             <QuillEditor

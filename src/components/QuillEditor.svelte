@@ -1,12 +1,16 @@
 <script>
     import { onMount } from "svelte";
     import Quill from "quill";
-    import { addFmolo } from "../request/fetchApi";
+    import * as qiniu from "qiniu-js";
+    import { addFmolo, qiniuToken } from "../request/fetchApi";
+    import { settingStrore } from "../store/store.js";
     import { createEventDispatcher } from "svelte";
     import ProgressLine from "./ProgressLine.svelte";
     export let content = "";
     export let _id = "";
     export let parentId = "";
+    export let images = [];
+
     export let canCancle = false;
 
     const dispatch = createEventDispatcher();
@@ -34,31 +38,54 @@
         const delta = quillEditor.clipboard.convert(content);
         quillEditor.setContents(delta, "silent");
         quillEditor.focus();
+        if (content.length != 0) {
+            isContentEmpty = false;
+        }
         quillEditor.on("text-change", function (delta, oldDelta, source) {
             isContentEmpty = quillEditor.getText().length == 1;
             console.log();
         });
         quillEditor.setSelection(quillEditor.getText().length);
+        let tempfiles = [];
+        images.forEach((element) => {
+            tempfiles = [
+                ...tempfiles,
+                {
+                    file: null,
+                    percent_completed: 100,
+                    uploadInfo: element,
+                    timeStamp: Date.now() + Math.random(),
+                    uploadingstatus: "已上传", //"上传中","已上传"
+                },
+            ];
+        });
+        imageFiles = tempfiles;
     });
-    $: {
-        console.log("parentId", parentId);
-    }
+
     $: imageFiles = joinFile(uploadimagefiles);
 
     $: {
         for (let index = 0; index < imageFiles.length; index++) {
             const element = imageFiles[index];
-            console.log(index, element);
             if (element.uploadingstatus == "未上传") {
                 element.uploadingstatus = "上传中";
-                uploadPic(element, index);
+                // uploadPic(element, index);
+                qiniuToken()
+                    .then(async (respone) => {
+                        let re = await respone.json();
+                        if (re.errorMessage == undefined) {
+                            uploadPicQiniu(element, index, re.body);
+                        }
+                    })
+                    .catch((reason) => {
+                        console.log(reason);
+                    });
             }
         }
     }
 
     function joinFile(uploadimagefiles) {
         let filelist = Array.from(uploadimagefiles);
-        let indexcount = 0;
         let tempfiles = imageFiles;
         filelist.forEach((element) => {
             tempfiles = [
@@ -66,24 +93,29 @@
                 {
                     file: element,
                     percent_completed: 0,
-                    index: indexcount,
+                    uploadInfo: {
+                        platform: "",
+                        url: "",
+                        key: "",
+                    },
+                    timeStamp: Date.now() + Math.random(),
                     uploadingstatus: "未上传", //"上传中","已上传"
                 },
             ];
-            indexcount++;
         });
         return tempfiles;
     }
     function cancelInput() {
+        imageFiles = [];
         dispatch("cancle", {});
     }
     function selectImages(params) {
         uploadimageNode.click();
     }
     function viewImage(params) {}
-    function deleteImage(index) {
+    function deleteImage(timeStamp) {
         imageFiles = imageFiles.filter((item) => {
-            return item.index != index;
+            return item.timeStamp != timeStamp;
         });
     }
     function insertHashTag() {
@@ -112,6 +144,33 @@
             url = window.webkitURL.createObjectURL(file);
         }
         return url;
+    }
+    function uploadPicQiniu(imageFile, index, token) {
+        console.log(imageFile, imageFile.name, token);
+        const observable = qiniu.upload(
+            imageFile.file,
+            imageFile.file.name,
+            token
+        );
+
+        const subscription = observable.subscribe(
+            (response) => {
+                let total = response.total;
+                imageFiles[index].percent_completed = parseInt(
+                    total.percent + ""
+                );
+                console.log(response, total);
+            },
+            (error) => {
+                console.log(error, "错误");
+            },
+            (response) => {
+                console.log(response, "已上传");
+                imageFiles[index].uploadingstatus = "已上传";
+                imageFiles[index].uploadInfo.key = response.key;
+                imageFiles[index].uploadInfo.platform = "qiniu";
+            }
+        ); // 这样传参形式也可以
     }
     function uploadPic(imageFile, index) {
         var formData = new FormData();
@@ -154,7 +213,6 @@
         let sContent = editor.childNodes[0].innerHTML;
         isSending = true;
         let cc = quillEditor.getContents();
-        console.log(cc.ops);
         let tags = [];
 
         for (let index = 0; index < cc.ops.length; index++) {
@@ -164,13 +222,30 @@
                 tags = [...tags, ...mt];
             }
         }
-        console.log(tags);
+        let imagesInfo = [];
+        for (let index = 0; index < imageFiles.length; index++) {
+            const element = imageFiles[index];
+            if (element.uploadingstatus != "已上传") {
+                return;
+            }
+            imagesInfo = [
+                ...imagesInfo,
+                {
+                    key: element.uploadInfo.key,
+                    platform: $settingStrore.platform,
+                    domain: $settingStrore.domain,
+                    timeStamp: element.timeStamp,
+                },
+            ];
+        }
+
         addFmolo({
             content: sContent,
             _id: _id,
             parentId: parentId,
             source: "web",
             tags: tags,
+            images: imagesInfo,
         })
             .then(async (respone) => {
                 let re = await respone.json();
@@ -193,7 +268,7 @@
 >
     <div bind:this={editor} id="editor" class="list-decimal list-inside" />
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each imageFiles as { file, percent_completed, index } (file)}
+        {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
             <div
                 class="w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden"
             >
@@ -203,7 +278,7 @@
                     <button on:click={viewImage}>
                         <i class="m-auto ri-zoom-in-line ri-xl text-white" />
                     </button>
-                    <button class=" " on:click={deleteImage(index)}>
+                    <button class=" " on:click={deleteImage(timeStamp)}>
                         <i class="m-auto ri-delete-bin-line ri-xl text-white" />
                     </button>
                 </div>
@@ -219,7 +294,9 @@
 
                 <img
                     class=" w-full h-full object-cover"
-                    src={getObjectURL(file)}
+                    src={file == null
+                        ? uploadInfo.domain + "/" + uploadInfo.key
+                        : getObjectURL(file)}
                     alt=""
                 />
                 {#if percent_completed == 100}

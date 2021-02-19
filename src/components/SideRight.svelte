@@ -5,6 +5,7 @@
     import { getAllFmolo, search } from "../request/fetchApi";
     import ProgressLine from "./ProgressLine.svelte";
     import { fly } from "svelte/transition";
+    import { pagedd } from "../store/store.js";
 
     let flowClient;
     let innerHeight = 0;
@@ -95,7 +96,16 @@
 <svelte:window bind:innerHeight />
 <div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 ">
     <div class="  flex flex-row items-center justify-between pr-4">
-        <div>MEMO</div>
+        <div class="flex flex-row items-center ">
+            NENO <button
+                class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
+                on:click={() => {
+                    $pagedd = "setting";
+                }}
+            >
+                <i class="ri-settings-fill" />
+            </button>
+        </div>
 
         <div class="bg-gray-200 rounded-lg h-8 p-2 flex items-center">
             <i class="ri-search-2-line text-gray-400" />
@@ -146,7 +156,7 @@
         style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length == 0}
-            {#each nenoItems as item, index (index)}
+            {#each nenoItems as item, index (item._id)}
                 <FmoloItem
                     {...item}
                     on:deleteOne={(event) => {
@@ -157,7 +167,7 @@
                 />
             {/each}
         {:else}
-            {#each searchItems as item, index (index)}
+            {#each searchItems as item, index (item._id)}
                 <FmoloItem
                     {...item}
                     searchContent={searchText}

@@ -1,11 +1,12 @@
 <script>
     import { tokoen } from "../store/store.js";
     import { tags, pin, pins } from "../request/fetchApi";
+    import { pagedd } from "../store/store.js";
+
     import { onMount } from "svelte";
     let allTags = [];
     let pinTags = [];
-    let showNormalTag = [];
-    let checkedIndex = 0;
+    let checkedIndex = $pagedd;
 
     onMount(() => {
         getPins();
@@ -65,23 +66,49 @@
 </script>
 
 <div class="hidden  sm:flex md:flex flex-col items-start" style="width:240px">
-    <div class="flex flex-col items-start text-sm text-gray-600">
+    <div
+        class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold"
+    >
+        <div class="flex  items-center justify-between">
+            FMOLOER
+            <div
+                class="text-sm rounded-sm bg-red-300 text-white p-1 pt-0 pb-0 "
+            >
+                FREE
+            </div>
+        </div>
+        <button
+            class="focus:outline-none"
+            on:click={() => {
+                $pagedd = "setting";
+                checkedIndex = "setting";
+            }}
+        >
+            <i class="ri-settings-fill" />
+        </button>
+    </div>
+    <div class="flex flex-col items-start text-sm text-gray-600 w-full">
         <button
             on:click={() => {
-                checkedIndex = 0;
+                $pagedd = "neno";
+                checkedIndex = "neno";
             }}
             class="{'    bu-op hover:text-white hover:bg-green-400 ' +
-                (checkedIndex == 0 ? 'bg-green-500 text-white' : '')}        "
+                (checkedIndex == 'neno'
+                    ? 'bg-green-500 text-white'
+                    : '')}        "
         >
             <i class="ri-quill-pen-fill mr-2" />NENO</button
         >
 
         <button
             on:click={() => {
-                checkedIndex = 1;
+                checkedIndex = "daily";
             }}
             class="{'    bu-op hover:text-white hover:bg-green-400 ' +
-                (checkedIndex == 1 ? 'bg-green-500 text-white' : '')}        "
+                (checkedIndex == 'daily'
+                    ? 'bg-green-500 text-white'
+                    : '')}        "
         >
             <i class="ri-calendar-event-fill mr-2" />每日回顾</button
         >
@@ -90,7 +117,9 @@
                 checkedIndex = 2;
             }}
             class="{'    bu-op hover:text-white hover:bg-green-400 ' +
-                (checkedIndex == 2 ? 'bg-green-500 text-white' : '')}        "
+                (checkedIndex == 'luck'
+                    ? 'bg-green-500 text-white'
+                    : '')}        "
         >
             <i class="ri-bubble-chart-fill mr-2" />随机漫步</button
         >

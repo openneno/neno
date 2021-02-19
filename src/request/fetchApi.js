@@ -41,4 +41,12 @@ export const pins = (data) => {
 export const search = (data) => {
     return fetch(`${baseurl}/search`, genergeParams(data))
 }
+export const qiniuToken = (data) => {
+    return fetch(`${baseurl}/qiniu`, genergeParams(data))
+}
+export const setting = (data) => {
+    return fetch(`${baseurl}/setting`, genergeParams(data))
+}
+
+
 

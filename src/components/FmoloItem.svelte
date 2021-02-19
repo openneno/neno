@@ -16,6 +16,7 @@
     export let content = "";
     export let images = [];
     export let parent = null;
+    export let parentId = "";
     export let children = [];
     export let searchContent = "";
     export let tags = [];
@@ -30,23 +31,18 @@
     let editMode = false;
 
     function toggleMoreWindow(node) {
-        console.log("toggleMoreWindow", node);
-
         if (node == 2) {
             openMore = false;
         }
     }
     function action(params) {
-        console.log(params);
         params.focus();
     }
     function toggleMore(node) {
-        console.log("button", node);
         openMore = !openMore;
     }
     function toggleEditMode(params) {
         editMode = !editMode;
-        console.log("toggleEditMode", params);
     }
     function deleteNeno(_id) {
         deleteOne({ _id: _id })
@@ -93,7 +89,6 @@
     }
 </script>
 
-<!-- <svelte:window on:click={() => toggleMoreWindow(2)} /> -->
 <div class="w-full p-4 rounded-lg bg-white mb-4 shadow-sm  hover:shadow-lg">
     <div class="flex justify-between">
         <div class="text-sm text-gray-500">
@@ -144,14 +139,16 @@
     {#if editMode}
         <QuillEditor
             {content}
+            {images}
             {_id}
+            {parentId}
             canCancle={true}
             on:cancle={() => {
                 editMode = false;
             }}
             on:update={(event) => {
                 console.log(event.detail);
-
+                images = event.detail.images;
                 content = event.detail.content;
             }}
         />
@@ -162,10 +159,10 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each images as { url }, index (index)}
+        {#each images as { domain, key }, index (index)}
             <img
                 class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
-                src={url}
+                src={domain + "/" + key}
                 alt=""
             />
         {/each}

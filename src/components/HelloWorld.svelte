@@ -1,7 +1,10 @@
 <script>
   import SideLeft from "./SideLeft.svelte";
   import SideRight from "./SideRight.svelte";
+  import Setting from "./Setting.svelte";
+
   import FmoloDetail from "./FmoloDetail.svelte";
+  import { pagedd } from "../store/store.js";
 </script>
 
 <div
@@ -9,7 +12,11 @@
 >
   <div class="max-w-6xl min-w-0 w-full  flex ">
     <SideLeft />
-    <SideRight />
+    {#if $pagedd == "neno"}
+      <SideRight />
+    {:else if $pagedd == "setting"}
+      <Setting />
+    {/if}
   </div>
   <FmoloDetail />
 </div>

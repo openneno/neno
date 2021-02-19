@@ -29,7 +29,7 @@ module.exports = {
     },
   },
   variants: {
-    textColor: ['group-hover'],
+    textColor: ['group-hover', 'hover'],
     backgroundColor: ['group-hover', 'hover'],
     opacity: ['group-hover', 'hover'],
     extend: {
