@@ -89,13 +89,7 @@
             <div class=" pl-6 ">
                 {#each fmoloDetail.children as item (item._id)}
                     <!-- content here -->
-                    <FmoloItem
-                        _id={item._id}
-                        created_at={item.created_at}
-                        content={item.content}
-                        children={[]}
-                        images={[]}
-                    />
+                    <FmoloItem {...item} images={[]} />
                 {/each}
             </div>
             <QuillEditor

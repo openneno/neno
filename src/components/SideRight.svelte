@@ -2,18 +2,17 @@
     import QuillEditor from "./QuillEditor.svelte";
     import FmoloItem from "./FmoloItem.svelte";
     import { onMount } from "svelte";
-    import { getAllFmolo } from "../request/fetchApi";
+    import { getAllFmolo, search } from "../request/fetchApi";
     import ProgressLine from "./ProgressLine.svelte";
     import { fly } from "svelte/transition";
 
     let flowClient;
     let innerHeight = 0;
     let flowClientTop = 0;
-    let scrollY = 0;
     let isLoding = false; //加载中状态
     let isLodingError = false; //加载错误
     let isEnd = false; //所有内容加载完毕
-
+    let searchText = "";
     let page = 0;
     $: {
         if (flowClient != undefined) {
@@ -22,59 +21,9 @@
         }
     }
 
-    let flomoItems = [
-        // {
-        //     createTime: "2021-02-01 11:12:24",
-        //     content: `<p>网页设计</p><ol class="list-decimal pl-6"><li><p>首页随机显示一个物种</p></li><li><p>设计一个搜索框,可以直接上传图片进行搜索,名字就叫小亮讲过的生物</p></li><li><p>可以查看更多,跳转到列表页</p></li></ol>`,
-        //     images: [
-        //         {
-        //             url:
-        //                 "https://flomo.oss-cn-shanghai.aliyuncs.com/file/2021-01-31/31298/a629f857ed3793e97d8d81783d6c5553.jpeg",
-        //         },
-        //         {
-        //             url:
-        //                 "https://flomo.oss-cn-shanghai.aliyuncs.com/file/2021-01-31/31298/a629f857ed3793e97d8d81783d6c5553.jpeg",
-        //         },
-        //         {
-        //             url:
-        //                 "https://flomo.oss-cn-shanghai.aliyuncs.com/file/2021-01-31/31298/a629f857ed3793e97d8d81783d6c5553.jpeg",
-        //         },
-        //         {
-        //             url:
-        //                 "https://flomo.oss-cn-shanghai.aliyuncs.com/file/2021-01-31/31298/a629f857ed3793e97d8d81783d6c5553.jpeg",
-        //         },
-        //     ],
-        //     parent: { content: "<p>捡了一只黑色的小猫</p>" },
-        //     children: [
-        //         {
-        //             content: `<p>网页设计</p><ol class="list-decimal pl-6"><li><p>首页随机显示一个物种</p></li><li><p>设计一个搜索框,可以直接上传图片进行搜索,名字就叫小亮讲过的生物</p></li><li><p>可以查看更多,跳转到列表页</p></li></ol>`,
-        //         },
-        //     ],
-        // },
-        // {
-        //     createTime: "2021-02-01 11:12:24",
-        //     content: `<p>网页设计</p>`,
-        //     images: [],
-        //     parent: { content: "<p>捡了一只黑色的小猫</p>" },
-        //     children: [
-        //         {
-        //             content: `<p>网页设计</p><ol class="list-decimal pl-6"><li><p>首页随机显示一个物种</p></li><li><p>设计一个搜索框,可以直接上传图片进行搜索,名字就叫小亮讲过的生物</p></li><li><p>可以查看更多,跳转到列表页</p></li></ol>`,
-        //         },
-        //     ],
-        // },
-        // {
-        //     createTime: "2021-02-01 11:12:24",
-        //     content: `<p>网页设计</p>`,
-        //     images: [],
-        //     parent: { content: "<p>捡了一只黑色的小猫</p>" },
-        //     children: [
-        //         {
-        //             content: `<p>网页设计</p><ol class="list-decimal pl-6"><li><p>首页随机显示一个物种</p></li><li><p>设计一个搜索框,可以直接上传图片进行搜索,名字就叫小亮讲过的生物</p></li><li><p>可以查看更多,跳转到列表页</p></li></ol>`,
-        //         },
-        //     ],
-        // },
-    ];
-    let isShowSideInRight = true;
+    let nenoItems = [];
+    let searchItems = [];
+
     onMount(() => {
         load();
         flowClient.addEventListener("scroll", function () {
@@ -105,7 +54,7 @@
                     isEnd = true;
                 }
                 re.body.forEach((element) => {
-                    flomoItems = [...flomoItems, element];
+                    nenoItems = [...nenoItems, element];
                 });
                 isLoding = false;
             })
@@ -115,6 +64,32 @@
                 isLoding = false;
             });
     }
+    function searchNeno() {
+        if (searchText.length != 0) {
+            isLoding = true;
+            search({ content: searchText })
+                .then(function (response) {
+                    if (response.ok) {
+                        return response;
+                    }
+                    throw new Error("Network response was not ok.");
+                })
+                .then(async (respone) => {
+                    let re = await respone.json();
+                    isLoding = false;
+
+                    re.body.forEach((element) => {
+                        searchItems = [...searchItems, element];
+                    });
+                })
+                .catch((reason) => {
+                    console.log("reason", reason);
+                    isLoding = false;
+                });
+        } else {
+            searchItems = [];
+        }
+    }
 </script>
 
 <svelte:window bind:innerHeight />
@@ -123,14 +98,30 @@
         <div>MEMO</div>
 
         <div class="bg-gray-200 rounded-lg h-8 p-2 flex items-center">
-            <i class="ri-search-2-line text-gray-300" />
-            <input class=" ml-2 bg-gray-200 focus:outline-none" type="text" />
+            <i class="ri-search-2-line text-gray-400" />
+            <input
+                class=" ml-2 bg-gray-200 focus:outline-none text-sm"
+                type="text"
+                on:keydown={(event) => {
+                    if (event.code == "Enter") {
+                        searchNeno();
+                    }
+                }}
+                bind:value={searchText}
+            />
+            <i
+                class="ri-close-circle-fill text-gray-400"
+                on:click={() => {
+                    searchText = "";
+                    searchItems = [];
+                }}
+            />
         </div>
     </div>
     <div class="p-4">
         <QuillEditor
             on:update={(event) => {
-                flomoItems = [event.detail, ...flomoItems];
+                nenoItems = [event.detail, ...nenoItems];
             }}
         />
     </div>
@@ -154,16 +145,30 @@
         class="flex flex-col overflow-y-scroll p-4 "
         style="height:{innerHeight - flowClientTop}px"
     >
-        {#each flomoItems as item, index (index)}
-            <FmoloItem
-                {...item}
-                on:deleteOne={(event) => {
-                    flomoItems = flomoItems.filter((item) => {
-                        return item._id != event.detail._id;
-                    });
-                }}
-            />
-        {/each}
+        {#if searchItems.length == 0}
+            {#each nenoItems as item, index (index)}
+                <FmoloItem
+                    {...item}
+                    on:deleteOne={(event) => {
+                        nenoItems = nenoItems.filter((item) => {
+                            return item._id != event.detail._id;
+                        });
+                    }}
+                />
+            {/each}
+        {:else}
+            {#each searchItems as item, index (index)}
+                <FmoloItem
+                    {...item}
+                    searchContent={searchText}
+                    on:deleteOne={(event) => {
+                        nenoItems = nenoItems.filter((item) => {
+                            return item._id != event.detail._id;
+                        });
+                    }}
+                />
+            {/each}
+        {/if}
     </div>
 </div>
 

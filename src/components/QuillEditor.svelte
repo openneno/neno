@@ -259,7 +259,7 @@
                 class="ql-list hover:bg-gray-200 p-1 focus:outline-none"
                 value="bullet"
                 ><i
-                    class="ri-list-ordered hover:bg-gray-200 p-1 focus:outline-none"
+                    class="ri-list-check hover:bg-gray-200 p-1 focus:outline-none"
                 /></button
             >
 
@@ -267,7 +267,7 @@
                 class="ql-list hover:bg-gray-200 p-1 focus:outline-none"
                 value="ordered"
                 ><i
-                    class="ri-list-check hover:bg-gray-200 p-1 focus:outline-none"
+                    class="ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-none"
                 /></button
             >
 

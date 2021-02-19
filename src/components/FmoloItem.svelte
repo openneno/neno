@@ -17,6 +17,7 @@
     export let images = [];
     export let parent = null;
     export let children = [];
+    export let searchContent = "";
     export let tags = [];
 
     function plainContent(content) {
@@ -61,7 +62,7 @@
             });
     }
     document.tagClick = (tag) => {
-        console.log("tagClick", tag);
+        console.log("tagClick", tag.innerText);
     };
     function praseTag(rawContent, tags) {
         let pContent = "";
@@ -74,7 +75,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  class=" cursor-pointer rounded-sm bg-green-500 text-white text-sm pl-1 pr-1" id="tagtag" onclick="tagClick('${tags[index]}')">
+                pContent += `<span  class=" cursor-pointer rounded-sm bg-green-500 text-white text-sm pl-1 pr-1 hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -82,6 +83,12 @@
             }
         }
         pContent += copyRawContent.substring(pIndex);
+        if (searchContent.length != 0) {
+            pContent = pContent.replaceAll(
+                searchContent,
+                `<span class="bg-yellow-400">${searchContent}</span>`
+            );
+        }
         return pContent;
     }
 </script>
@@ -211,5 +218,5 @@
 </div>
 
 <!-- <svelte:window on:click={toggleMore} /> -->
-<style type="text/postcss">
+<style lang="postcss">
 </style>

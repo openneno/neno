@@ -11,7 +11,7 @@ module.exports = {
     },
 
     screens: {
-      'lt': '456px',
+      'lt': '400px',
       'sm': '640px',
       // => @media (min-width: 640px) { ... }
 
@@ -29,6 +29,9 @@ module.exports = {
     },
   },
   variants: {
+    textColor: ['group-hover'],
+    backgroundColor: ['group-hover', 'hover'],
+    opacity: ['group-hover', 'hover'],
     extend: {
       opacity: ['disabled'],
     }
