@@ -12,7 +12,7 @@
     setting()
       .then(async (respone) => {
         let re = await respone.json();
-        console.log($settingStrore);
+        console.log("settingStrore",$settingStrore);
 
         if (Object.keys(re.body).length == 0) {
           console.log($settingStrore);

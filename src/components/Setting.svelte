@@ -6,7 +6,7 @@
     import { pagedd } from "../store/store.js";
 
     let platform = $settingStrore.platform;
-    let domain = $settingStrore.domain;
+    let imgDomain = $settingStrore.imgDomain;
     let done = "";
 
     onMount(() => {
@@ -25,7 +25,7 @@
             });
     });
     function saveSetting() {
-        $settingStrore.domain = domain;
+        $settingStrore.imgDomain = imgDomain;
         $settingStrore.platform = platform;
 
         setting($settingStrore)
@@ -63,9 +63,9 @@
         <label for="">图库域名</label>
         <input
             type="text"
-            bind:value={domain}
+            bind:value={imgDomain}
             class="w-full border-2  mt-4 outline-white p-2"
-            placeholder="https://img.fmolo.bijiduo.com"
+            placeholder="http://img.fmolo.bijiduo.com"
         />
     </div>
     <div class="m-4">

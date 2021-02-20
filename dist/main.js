@@ -992,10 +992,10 @@
     //Insert store variables here
     const tokoen = writable(" eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6Ijk0OTAwNTQ4NkBxcS5jb20iLCJleHAiOjE2MTMyMTU2MTMsImlhdCI6MTYxMzEyOTIxMywiaXNzIjoiYXdlTGlzdCJ9.g3JKHINnQvqsw9H1-phS_ma-08DGzLx5dQRv8McRnJU");
     const pagedd = writable("neno");//neno(NENO),dayily(每日回顾),luck(每日漫步),setting(设置)
-    const settingStrore = writable({ platform: "七牛", domain: "http://img.neno.bijiduo.com" });//neno(NENO),dayily(每日回顾),luck(每日漫步),setting(设置)
+    const settingStrore = writable({ platform: "七牛", imgDomain: "http://img.neno.bijiduo.com", });
     const countStrore = writable({ tagCount: 0, nenoCount: 0, dayCount: 0, dateCount: {} });
-
-    const tagStrore = writable({ pinTags:[],allTags:[]});
+    const tagStrore = writable({ pinTags: [], allTags: [] });
+    const searchNenoByDate = writable({ date: "" });
 
     tokoen.subscribe(value => {
     });
@@ -1066,25 +1066,25 @@
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[8] = list[i];
+    	child_ctx[10] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[11] = list[i];
-    	child_ctx[12] = list;
-    	child_ctx[13] = i;
+    	child_ctx[13] = list[i];
+    	child_ctx[14] = list;
+    	child_ctx[15] = i;
     	return child_ctx;
     }
 
-    // (65:20) {#if day.hover}
+    // (69:20) {#if day.hover}
     function create_if_block(ctx) {
     	let div;
-    	let t0_value = /*day*/ ctx[11].count + "";
+    	let t0_value = /*day*/ ctx[13].count + "";
     	let t0;
     	let t1;
-    	let t2_value = /*day*/ ctx[11].date + "";
+    	let t2_value = /*day*/ ctx[13].date + "";
     	let t2;
 
     	const block = {
@@ -1095,7 +1095,7 @@
     			t2 = text(t2_value);
     			attr_dev(div, "class", "absolute  bg-gray-800 text-white text-sm rounded-sm pl-2 pr-2 pt-1 pb-1 z-50 w-48 flex justify-center items-center");
     			set_style(div, "top", "-2rem");
-    			add_location(div, file, 65, 24, 2313);
+    			add_location(div, file, 69, 24, 2569);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1104,8 +1104,8 @@
     			append_dev(div, t2);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*gmap*/ 1 && t0_value !== (t0_value = /*day*/ ctx[11].count + "")) set_data_dev(t0, t0_value);
-    			if (dirty & /*gmap*/ 1 && t2_value !== (t2_value = /*day*/ ctx[11].date + "")) set_data_dev(t2, t2_value);
+    			if (dirty & /*gmap*/ 1 && t0_value !== (t0_value = /*day*/ ctx[13].count + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*gmap*/ 1 && t2_value !== (t2_value = /*day*/ ctx[13].date + "")) set_data_dev(t2, t2_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -1116,14 +1116,14 @@
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(65:20) {#if day.hover}",
+    		source: "(69:20) {#if day.hover}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (47:12) {#each week as day}
+    // (48:12) {#each week as day}
     function create_each_block_1(ctx) {
     	let div1;
     	let div0;
@@ -1131,15 +1131,19 @@
     	let mounted;
     	let dispose;
 
+    	function click_handler() {
+    		return /*click_handler*/ ctx[4](/*day*/ ctx[13]);
+    	}
+
     	function mouseenter_handler() {
-    		return /*mouseenter_handler*/ ctx[3](/*day*/ ctx[11], /*each_value_1*/ ctx[12], /*day_index*/ ctx[13]);
+    		return /*mouseenter_handler*/ ctx[5](/*day*/ ctx[13], /*each_value_1*/ ctx[14], /*day_index*/ ctx[15]);
     	}
 
     	function mouseleave_handler() {
-    		return /*mouseleave_handler*/ ctx[4](/*day*/ ctx[11], /*each_value_1*/ ctx[12], /*day_index*/ ctx[13]);
+    		return /*mouseleave_handler*/ ctx[6](/*day*/ ctx[13], /*each_value_1*/ ctx[14], /*day_index*/ ctx[15]);
     	}
 
-    	let if_block = /*day*/ ctx[11].hover && create_if_block(ctx);
+    	let if_block = /*day*/ ctx[13].hover && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
@@ -1148,16 +1152,16 @@
     			t = space();
     			if (if_block) if_block.c();
     			attr_dev(div0, "class", "rounded-sm w-4 h-4 z-0 ");
-    			toggle_class(div0, "border-green-500", /*day*/ ctx[11].date == /*toDay*/ ctx[1]);
-    			toggle_class(div0, "border-soild", /*day*/ ctx[11].date == /*toDay*/ ctx[1]);
-    			toggle_class(div0, "bg-gray-300", /*day*/ ctx[11].count == 0);
-    			toggle_class(div0, "bg-green-300", /*day*/ ctx[11].count > 0 && /*day*/ ctx[11].count <= 3);
-    			toggle_class(div0, "bg-green-400", /*day*/ ctx[11].count > 3 && /*day*/ ctx[11].count <= 8);
-    			toggle_class(div0, "bg-green-600", /*day*/ ctx[11].count > 8);
-    			toggle_class(div0, "border-2", /*day*/ ctx[11].date == /*toDay*/ ctx[1]);
-    			add_location(div0, file, 48, 20, 1450);
+    			toggle_class(div0, "border-green-500", /*day*/ ctx[13].date == /*toDay*/ ctx[2]);
+    			toggle_class(div0, "border-soild", /*day*/ ctx[13].date == /*toDay*/ ctx[2]);
+    			toggle_class(div0, "bg-gray-300", /*day*/ ctx[13].count == 0);
+    			toggle_class(div0, "bg-green-300", /*day*/ ctx[13].count > 0 && /*day*/ ctx[13].count <= 3);
+    			toggle_class(div0, "bg-green-400", /*day*/ ctx[13].count > 3 && /*day*/ ctx[13].count <= 8);
+    			toggle_class(div0, "bg-green-600", /*day*/ ctx[13].count > 8);
+    			toggle_class(div0, "border-2", /*day*/ ctx[13].date == /*toDay*/ ctx[2]);
+    			add_location(div0, file, 49, 20, 1548);
     			attr_dev(div1, "class", "  relative flex justify-center items-center ");
-    			add_location(div1, file, 47, 16, 1370);
+    			add_location(div1, file, 48, 16, 1468);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -1167,6 +1171,7 @@
 
     			if (!mounted) {
     				dispose = [
+    					listen_dev(div0, "click", click_handler, false, false, false),
     					listen_dev(div0, "mouseenter", mouseenter_handler, false, false, false),
     					listen_dev(div0, "mouseleave", mouseleave_handler, false, false, false)
     				];
@@ -1177,35 +1182,35 @@
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*gmap, toDay*/ 3) {
-    				toggle_class(div0, "border-green-500", /*day*/ ctx[11].date == /*toDay*/ ctx[1]);
+    			if (dirty & /*gmap, toDay*/ 5) {
+    				toggle_class(div0, "border-green-500", /*day*/ ctx[13].date == /*toDay*/ ctx[2]);
     			}
 
-    			if (dirty & /*gmap, toDay*/ 3) {
-    				toggle_class(div0, "border-soild", /*day*/ ctx[11].date == /*toDay*/ ctx[1]);
-    			}
-
-    			if (dirty & /*gmap*/ 1) {
-    				toggle_class(div0, "bg-gray-300", /*day*/ ctx[11].count == 0);
+    			if (dirty & /*gmap, toDay*/ 5) {
+    				toggle_class(div0, "border-soild", /*day*/ ctx[13].date == /*toDay*/ ctx[2]);
     			}
 
     			if (dirty & /*gmap*/ 1) {
-    				toggle_class(div0, "bg-green-300", /*day*/ ctx[11].count > 0 && /*day*/ ctx[11].count <= 3);
+    				toggle_class(div0, "bg-gray-300", /*day*/ ctx[13].count == 0);
     			}
 
     			if (dirty & /*gmap*/ 1) {
-    				toggle_class(div0, "bg-green-400", /*day*/ ctx[11].count > 3 && /*day*/ ctx[11].count <= 8);
+    				toggle_class(div0, "bg-green-300", /*day*/ ctx[13].count > 0 && /*day*/ ctx[13].count <= 3);
     			}
 
     			if (dirty & /*gmap*/ 1) {
-    				toggle_class(div0, "bg-green-600", /*day*/ ctx[11].count > 8);
+    				toggle_class(div0, "bg-green-400", /*day*/ ctx[13].count > 3 && /*day*/ ctx[13].count <= 8);
     			}
 
-    			if (dirty & /*gmap, toDay*/ 3) {
-    				toggle_class(div0, "border-2", /*day*/ ctx[11].date == /*toDay*/ ctx[1]);
+    			if (dirty & /*gmap*/ 1) {
+    				toggle_class(div0, "bg-green-600", /*day*/ ctx[13].count > 8);
     			}
 
-    			if (/*day*/ ctx[11].hover) {
+    			if (dirty & /*gmap, toDay*/ 5) {
+    				toggle_class(div0, "border-2", /*day*/ ctx[13].date == /*toDay*/ ctx[2]);
+    			}
+
+    			if (/*day*/ ctx[13].hover) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -1230,17 +1235,17 @@
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(47:12) {#each week as day}",
+    		source: "(48:12) {#each week as day}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (45:4) {#each gmap as week}
+    // (46:4) {#each gmap as week}
     function create_each_block(ctx) {
     	let div;
-    	let each_value_1 = /*week*/ ctx[8];
+    	let each_value_1 = /*week*/ ctx[10];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -1257,7 +1262,7 @@
     			}
 
     			attr_dev(div, "class", " space-y-1 ");
-    			add_location(div, file, 45, 8, 1294);
+    			add_location(div, file, 46, 8, 1392);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1267,8 +1272,8 @@
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*gmap, toDay*/ 3) {
-    				each_value_1 = /*week*/ ctx[8];
+    			if (dirty & /*gmap, toDay, dispatch*/ 7) {
+    				each_value_1 = /*week*/ ctx[10];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -1301,7 +1306,7 @@
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(45:4) {#each gmap as week}",
+    		source: "(46:4) {#each gmap as week}",
     		ctx
     	});
 
@@ -1330,9 +1335,9 @@
 
     			t = space();
     			div0 = element("div");
-    			add_location(div0, file, 76, 4, 2743);
+    			add_location(div0, file, 80, 4, 2999);
     			attr_dev(div1, "class", "w-full flex justify-between pl-1 ");
-    			add_location(div1, file, 43, 0, 1211);
+    			add_location(div1, file, 44, 0, 1309);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1348,7 +1353,7 @@
     			append_dev(div1, div0);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*gmap, toDay*/ 3) {
+    			if (dirty & /*gmap, toDay, dispatch*/ 7) {
     				each_value = /*gmap*/ ctx[0];
     				validate_each_argument(each_value);
     				let i;
@@ -1395,6 +1400,7 @@
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("GreenMap", slots, []);
     	let { countDate = {} } = $$props;
+    	const dispatch = createEventDispatcher();
     	let weekCount = 12;
     	let weekDay = 7;
     	let gmap = [];
@@ -1432,6 +1438,10 @@
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<GreenMap> was created with unknown prop '${key}'`);
     	});
 
+    	const click_handler = day => {
+    		dispatch("greenmapClick", day.date == toDay ? "" : day.date);
+    	};
+
     	const mouseenter_handler = (day, each_value_1, day_index) => {
     		$$invalidate(0, each_value_1[day_index].hover = true, gmap);
     	};
@@ -1441,13 +1451,15 @@
     	};
 
     	$$self.$$set = $$props => {
-    		if ("countDate" in $$props) $$invalidate(2, countDate = $$props.countDate);
+    		if ("countDate" in $$props) $$invalidate(3, countDate = $$props.countDate);
     	};
 
     	$$self.$capture_state = () => ({
     		dayjs: dayjs_min,
     		onMount,
+    		createEventDispatcher,
     		countDate,
+    		dispatch,
     		weekCount,
     		weekDay,
     		gmap,
@@ -1456,11 +1468,11 @@
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("countDate" in $$props) $$invalidate(2, countDate = $$props.countDate);
+    		if ("countDate" in $$props) $$invalidate(3, countDate = $$props.countDate);
     		if ("weekCount" in $$props) weekCount = $$props.weekCount;
     		if ("weekDay" in $$props) weekDay = $$props.weekDay;
     		if ("gmap" in $$props) $$invalidate(0, gmap = $$props.gmap);
-    		if ("toDay" in $$props) $$invalidate(1, toDay = $$props.toDay);
+    		if ("toDay" in $$props) $$invalidate(2, toDay = $$props.toDay);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -1468,20 +1480,28 @@
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*countDate*/ 4) {
+    		if ($$self.$$.dirty & /*countDate*/ 8) {
     			 {
     				name();
     			}
     		}
     	};
 
-    	return [gmap, toDay, countDate, mouseenter_handler, mouseleave_handler];
+    	return [
+    		gmap,
+    		dispatch,
+    		toDay,
+    		countDate,
+    		click_handler,
+    		mouseenter_handler,
+    		mouseleave_handler
+    	];
     }
 
     class GreenMap extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { countDate: 2 });
+    		init(this, options, instance, create_fragment, safe_not_equal, { countDate: 3 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -1507,18 +1527,18 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[17] = list[i];
+    	child_ctx[19] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i]._id;
-    	child_ctx[17] = list[i].tag;
+    	child_ctx[22] = list[i]._id;
+    	child_ctx[19] = list[i].tag;
     	return child_ctx;
     }
 
-    // (170:4) {#if pinTags.length != 0}
+    // (174:4) {#if pinTags.length != 0}
     function create_if_block_1(ctx) {
     	let div;
     	let t1;
@@ -1543,7 +1563,7 @@
 
     			each_1_anchor = empty();
     			attr_dev(div, "class", " p-4 w-full text-sm");
-    			add_location(div, file$1, 170, 8, 5367);
+    			add_location(div, file$1, 174, 8, 5470);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1556,7 +1576,7 @@
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*pinNeno, pinTags*/ 34) {
+    			if (dirty & /*pinNeno, pinTags*/ 66) {
     				each_value_1 = /*pinTags*/ ctx[1];
     				validate_each_argument(each_value_1);
     				let i;
@@ -1592,17 +1612,17 @@
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(170:4) {#if pinTags.length != 0}",
+    		source: "(174:4) {#if pinTags.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (173:8) {#each pinTags as { _id, tag }}
+    // (177:8) {#each pinTags as { _id, tag }}
     function create_each_block_1$1(ctx) {
     	let button1;
-    	let t0_value = /*tag*/ ctx[17] + "";
+    	let t0_value = /*tag*/ ctx[19] + "";
     	let t0;
     	let t1;
     	let button0;
@@ -1612,7 +1632,7 @@
     	let dispose;
 
     	function click_handler_4() {
-    		return /*click_handler_4*/ ctx[10](/*tag*/ ctx[17]);
+    		return /*click_handler_4*/ ctx[12](/*tag*/ ctx[19]);
     	}
 
     	const block = {
@@ -1624,11 +1644,11 @@
     			i = element("i");
     			t2 = space();
     			attr_dev(i, "class", "ri-pushpin-fill");
-    			add_location(i, file$1, 183, 20, 5908);
+    			add_location(i, file$1, 187, 20, 6011);
     			attr_dev(button0, "class", "focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2");
-    			add_location(button0, file$1, 177, 16, 5658);
+    			add_location(button0, file$1, 181, 16, 5761);
     			attr_dev(button1, "class", "rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:bg-gray-200 flex justify-between text-sm");
-    			add_location(button1, file$1, 173, 12, 5465);
+    			add_location(button1, file$1, 177, 12, 5568);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button1, anchor);
@@ -1645,7 +1665,7 @@
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*pinTags*/ 2 && t0_value !== (t0_value = /*tag*/ ctx[17] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*pinTags*/ 2 && t0_value !== (t0_value = /*tag*/ ctx[19] + "")) set_data_dev(t0, t0_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button1);
@@ -1658,14 +1678,14 @@
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(173:8) {#each pinTags as { _id, tag }}",
+    		source: "(177:8) {#each pinTags as { _id, tag }}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (190:4) {#if allTags.length != 0}
+    // (194:4) {#if allTags.length != 0}
     function create_if_block$1(ctx) {
     	let div;
     	let t1;
@@ -1690,7 +1710,7 @@
 
     			each_1_anchor = empty();
     			attr_dev(div, "class", "  p-4 pt-2 pb-2 w-full text-sm");
-    			add_location(div, file$1, 190, 8, 6058);
+    			add_location(div, file$1, 194, 8, 6161);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1703,7 +1723,7 @@
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*pinNeno, allTags*/ 33) {
+    			if (dirty & /*pinNeno, allTags*/ 65) {
     				each_value = /*allTags*/ ctx[0];
     				validate_each_argument(each_value);
     				let i;
@@ -1739,17 +1759,17 @@
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(190:4) {#if allTags.length != 0}",
+    		source: "(194:4) {#if allTags.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (193:8) {#each allTags as tag}
+    // (197:8) {#each allTags as tag}
     function create_each_block$1(ctx) {
     	let button1;
-    	let t0_value = /*tag*/ ctx[17] + "";
+    	let t0_value = /*tag*/ ctx[19] + "";
     	let t0;
     	let t1;
     	let button0;
@@ -1759,7 +1779,7 @@
     	let dispose;
 
     	function click_handler_5() {
-    		return /*click_handler_5*/ ctx[11](/*tag*/ ctx[17]);
+    		return /*click_handler_5*/ ctx[13](/*tag*/ ctx[19]);
     	}
 
     	const block = {
@@ -1771,11 +1791,11 @@
     			i = element("i");
     			t2 = space();
     			attr_dev(i, "class", "ri-pushpin-2-fill");
-    			add_location(i, file$1, 203, 20, 6599);
+    			add_location(i, file$1, 207, 20, 6702);
     			attr_dev(button0, "class", "focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2");
-    			add_location(button0, file$1, 197, 16, 6350);
+    			add_location(button0, file$1, 201, 16, 6453);
     			attr_dev(button1, "class", "rounded-r  group p-4 pt-2 pb-2 focus:outline-none w-full hover:bg-gray-200 flex justify-between text-sm");
-    			add_location(button1, file$1, 193, 12, 6158);
+    			add_location(button1, file$1, 197, 12, 6261);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button1, anchor);
@@ -1792,7 +1812,7 @@
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*allTags*/ 1 && t0_value !== (t0_value = /*tag*/ ctx[17] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*allTags*/ 1 && t0_value !== (t0_value = /*tag*/ ctx[19] + "")) set_data_dev(t0, t0_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button1);
@@ -1805,7 +1825,7 @@
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(193:8) {#each allTags as tag}",
+    		source: "(197:8) {#each allTags as tag}",
     		ctx
     	});
 
@@ -1871,6 +1891,7 @@
     			$$inline: true
     		});
 
+    	greenmap.$on("greenmapClick", /*greenmapClick_handler*/ ctx[8]);
     	let if_block0 = /*pinTags*/ ctx[1].length != 0 && create_if_block_1(ctx);
     	let if_block1 = /*allTags*/ ctx[0].length != 0 && create_if_block$1(ctx);
 
@@ -1921,57 +1942,57 @@
     			t20 = space();
     			if (if_block1) if_block1.c();
     			attr_dev(div0, "class", "text-sm rounded-sm bg-red-300 text-white p-1 pt-0 pb-0 ");
-    			add_location(div0, file$1, 99, 12, 3051);
+    			add_location(div0, file$1, 99, 12, 3068);
     			attr_dev(div1, "class", "flex  items-center justify-between");
-    			add_location(div1, file$1, 97, 8, 2968);
+    			add_location(div1, file$1, 97, 8, 2985);
     			attr_dev(i0, "class", "ri-settings-fill");
-    			add_location(i0, file$1, 112, 12, 3419);
+    			add_location(i0, file$1, 112, 12, 3436);
     			attr_dev(button0, "class", "focus:outline-none");
-    			add_location(button0, file$1, 105, 8, 3219);
+    			add_location(button0, file$1, 105, 8, 3236);
     			attr_dev(div2, "class", "flex  items-center justify-between  text-gray-600 w-full p-4 font-bold");
-    			add_location(div2, file$1, 94, 4, 2859);
+    			add_location(div2, file$1, 94, 4, 2876);
     			attr_dev(div3, "class", "text-xl");
-    			add_location(div3, file$1, 119, 12, 3656);
+    			add_location(div3, file$1, 123, 12, 3759);
     			attr_dev(div4, "class", "font-bold text-lg");
-    			add_location(div4, file$1, 118, 8, 3611);
+    			add_location(div4, file$1, 122, 8, 3714);
     			attr_dev(div5, "class", "text-xl");
-    			add_location(div5, file$1, 123, 12, 3796);
+    			add_location(div5, file$1, 127, 12, 3899);
     			attr_dev(div6, "class", "font-bold text-lg");
-    			add_location(div6, file$1, 122, 8, 3751);
+    			add_location(div6, file$1, 126, 8, 3854);
     			attr_dev(div7, "class", "text-xl");
-    			add_location(div7, file$1, 127, 12, 3935);
+    			add_location(div7, file$1, 131, 12, 4038);
     			attr_dev(div8, "class", "font-bold text-lg");
-    			add_location(div8, file$1, 126, 8, 3890);
+    			add_location(div8, file$1, 130, 8, 3993);
     			attr_dev(div9, "class", "flex justify-around  w-full mt-4 text-gray-500");
-    			add_location(div9, file$1, 117, 4, 3541);
+    			add_location(div9, file$1, 121, 4, 3644);
     			attr_dev(i1, "class", "ri-quill-pen-fill mr-2");
-    			add_location(i1, file$1, 142, 12, 4472);
+    			add_location(i1, file$1, 146, 12, 4575);
 
     			attr_dev(button1, "class", button1_class_value = "" + ("    bu-op hover:text-white hover:bg-green-400 " + (/*checkedIndex*/ ctx[2] == "neno"
     			? "bg-green-500 text-white"
     			: "") + "        " + " svelte-8b3ze5"));
 
-    			add_location(button1, file$1, 132, 8, 4119);
+    			add_location(button1, file$1, 136, 8, 4222);
     			attr_dev(i2, "class", "ri-calendar-event-fill mr-2");
-    			add_location(i2, file$1, 154, 12, 4863);
+    			add_location(i2, file$1, 158, 12, 4966);
 
     			attr_dev(button2, "class", button2_class_value = "" + ("    bu-op hover:text-white hover:bg-green-400 " + (/*checkedIndex*/ ctx[2] == "daily"
     			? "bg-green-500 text-white"
     			: "") + "        " + " svelte-8b3ze5"));
 
-    			add_location(button2, file$1, 145, 8, 4543);
+    			add_location(button2, file$1, 149, 8, 4646);
     			attr_dev(i3, "class", "ri-bubble-chart-fill mr-2");
-    			add_location(i3, file$1, 165, 12, 5250);
+    			add_location(i3, file$1, 169, 12, 5353);
 
     			attr_dev(button3, "class", button3_class_value = "" + ("    bu-op hover:text-white hover:bg-green-400 " + (/*checkedIndex*/ ctx[2] == "luck"
     			? "bg-green-500 text-white"
     			: "") + "        " + " svelte-8b3ze5"));
 
-    			add_location(button3, file$1, 156, 8, 4937);
+    			add_location(button3, file$1, 160, 8, 5040);
     			attr_dev(div10, "class", "flex flex-col items-start text-sm text-gray-600 w-full mt-2");
-    			add_location(div10, file$1, 131, 4, 4036);
+    			add_location(div10, file$1, 135, 4, 4139);
     			attr_dev(div11, "class", "w-full");
-    			add_location(div11, file$1, 93, 0, 2833);
+    			add_location(div11, file$1, 93, 0, 2850);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2024,10 +2045,10 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*click_handler*/ ctx[6], false, false, false),
-    					listen_dev(button1, "click", /*click_handler_1*/ ctx[7], false, false, false),
-    					listen_dev(button2, "click", /*click_handler_2*/ ctx[8], false, false, false),
-    					listen_dev(button3, "click", /*click_handler_3*/ ctx[9], false, false, false)
+    					listen_dev(button0, "click", /*click_handler*/ ctx[7], false, false, false),
+    					listen_dev(button1, "click", /*click_handler_1*/ ctx[9], false, false, false),
+    					listen_dev(button2, "click", /*click_handler_2*/ ctx[10], false, false, false),
+    					listen_dev(button3, "click", /*click_handler_3*/ ctx[11], false, false, false)
     				];
 
     				mounted = true;
@@ -2119,12 +2140,15 @@
     	let $pagedd;
     	let $countStrore;
     	let $tagStrore;
+    	let $searchNenoByDate;
     	validate_store(pagedd, "pagedd");
     	component_subscribe($$self, pagedd, $$value => $$invalidate(3, $pagedd = $$value));
     	validate_store(countStrore, "countStrore");
     	component_subscribe($$self, countStrore, $$value => $$invalidate(4, $countStrore = $$value));
     	validate_store(tagStrore, "tagStrore");
-    	component_subscribe($$self, tagStrore, $$value => $$invalidate(12, $tagStrore = $$value));
+    	component_subscribe($$self, tagStrore, $$value => $$invalidate(14, $tagStrore = $$value));
+    	validate_store(searchNenoByDate, "searchNenoByDate");
+    	component_subscribe($$self, searchNenoByDate, $$value => $$invalidate(5, $searchNenoByDate = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SideLeft", slots, []);
     	let allTags = [];
@@ -2219,6 +2243,10 @@
     		$$invalidate(2, checkedIndex = "setting");
     	};
 
+    	const greenmapClick_handler = event => {
+    		set_store_value(searchNenoByDate, $searchNenoByDate.date = event.detail, $searchNenoByDate);
+    	};
+
     	const click_handler_1 = () => {
     		set_store_value(pagedd, $pagedd = "neno", $pagedd);
     		$$invalidate(2, checkedIndex = "neno");
@@ -2248,6 +2276,7 @@
     		pagedd,
     		countStrore,
     		tagStrore,
+    		searchNenoByDate,
     		GreenMap,
     		onMount,
     		dayjs: dayjs_min,
@@ -2261,7 +2290,8 @@
     		countcount,
     		$pagedd,
     		$countStrore,
-    		$tagStrore
+    		$tagStrore,
+    		$searchNenoByDate
     	});
 
     	$$self.$inject_state = $$props => {
@@ -2281,8 +2311,10 @@
     		checkedIndex,
     		$pagedd,
     		$countStrore,
+    		$searchNenoByDate,
     		pinNeno,
     		click_handler,
+    		greenmapClick_handler,
     		click_handler_1,
     		click_handler_2,
     		click_handler_3,
@@ -19481,7 +19513,7 @@
     	return child_ctx;
     }
 
-    // (332:4) {#if showTip}
+    // (335:4) {#if showTip}
     function create_if_block_4(ctx) {
     	let div;
     	let each_value_1 = /*tagTips*/ ctx[6];
@@ -19503,7 +19535,7 @@
     			attr_dev(div, "class", "rounded bg-gray-800 text-sm text-white w-auto absolute font-bold");
     			set_style(div, "top", /*tipTop*/ ctx[8] + /*tipHeight*/ ctx[9] + "px");
     			set_style(div, "left", /*tipLeft*/ ctx[7] + "px");
-    			add_location(div, file$3, 333, 8, 11078);
+    			add_location(div, file$3, 336, 8, 11168);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -19555,14 +19587,14 @@
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(332:4) {#if showTip}",
+    		source: "(335:4) {#if showTip}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (338:12) {#each tagTips as item}
+    // (341:12) {#each tagTips as item}
     function create_each_block_1$2(ctx) {
     	let div;
     	let t0_value = /*item*/ ctx[44] + "";
@@ -19582,7 +19614,7 @@
     			t1 = space();
     			attr_dev(div, "class", "hover:bg-gray-800 rounded-sm p-1");
     			attr_dev(div, "tabindex", "0");
-    			add_location(div, file$3, 338, 16, 11299);
+    			add_location(div, file$3, 341, 16, 11389);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -19609,14 +19641,14 @@
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(338:12) {#each tagTips as item}",
+    		source: "(341:12) {#each tagTips as item}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (369:16) {#if percent_completed < 100 && percent_completed > 0}
+    // (372:16) {#if percent_completed < 100 && percent_completed > 0}
     function create_if_block_3(ctx) {
     	let div1;
     	let div0;
@@ -19631,9 +19663,9 @@
     			t0 = text(t0_value);
     			t1 = text("%");
     			attr_dev(div0, "class", "m-auto text-white");
-    			add_location(div0, file$3, 372, 24, 12879);
+    			add_location(div0, file$3, 375, 24, 12969);
     			attr_dev(div1, "class", " w-full  h-full box-border absolute top-0 bg-black  bg-opacity-25 focus:outline-none flex justify-around  items-center ");
-    			add_location(div1, file$3, 369, 20, 12673);
+    			add_location(div1, file$3, 372, 20, 12763);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -19653,14 +19685,14 @@
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(369:16) {#if percent_completed < 100 && percent_completed > 0}",
+    		source: "(372:16) {#if percent_completed < 100 && percent_completed > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (386:16) {#if percent_completed == 100}
+    // (389:16) {#if percent_completed == 100}
     function create_if_block_2(ctx) {
     	let lable;
     	let div;
@@ -19672,11 +19704,11 @@
     			div = element("div");
     			i = element("i");
     			attr_dev(i, "class", "ri-check-line text-white");
-    			add_location(i, file$3, 402, 28, 14036);
+    			add_location(i, file$3, 405, 28, 14129);
     			attr_dev(div, "for", "");
     			set_style(div, "transform", "rotate(-45deg)");
     			set_style(div, "margin-top", "2px");
-    			add_location(div, file$3, 398, 24, 13856);
+    			add_location(div, file$3, 401, 24, 13949);
     			attr_dev(lable, "class", "block");
     			set_style(lable, "position", "absolute");
     			set_style(lable, "right", "-15px");
@@ -19687,7 +19719,7 @@
     			set_style(lable, "text-align", "center");
     			set_style(lable, "transform", "rotate(45deg)");
     			set_style(lable, "box-shadow", "0 0 1pc 1px rgb(0 0 0 / 20%)");
-    			add_location(lable, file$3, 386, 20, 13396);
+    			add_location(lable, file$3, 389, 20, 13489);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, lable, anchor);
@@ -19703,14 +19735,14 @@
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(386:16) {#if percent_completed == 100}",
+    		source: "(389:16) {#if percent_completed == 100}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (353:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
+    // (356:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
     function create_each_block$2(ctx) {
     	let div1;
     	let div0;
@@ -19750,24 +19782,24 @@
     			if (if_block1) if_block1.c();
     			t4 = space();
     			attr_dev(i0, "class", "m-auto ri-zoom-in-line ri-xl text-white");
-    			add_location(i0, file$3, 362, 24, 12284);
-    			add_location(button0, file$3, 361, 20, 12229);
+    			add_location(i0, file$3, 365, 24, 12374);
+    			add_location(button0, file$3, 364, 20, 12319);
     			attr_dev(i1, "class", "m-auto ri-delete-bin-line ri-xl text-white");
-    			add_location(i1, file$3, 365, 24, 12468);
+    			add_location(i1, file$3, 368, 24, 12558);
     			attr_dev(button1, "class", " ");
-    			add_location(button1, file$3, 364, 20, 12390);
+    			add_location(button1, file$3, 367, 20, 12480);
     			attr_dev(div0, "class", " w-16 h-16  box-border absolute top-0 opacity-0 bg-black hover:opacity-75 focus:outline-none flex justify-around  ");
-    			add_location(div0, file$3, 358, 16, 12040);
+    			add_location(div0, file$3, 361, 16, 12130);
     			attr_dev(img, "class", " w-full h-full object-cover");
 
     			if (img.src !== (img_src_value = /*file*/ ctx[38] == null
-    			? /*uploadInfo*/ ctx[40].domain + "/" + /*uploadInfo*/ ctx[40].key
+    			? /*uploadInfo*/ ctx[40].imgDomain + "/" + /*uploadInfo*/ ctx[40].key
     			: getObjectURL(/*file*/ ctx[38]))) attr_dev(img, "src", img_src_value);
 
     			attr_dev(img, "alt", "");
-    			add_location(img, file$3, 378, 16, 13063);
+    			add_location(img, file$3, 381, 16, 13153);
     			attr_dev(div1, "class", "w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden");
-    			add_location(div1, file$3, 353, 12, 11779);
+    			add_location(div1, file$3, 356, 12, 11869);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -19821,7 +19853,7 @@
     			}
 
     			if (!current || dirty[0] & /*imageFiles*/ 4 && img.src !== (img_src_value = /*file*/ ctx[38] == null
-    			? /*uploadInfo*/ ctx[40].domain + "/" + /*uploadInfo*/ ctx[40].key
+    			? /*uploadInfo*/ ctx[40].imgDomain + "/" + /*uploadInfo*/ ctx[40].key
     			: getObjectURL(/*file*/ ctx[38]))) {
     				attr_dev(img, "src", img_src_value);
     			}
@@ -19867,14 +19899,14 @@
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(353:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}",
+    		source: "(356:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (454:12) {#if canCancle}
+    // (457:12) {#if canCancle}
     function create_if_block_1$1(ctx) {
     	let button;
     	let mounted;
@@ -19885,7 +19917,7 @@
     			button = element("button");
     			button.textContent = "取消";
     			attr_dev(button, "class", "rounded-sm bg-white border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm");
-    			add_location(button, file$3, 454, 16, 16059);
+    			add_location(button, file$3, 457, 16, 16152);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -19907,14 +19939,14 @@
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(454:12) {#if canCancle}",
+    		source: "(457:12) {#if canCancle}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (469:16) {:else}
+    // (472:16) {:else}
     function create_else_block(ctx) {
     	let t;
 
@@ -19936,14 +19968,14 @@
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(469:16) {:else}",
+    		source: "(472:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (467:16) {#if isSending}
+    // (470:16) {#if isSending}
     function create_if_block$2(ctx) {
     	let progressline;
     	let current;
@@ -19983,7 +20015,7 @@
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(467:16) {#if isSending}",
+    		source: "(470:16) {#if isSending}",
     		ctx
     	});
 
@@ -20096,53 +20128,53 @@
     			if_block2.c();
     			attr_dev(div0, "id", "editor");
     			attr_dev(div0, "class", "list-decimal list-inside");
-    			add_location(div0, file$3, 330, 4, 10947);
+    			add_location(div0, file$3, 333, 4, 11037);
     			attr_dev(div1, "class", "flex flex-wrap flex-row  mt-4  pl-3");
-    			add_location(div1, file$3, 351, 4, 11634);
+    			add_location(div1, file$3, 354, 4, 11724);
     			attr_dev(i0, "class", "ri-hashtag");
-    			add_location(i0, file$3, 413, 41, 14467);
+    			add_location(i0, file$3, 416, 41, 14560);
     			attr_dev(button0, "class", "rounded-sm hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button0, file$3, 411, 12, 14340);
+    			add_location(button0, file$3, 414, 12, 14433);
     			attr_dev(i1, "class", "ri-bold");
-    			add_location(i1, file$3, 416, 17, 14611);
+    			add_location(i1, file$3, 419, 17, 14704);
     			attr_dev(button1, "class", "ql-bold hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button1, file$3, 415, 12, 14528);
+    			add_location(button1, file$3, 418, 12, 14621);
     			attr_dev(i2, "class", "ri-list-check hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(i2, file$3, 421, 17, 14801);
+    			add_location(i2, file$3, 424, 17, 14894);
     			attr_dev(button2, "class", "ql-list hover:bg-gray-200 p-1 focus:outline-none");
     			button2.value = "bullet";
-    			add_location(button2, file$3, 418, 12, 14669);
+    			add_location(button2, file$3, 421, 12, 14762);
     			attr_dev(i3, "class", "ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(i3, file$3, 429, 17, 15079);
+    			add_location(i3, file$3, 432, 17, 15172);
     			attr_dev(button3, "class", "ql-list hover:bg-gray-200 p-1 focus:outline-none");
     			button3.value = "ordered";
-    			add_location(button3, file$3, 426, 12, 14946);
+    			add_location(button3, file$3, 429, 12, 15039);
     			attr_dev(i4, "class", "ri-underline");
-    			add_location(i4, file$3, 436, 17, 15332);
+    			add_location(i4, file$3, 439, 17, 15425);
     			attr_dev(button4, "class", "ql-underline hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button4, file$3, 434, 12, 15227);
+    			add_location(button4, file$3, 437, 12, 15320);
     			attr_dev(i5, "class", "ri-image-2-line ");
-    			add_location(i5, file$3, 440, 40, 15522);
+    			add_location(i5, file$3, 443, 40, 15615);
     			attr_dev(button5, "class", "rounded-sm hover:bg-gray-200 p-1 focus:outline-none ");
-    			add_location(button5, file$3, 438, 12, 15395);
+    			add_location(button5, file$3, 441, 12, 15488);
     			attr_dev(input, "class", "w-full  rounded-lg   p-2 bg-blue-400 text-white focus:outline-none");
     			attr_dev(input, "type", "file");
     			set_style(input, "display", "none");
     			attr_dev(input, "accept", "image/png, image/jpeg, image/gif, image/jpg");
     			input.multiple = true;
-    			add_location(input, file$3, 442, 12, 15589);
+    			add_location(input, file$3, 445, 12, 15682);
     			attr_dev(div2, "id", "toolbar");
     			attr_dev(div2, "class", "space-x-2");
-    			add_location(div2, file$3, 410, 8, 14270);
+    			add_location(div2, file$3, 413, 8, 14363);
     			attr_dev(button6, "class", "rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16");
     			button6.disabled = button6_disabled_value = /*isContentEmpty*/ ctx[11] || /*isSending*/ ctx[12];
-    			add_location(button6, file$3, 459, 12, 16300);
+    			add_location(button6, file$3, 462, 12, 16393);
     			attr_dev(div3, "class", "flex space-x-2");
-    			add_location(div3, file$3, 452, 8, 15984);
+    			add_location(div3, file$3, 455, 8, 16077);
     			attr_dev(div4, "class", " flex justify-between  pl-3 pr-3");
-    			add_location(div4, file$3, 409, 4, 14214);
+    			add_location(div4, file$3, 412, 4, 14307);
     			attr_dev(div5, "class", "border-gray-200 border-solid border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white relative");
-    			add_location(div5, file$3, 327, 0, 10815);
+    			add_location(div5, file$3, 330, 0, 10905);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20447,6 +20479,10 @@
 
     	function toolTip() {
     		let selection = quillEditor.getSelection();
+
+    		if (selection == null) {
+    			return;
+    		}
     		let cIndex = selection.index;
     		var text = quillEditor.getText();
     		let sIndex = text.lastIndexOf("#", cIndex);
@@ -20613,7 +20649,7 @@
     				{
     					key: element.uploadInfo.key,
     					platform: $settingStrore.platform,
-    					domain: $settingStrore.domain,
+    					imgDomain: $settingStrore.imgDomain,
     					timeStamp: element.timeStamp
     				}
     			];
@@ -21550,7 +21586,7 @@
 
     function get_each_context_1$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[31] = list[i].domain;
+    	child_ctx[31] = list[i].imgDomain;
     	child_ctx[32] = list[i].key;
     	child_ctx[34] = i;
     	return child_ctx;
@@ -21761,7 +21797,7 @@
     	return block;
     }
 
-    // (167:8) {#each images as { domain, key }
+    // (167:8) {#each images as { imgDomain, key }
     function create_each_block_1$3(key_1, ctx) {
     	let img;
     	let img_src_value;
@@ -21772,9 +21808,9 @@
     		c: function create() {
     			img = element("img");
     			attr_dev(img, "class", "w-32 h-32 rounded-md mr-2 mb-2 object-cover");
-    			if (img.src !== (img_src_value = /*domain*/ ctx[31] + "/" + /*key*/ ctx[32])) attr_dev(img, "src", img_src_value);
+    			if (img.src !== (img_src_value = /*imgDomain*/ ctx[31] + "/" + /*key*/ ctx[32])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			add_location(img, file$5, 167, 12, 5814);
+    			add_location(img, file$5, 167, 12, 5817);
     			this.first = img;
     		},
     		m: function mount(target, anchor) {
@@ -21783,7 +21819,7 @@
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty[0] & /*images*/ 2 && img.src !== (img_src_value = /*domain*/ ctx[31] + "/" + /*key*/ ctx[32])) {
+    			if (dirty[0] & /*images*/ 2 && img.src !== (img_src_value = /*imgDomain*/ ctx[31] + "/" + /*key*/ ctx[32])) {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
@@ -21796,7 +21832,7 @@
     		block,
     		id: create_each_block_1$3.name,
     		type: "each",
-    		source: "(167:8) {#each images as { domain, key }",
+    		source: "(167:8) {#each images as { imgDomain, key }",
     		ctx
     	});
 
@@ -21822,16 +21858,16 @@
     			div = element("div");
     			t1 = text(t1_value);
     			attr_dev(i, "class", "ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500");
-    			add_location(i, file$5, 181, 12, 6268);
+    			add_location(i, file$5, 181, 12, 6274);
     			attr_dev(div, "class", "text-gray-500 text-sm");
     			set_style(div, "-webkit-line-clamp", "1");
     			set_style(div, "text-overflow", "ellipsis");
     			set_style(div, "display", "-webkit-box");
     			set_style(div, "-webkit-box-orient", "vertical");
     			set_style(div, "overflow", "hidden");
-    			add_location(div, file$5, 184, 12, 6385);
+    			add_location(div, file$5, 184, 12, 6391);
     			attr_dev(button, "class", "flex items-center space-x-1  hover:shadow-sm focus:outline-none");
-    			add_location(button, file$5, 175, 8, 6057);
+    			add_location(button, file$5, 175, 8, 6063);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -21891,16 +21927,16 @@
     			t1 = text(t1_value);
     			t2 = space();
     			attr_dev(i, "class", "ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500");
-    			add_location(i, file$5, 204, 12, 6981);
+    			add_location(i, file$5, 204, 12, 6987);
     			attr_dev(div, "class", "text-gray-500 text-sm");
     			set_style(div, "-webkit-line-clamp", "1");
     			set_style(div, "text-overflow", "ellipsis");
     			set_style(div, "display", "-webkit-box");
     			set_style(div, "-webkit-box-orient", "vertical");
     			set_style(div, "overflow", "hidden");
-    			add_location(div, file$5, 207, 12, 7100);
+    			add_location(div, file$5, 207, 12, 7106);
     			attr_dev(button, "class", "flex items-center  space-x-1   hover:shadow-sm focus:outline-none");
-    			add_location(button, file$5, 198, 8, 6770);
+    			add_location(button, file$5, 198, 8, 6776);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -22878,7 +22914,7 @@
     	return child_ctx;
     }
 
-    // (141:4) {#if isLoding}
+    // (145:4) {#if isLoding}
     function create_if_block_2$3(ctx) {
     	let div;
     	let progressline;
@@ -22891,7 +22927,7 @@
     			div = element("div");
     			create_component(progressline.$$.fragment);
     			attr_dev(div, "class", "w-full ");
-    			add_location(div, file$7, 141, 8, 4631);
+    			add_location(div, file$7, 145, 8, 4891);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -22926,14 +22962,14 @@
     		block,
     		id: create_if_block_2$3.name,
     		type: "if",
-    		source: "(141:4) {#if isLoding}",
+    		source: "(145:4) {#if isLoding}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (146:4) {#if isLodingError}
+    // (150:4) {#if isLodingError}
     function create_if_block_1$5(ctx) {
     	let div;
     	let button;
@@ -22946,9 +22982,9 @@
     			button = element("button");
     			button.textContent = "重新获取";
     			attr_dev(button, "class", " w-full rounded focus:outline-none m-aut bg-red-400  text-white  p-2  ");
-    			add_location(button, file$7, 147, 12, 4832);
+    			add_location(button, file$7, 151, 12, 5092);
     			attr_dev(div, "class", "w-full pl-4 pr-4");
-    			add_location(div, file$7, 146, 8, 4788);
+    			add_location(div, file$7, 150, 8, 5048);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -22971,28 +23007,29 @@
     		block,
     		id: create_if_block_1$5.name,
     		type: "if",
-    		source: "(146:4) {#if isLodingError}",
+    		source: "(150:4) {#if isLodingError}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (172:8) {:else}
+    // (176:8) {:else}
     function create_else_block$2(ctx) {
+    	let each_blocks = [];
+    	let each_1_lookup = new Map();
     	let each_1_anchor;
     	let current;
     	let each_value_1 = /*searchItems*/ ctx[7];
     	validate_each_argument(each_value_1);
-    	let each_blocks = [];
+    	const get_key = ctx => /*item*/ ctx[22]._id;
+    	validate_each_keys(ctx, each_value_1, get_each_context_1$4, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1$4(get_each_context_1$4(ctx, each_value_1, i));
+    		let child_ctx = get_each_context_1$4(ctx, each_value_1, i);
+    		let key = get_key(child_ctx);
+    		each_1_lookup.set(key, each_blocks[i] = create_each_block_1$4(key, child_ctx));
     	}
-
-    	const out = i => transition_out(each_blocks[i], 1, 1, () => {
-    		each_blocks[i] = null;
-    	});
 
     	const block = {
     		c: function create() {
@@ -23014,28 +23051,9 @@
     			if (dirty & /*searchItems, searchText, nenoItems*/ 224) {
     				each_value_1 = /*searchItems*/ ctx[7];
     				validate_each_argument(each_value_1);
-    				let i;
-
-    				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$4(ctx, each_value_1, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    						transition_in(each_blocks[i], 1);
-    					} else {
-    						each_blocks[i] = create_each_block_1$4(child_ctx);
-    						each_blocks[i].c();
-    						transition_in(each_blocks[i], 1);
-    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
-    					}
-    				}
-
     				group_outros();
-
-    				for (i = each_value_1.length; i < each_blocks.length; i += 1) {
-    					out(i);
-    				}
-
+    				validate_each_keys(ctx, each_value_1, get_each_context_1$4, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value_1, each_1_lookup, each_1_anchor.parentNode, outro_and_destroy_block, create_each_block_1$4, each_1_anchor, get_each_context_1$4);
     				check_outros();
     			}
     		},
@@ -23049,8 +23067,6 @@
     			current = true;
     		},
     		o: function outro(local) {
-    			each_blocks = each_blocks.filter(Boolean);
-
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				transition_out(each_blocks[i]);
     			}
@@ -23058,7 +23074,10 @@
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_each(each_blocks, detaching);
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].d(detaching);
+    			}
+
     			if (detaching) detach_dev(each_1_anchor);
     		}
     	};
@@ -23067,28 +23086,29 @@
     		block,
     		id: create_else_block$2.name,
     		type: "else",
-    		source: "(172:8) {:else}",
+    		source: "(176:8) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (161:8) {#if searchItems.length == 0}
+    // (165:8) {#if searchItems.length == 0}
     function create_if_block$6(ctx) {
+    	let each_blocks = [];
+    	let each_1_lookup = new Map();
     	let each_1_anchor;
     	let current;
     	let each_value = /*nenoItems*/ ctx[6];
     	validate_each_argument(each_value);
-    	let each_blocks = [];
+    	const get_key = ctx => /*item*/ ctx[22]._id;
+    	validate_each_keys(ctx, each_value, get_each_context$5, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$5(get_each_context$5(ctx, each_value, i));
+    		let child_ctx = get_each_context$5(ctx, each_value, i);
+    		let key = get_key(child_ctx);
+    		each_1_lookup.set(key, each_blocks[i] = create_each_block$5(key, child_ctx));
     	}
-
-    	const out = i => transition_out(each_blocks[i], 1, 1, () => {
-    		each_blocks[i] = null;
-    	});
 
     	const block = {
     		c: function create() {
@@ -23110,28 +23130,9 @@
     			if (dirty & /*nenoItems*/ 64) {
     				each_value = /*nenoItems*/ ctx[6];
     				validate_each_argument(each_value);
-    				let i;
-
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$5(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    						transition_in(each_blocks[i], 1);
-    					} else {
-    						each_blocks[i] = create_each_block$5(child_ctx);
-    						each_blocks[i].c();
-    						transition_in(each_blocks[i], 1);
-    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
-    					}
-    				}
-
     				group_outros();
-
-    				for (i = each_value.length; i < each_blocks.length; i += 1) {
-    					out(i);
-    				}
-
+    				validate_each_keys(ctx, each_value, get_each_context$5, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, each_1_anchor.parentNode, outro_and_destroy_block, create_each_block$5, each_1_anchor, get_each_context$5);
     				check_outros();
     			}
     		},
@@ -23145,8 +23146,6 @@
     			current = true;
     		},
     		o: function outro(local) {
-    			each_blocks = each_blocks.filter(Boolean);
-
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				transition_out(each_blocks[i]);
     			}
@@ -23154,7 +23153,10 @@
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_each(each_blocks, detaching);
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].d(detaching);
+    			}
+
     			if (detaching) detach_dev(each_1_anchor);
     		}
     	};
@@ -23163,15 +23165,16 @@
     		block,
     		id: create_if_block$6.name,
     		type: "if",
-    		source: "(161:8) {#if searchItems.length == 0}",
+    		source: "(165:8) {#if searchItems.length == 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (173:12) {#each searchItems as item}
-    function create_each_block_1$4(ctx) {
+    // (177:12) {#each searchItems as item (item._id)}
+    function create_each_block_1$4(key_1, ctx) {
+    	let first;
     	let fmoloitem;
     	let current;
     	const fmoloitem_spread_levels = [/*item*/ ctx[22], { searchContent: /*searchText*/ ctx[5] }];
@@ -23185,14 +23188,21 @@
     	fmoloitem.$on("deleteOne", /*deleteOne_handler_1*/ ctx[18]);
 
     	const block = {
+    		key: key_1,
+    		first: null,
     		c: function create() {
+    			first = empty();
     			create_component(fmoloitem.$$.fragment);
+    			this.first = first;
     		},
     		m: function mount(target, anchor) {
+    			insert_dev(target, first, anchor);
     			mount_component(fmoloitem, target, anchor);
     			current = true;
     		},
-    		p: function update(ctx, dirty) {
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
     			const fmoloitem_changes = (dirty & /*searchItems, searchText*/ 160)
     			? get_spread_update(fmoloitem_spread_levels, [
     					dirty & /*searchItems*/ 128 && get_spread_object(/*item*/ ctx[22]),
@@ -23212,6 +23222,7 @@
     			current = false;
     		},
     		d: function destroy(detaching) {
+    			if (detaching) detach_dev(first);
     			destroy_component(fmoloitem, detaching);
     		}
     	};
@@ -23220,15 +23231,16 @@
     		block,
     		id: create_each_block_1$4.name,
     		type: "each",
-    		source: "(173:12) {#each searchItems as item}",
+    		source: "(177:12) {#each searchItems as item (item._id)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (162:12) {#each nenoItems as item}
-    function create_each_block$5(ctx) {
+    // (166:12) {#each nenoItems as item (item._id)}
+    function create_each_block$5(key_1, ctx) {
+    	let first;
     	let fmoloitem;
     	let current;
     	const fmoloitem_spread_levels = [/*item*/ ctx[22]];
@@ -23242,14 +23254,21 @@
     	fmoloitem.$on("deleteOne", /*deleteOne_handler*/ ctx[17]);
 
     	const block = {
+    		key: key_1,
+    		first: null,
     		c: function create() {
+    			first = empty();
     			create_component(fmoloitem.$$.fragment);
+    			this.first = first;
     		},
     		m: function mount(target, anchor) {
+    			insert_dev(target, first, anchor);
     			mount_component(fmoloitem, target, anchor);
     			current = true;
     		},
-    		p: function update(ctx, dirty) {
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
     			const fmoloitem_changes = (dirty & /*nenoItems*/ 64)
     			? get_spread_update(fmoloitem_spread_levels, [get_spread_object(/*item*/ ctx[22])])
     			: {};
@@ -23266,6 +23285,7 @@
     			current = false;
     		},
     		d: function destroy(detaching) {
+    			if (detaching) detach_dev(first);
     			destroy_component(fmoloitem, detaching);
     		}
     	};
@@ -23274,7 +23294,7 @@
     		block,
     		id: create_each_block$5.name,
     		type: "each",
-    		source: "(162:12) {#each nenoItems as item}",
+    		source: "(166:12) {#each nenoItems as item (item._id)}",
     		ctx
     	});
 
@@ -23349,29 +23369,29 @@
     			div4 = element("div");
     			if_block2.c();
     			attr_dev(i0, "class", "ri-settings-fill");
-    			add_location(i0, file$7, 108, 16, 3616);
+    			add_location(i0, file$7, 112, 16, 3862);
     			attr_dev(button, "class", "focus:outline-none text-gray-600   sm:hidden md:hidden ml-2");
-    			add_location(button, file$7, 102, 17, 3402);
+    			add_location(button, file$7, 106, 17, 3648);
     			attr_dev(div0, "class", "flex flex-row items-center ");
-    			add_location(div0, file$7, 101, 8, 3342);
+    			add_location(div0, file$7, 105, 8, 3588);
     			attr_dev(i1, "class", "ri-search-2-line text-gray-400");
-    			add_location(i1, file$7, 113, 12, 3773);
+    			add_location(i1, file$7, 117, 12, 4019);
     			attr_dev(input, "class", " ml-2 bg-gray-200 focus:outline-none text-sm");
     			attr_dev(input, "type", "text");
-    			add_location(input, file$7, 114, 12, 3831);
+    			add_location(input, file$7, 118, 12, 4077);
     			attr_dev(i2, "class", "ri-close-circle-fill text-gray-400");
-    			add_location(i2, file$7, 124, 12, 4181);
+    			add_location(i2, file$7, 128, 12, 4441);
     			attr_dev(div1, "class", "bg-gray-200 rounded-lg h-8 p-2 flex items-center");
-    			add_location(div1, file$7, 112, 8, 3697);
+    			add_location(div1, file$7, 116, 8, 3943);
     			attr_dev(div2, "class", "  flex flex-row items-center justify-between pr-4");
-    			add_location(div2, file$7, 100, 4, 3269);
+    			add_location(div2, file$7, 104, 4, 3515);
     			attr_dev(div3, "class", "p-4 ");
-    			add_location(div3, file$7, 133, 4, 4425);
+    			add_location(div3, file$7, 137, 4, 4685);
     			attr_dev(div4, "class", "flex flex-col overflow-y-scroll p-4 ");
     			set_style(div4, "height", /*innerHeight*/ ctx[1] - /*flowClientTop*/ ctx[2] + "px");
-    			add_location(div4, file$7, 155, 4, 5080);
+    			add_location(div4, file$7, 159, 4, 5340);
     			attr_dev(div5, "class", "  flex-1 flex flex-col justify-start  pt-4 pl-4 w-0");
-    			add_location(div5, file$7, 99, 0, 3198);
+    			add_location(div5, file$7, 103, 0, 3444);
     		},
     		l: function claim(nodes) {
     			throw new Error_1("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -23538,6 +23558,11 @@
     	onMount(() => {
     		load();
 
+    		searchNenoByDate.subscribe(value => {
+    			console.log("searchNenoByDate", value);
+    			searchNeno("", value.date);
+    		});
+
     		flowClient.addEventListener("scroll", function () {
     			if (flowClient.scrollTop == flowClient.scrollHeight - flowClient.clientHeight && !isLoding && !isEnd) {
     				page += 1;
@@ -23575,11 +23600,14 @@
     		});
     	}
 
-    	function searchNeno() {
-    		if (searchText.length != 0) {
+    	function searchNeno(searchText, searchDate) {
+    		if (searchText.length != 0 || searchDate.length != 0) {
     			$$invalidate(3, isLoding = true);
 
-    			search({ content: searchText }).then(function (response) {
+    			search({
+    				content: searchText,
+    				created_at: searchDate
+    			}).then(function (response) {
     				if (response.ok) {
     					return response;
     				}
@@ -23617,7 +23645,7 @@
 
     	const keydown_handler = event => {
     		if (event.code == "Enter") {
-    			searchNeno();
+    			searchNeno(searchText, "");
     		}
     	};
 
@@ -23662,6 +23690,7 @@
     		onMount,
     		fly,
     		pagedd,
+    		searchNenoByDate,
     		QuillEditor,
     		FmoloItem,
     		getAllFmolo,
@@ -23807,36 +23836,36 @@
     			t10 = text("保存");
     			t11 = text(/*done*/ ctx[2]);
     			attr_dev(i, "class", "ri-arrow-left-line");
-    			add_location(i, file$8, 51, 12, 1612);
+    			add_location(i, file$8, 51, 12, 1624);
     			attr_dev(button0, "class", "focus:outline-none text-gray-600   sm:hidden md:hidden mr-4");
-    			add_location(button0, file$8, 45, 8, 1417);
+    			add_location(button0, file$8, 45, 8, 1429);
     			attr_dev(div0, "class", "font-bold text-lg flex  justify-start  items-center");
-    			add_location(div0, file$8, 44, 4, 1342);
+    			add_location(div0, file$8, 44, 4, 1354);
     			attr_dev(label0, "for", "");
-    			add_location(label0, file$8, 55, 8, 1724);
+    			add_location(label0, file$8, 55, 8, 1736);
     			attr_dev(option, "class", "p-2");
     			option.__value = "七牛云";
     			option.value = option.__value;
-    			add_location(option, file$8, 58, 12, 1878);
+    			add_location(option, file$8, 58, 12, 1890);
     			attr_dev(select, "class", "p-2 mt-4");
     			if (/*platform*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[6].call(select));
-    			add_location(select, file$8, 56, 8, 1760);
+    			add_location(select, file$8, 56, 8, 1772);
     			attr_dev(div1, "class", "m-4 flex flex-col");
-    			add_location(div1, file$8, 54, 4, 1683);
+    			add_location(div1, file$8, 54, 4, 1695);
     			attr_dev(label1, "for", "");
-    			add_location(label1, file$8, 62, 8, 1986);
+    			add_location(label1, file$8, 62, 8, 1998);
     			attr_dev(input, "type", "text");
     			attr_dev(input, "class", "w-full border-2  mt-4 outline-white p-2");
-    			attr_dev(input, "placeholder", "https://img.fmolo.bijiduo.com");
-    			add_location(input, file$8, 63, 8, 2022);
+    			attr_dev(input, "placeholder", "http://img.fmolo.bijiduo.com");
+    			add_location(input, file$8, 63, 8, 2034);
     			attr_dev(div2, "class", "m-4");
-    			add_location(div2, file$8, 61, 4, 1959);
+    			add_location(div2, file$8, 61, 4, 1971);
     			attr_dev(button1, "class", "w-full border-2   outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white");
-    			add_location(button1, file$8, 71, 8, 2261);
+    			add_location(button1, file$8, 71, 8, 2275);
     			attr_dev(div3, "class", "m-4");
-    			add_location(div3, file$8, 70, 4, 2234);
+    			add_location(div3, file$8, 70, 4, 2248);
     			attr_dev(div4, "class", "  flex-1 flex flex-col justify-start  pt-4 pl-4 ");
-    			add_location(div4, file$8, 43, 0, 1274);
+    			add_location(div4, file$8, 43, 0, 1286);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -23860,7 +23889,7 @@
     			append_dev(div2, label1);
     			append_dev(div2, t8);
     			append_dev(div2, input);
-    			set_input_value(input, /*domain*/ ctx[1]);
+    			set_input_value(input, /*imgDomain*/ ctx[1]);
     			append_dev(div4, t9);
     			append_dev(div4, div3);
     			append_dev(div3, button1);
@@ -23883,8 +23912,8 @@
     				select_option(select, /*platform*/ ctx[0]);
     			}
 
-    			if (dirty & /*domain*/ 2 && input.value !== /*domain*/ ctx[1]) {
-    				set_input_value(input, /*domain*/ ctx[1]);
+    			if (dirty & /*imgDomain*/ 2 && input.value !== /*imgDomain*/ ctx[1]) {
+    				set_input_value(input, /*imgDomain*/ ctx[1]);
     			}
 
     			if (dirty & /*done*/ 4) set_data_dev(t11, /*done*/ ctx[2]);
@@ -23919,7 +23948,7 @@
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Setting", slots, []);
     	let platform = $settingStrore.platform;
-    	let domain = $settingStrore.domain;
+    	let imgDomain = $settingStrore.imgDomain;
     	let done = "";
 
     	onMount(() => {
@@ -23941,7 +23970,7 @@
     	});
 
     	function saveSetting() {
-    		set_store_value(settingStrore, $settingStrore.domain = domain, $settingStrore);
+    		set_store_value(settingStrore, $settingStrore.imgDomain = imgDomain, $settingStrore);
     		set_store_value(settingStrore, $settingStrore.platform = platform, $settingStrore);
 
     		setting($settingStrore).then(async respone => {
@@ -23974,8 +24003,8 @@
     	}
 
     	function input_input_handler() {
-    		domain = this.value;
-    		$$invalidate(1, domain);
+    		imgDomain = this.value;
+    		$$invalidate(1, imgDomain);
     	}
 
     	const click_handler_1 = () => {
@@ -23988,7 +24017,7 @@
     		settingStrore,
     		pagedd,
     		platform,
-    		domain,
+    		imgDomain,
     		done,
     		saveSetting,
     		$settingStrore,
@@ -23997,7 +24026,7 @@
 
     	$$self.$inject_state = $$props => {
     		if ("platform" in $$props) $$invalidate(0, platform = $$props.platform);
-    		if ("domain" in $$props) $$invalidate(1, domain = $$props.domain);
+    		if ("imgDomain" in $$props) $$invalidate(1, imgDomain = $$props.imgDomain);
     		if ("done" in $$props) $$invalidate(2, done = $$props.done);
     	};
 
@@ -24007,7 +24036,7 @@
 
     	return [
     		platform,
-    		domain,
+    		imgDomain,
     		done,
     		$pagedd,
     		saveSetting,
@@ -24386,7 +24415,7 @@
     			t = space();
     			create_component(helloworld.$$.fragment);
     			attr_dev(main, "class", "overflow-y-hidden f h-screen");
-    			add_location(main, file$a, 29, 0, 814);
+    			add_location(main, file$a, 29, 0, 830);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24438,7 +24467,7 @@
     	onMount(() => {
     		setting().then(async respone => {
     			let re = await respone.json();
-    			console.log($settingStrore);
+    			console.log("settingStrore", $settingStrore);
 
     			if (Object.keys(re.body).length == 0) {
     				console.log($settingStrore);

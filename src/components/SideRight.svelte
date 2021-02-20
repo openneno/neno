@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { fly } from "svelte/transition";
-    import { pagedd } from "../store/store.js";
+    import { pagedd, searchNenoByDate } from "../store/store.js";
 
     import QuillEditor from "./QuillEditor.svelte";
     import FmoloItem from "./FmoloItem.svelte";
@@ -30,6 +30,10 @@
 
     onMount(() => {
         load();
+        searchNenoByDate.subscribe((value) => {
+            console.log("searchNenoByDate", value);
+            searchNeno("", value.date);
+        });
         flowClient.addEventListener("scroll", function () {
             if (
                 flowClient.scrollTop ==
@@ -68,10 +72,10 @@
                 isLoding = false;
             });
     }
-    function searchNeno() {
-        if (searchText.length != 0) {
+    function searchNeno(searchText, searchDate) {
+        if (searchText.length != 0 || searchDate.length != 0) {
             isLoding = true;
-            search({ content: searchText })
+            search({ content: searchText, created_at: searchDate })
                 .then(function (response) {
                     if (response.ok) {
                         return response;
@@ -117,7 +121,7 @@
                 type="text"
                 on:keydown={(event) => {
                     if (event.code == "Enter") {
-                        searchNeno();
+                        searchNeno(searchText, "");
                     }
                 }}
                 bind:value={searchText}
@@ -159,7 +163,7 @@
         style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length == 0}
-            {#each nenoItems as item}
+            {#each nenoItems as item (item._id)}
                 <FmoloItem
                     {...item}
                     on:deleteOne={(event) => {
@@ -170,7 +174,7 @@
                 />
             {/each}
         {:else}
-            {#each searchItems as item}
+            {#each searchItems as item (item._id)}
                 <FmoloItem
                     {...item}
                     searchContent={searchText}

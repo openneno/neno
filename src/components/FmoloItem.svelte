@@ -164,10 +164,10 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each images as { domain, key }, index (index)}
+        {#each images as { imgDomain, key }, index (index)}
             <img
                 class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
-                src={domain + "/" + key}
+                src={imgDomain + "/" + key}
                 alt=""
             />
         {/each}

@@ -1,6 +1,6 @@
 <script>
     import { tags, pin, pins, count } from "../request/fetchApi";
-    import { pagedd, countStrore, tagStrore } from "../store/store.js";
+    import { pagedd, countStrore, tagStrore,searchNenoByDate } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
 
     import { onMount } from "svelte";
@@ -113,7 +113,11 @@
             <i class="ri-settings-fill" />
         </button>
     </div>
-    <GreenMap countDate={$countStrore.countDate} />
+    <GreenMap countDate={$countStrore.countDate} on:greenmapClick={(event)=>{
+        $searchNenoByDate.date=event.detail
+
+
+    }} />
 
     <div class="flex justify-around  w-full mt-4 text-gray-500">
         <div class="font-bold text-lg">

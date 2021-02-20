@@ -89,7 +89,10 @@
     });
     function toolTip() {
         let selection = quillEditor.getSelection();
-
+        if (selection == null) {
+            return;
+        }
+        selection;
         let cIndex = selection.index;
         var text = quillEditor.getText();
         let sIndex = text.lastIndexOf("#", cIndex);
@@ -295,7 +298,7 @@
                 {
                     key: element.uploadInfo.key,
                     platform: $settingStrore.platform,
-                    domain: $settingStrore.domain,
+                    imgDomain: $settingStrore.imgDomain,
                     timeStamp: element.timeStamp,
                 },
             ];
@@ -379,7 +382,7 @@
                 <img
                     class=" w-full h-full object-cover"
                     src={file == null
-                        ? uploadInfo.domain + "/" + uploadInfo.key
+                        ? uploadInfo.imgDomain + "/" + uploadInfo.key
                         : getObjectURL(file)}
                     alt=""
                 />

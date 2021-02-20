@@ -1,8 +1,9 @@
 <script>
     import dayjs from "dayjs";
     import { onMount } from "svelte";
+    import { createEventDispatcher } from "svelte";
     export let countDate = {};
-
+    const dispatch = createEventDispatcher();
     let weekCount = 12;
     let weekDay = 7;
     let gmap = [];
@@ -47,6 +48,9 @@
             {#each week as day}
                 <div class="  relative flex justify-center items-center ">
                     <div
+                        on:click={() => {
+                            dispatch("greenmapClick", day.date == toDay?"":day.date);
+                        }}
                         class="rounded-sm w-4 h-4 z-0 "
                         class:border-green-500={day.date == toDay}
                         class:border-soild={day.date == toDay}
