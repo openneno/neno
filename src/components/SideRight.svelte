@@ -81,10 +81,10 @@
                 .then(async (respone) => {
                     let re = await respone.json();
                     isLoding = false;
-
-                    re.body.forEach((element) => {
-                        searchItems = [...searchItems, element];
-                    });
+                    searchItems = re.body;
+                    // re.body.forEach((element) => {
+                    //     searchItems = [...searchItems, element];
+                    // });
                 })
                 .catch((reason) => {
                     console.log("reason", reason);
@@ -97,7 +97,7 @@
 </script>
 
 <svelte:window bind:innerHeight />
-<div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 ">
+<div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 w-0">
     <div class="  flex flex-row items-center justify-between pr-4">
         <div class="flex flex-row items-center ">
             NENO <button
@@ -131,7 +131,7 @@
             />
         </div>
     </div>
-    <div class="p-4">
+    <div class="p-4 ">
         <QuillEditor
             on:update={(event) => {
                 nenoItems = [event.detail, ...nenoItems];
@@ -159,7 +159,7 @@
         style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length == 0}
-            {#each nenoItems as item, index (item._id)}
+            {#each nenoItems as item}
                 <FmoloItem
                     {...item}
                     on:deleteOne={(event) => {
@@ -170,7 +170,7 @@
                 />
             {/each}
         {:else}
-            {#each searchItems as item, index (item._id)}
+            {#each searchItems as item}
                 <FmoloItem
                     {...item}
                     searchContent={searchText}

@@ -1,6 +1,6 @@
 <script>
     import { tags, pin, pins, count } from "../request/fetchApi";
-    import { pagedd, countStrore } from "../store/store.js";
+    import { pagedd, countStrore, tagStrore } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
 
     import { onMount } from "svelte";
@@ -21,6 +21,8 @@
             .then(async (respone) => {
                 let re = await respone.json();
                 let tempTags = re.body;
+                $countStrore.tagCount = tempTags.length;
+                $tagStrore.allTags = tempTags;
                 pinTags.forEach((item) => {
                     let index = tempTags.indexOf(item.tag);
                     if (index != -1) {
@@ -28,7 +30,6 @@
                     }
                 });
                 allTags = tempTags;
-                $countStrore.tagCount = allTags.length;
             })
             .catch((reason) => {
                 console.log(reason);

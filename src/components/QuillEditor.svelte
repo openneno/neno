@@ -2,12 +2,12 @@
     import { onMount } from "svelte";
     import { createEventDispatcher } from "svelte";
     import { fly } from "svelte/transition";
-    import {  cubicOut } from "svelte/easing";
+    import { cubicOut } from "svelte/easing";
 
     import Quill from "quill";
     import * as qiniu from "qiniu-js";
     import { addFmolo, qiniuToken } from "../request/fetchApi";
-    import { settingStrore } from "../store/store.js";
+    import { settingStrore, tagStrore } from "../store/store.js";
 
     import ProgressLine from "./ProgressLine.svelte";
     export let content = "";
@@ -23,6 +23,14 @@
     let toolbar = "";
 
     let quillEditor;
+    let showTip = false;
+    let tagStartIndex = 0;
+    let selectionIndex = 0;
+
+    let tagTips = [];
+    let tipLeft = 0;
+    let tipTop = 0;
+    let tipHeight = 0;
 
     let uploadimageNode = "";
     let uploadimagefiles = [];
@@ -47,7 +55,21 @@
         }
         quillEditor.on("text-change", function (delta, oldDelta, source) {
             isContentEmpty = quillEditor.getText().length == 1;
-            console.log();
+            console.log(delta);
+            if (delta.ops.length > 1 && delta.ops[1].insert == "\n") {
+                tagTips = [];
+                showTip = false;
+            } else {
+                toolTip();
+            }
+        });
+        quillEditor.on("selection-change", function (range, oldRange, source) {
+            if (range) {
+                console.log(range);
+                toolTip();
+            } else {
+                console.log("Cursor not in the editor");
+            }
         });
         quillEditor.setSelection(quillEditor.getText().length);
         let tempfiles = [];
@@ -65,7 +87,43 @@
         });
         imageFiles = tempfiles;
     });
+    function toolTip() {
+        let selection = quillEditor.getSelection();
 
+        let cIndex = selection.index;
+        var text = quillEditor.getText();
+        let sIndex = text.lastIndexOf("#", cIndex);
+        if (sIndex != -1) {
+            let tagMay = text.substring(sIndex, cIndex);
+            tagTips = [];
+            for (let index = 0; index < $tagStrore.allTags.length; index++) {
+                const element = $tagStrore.allTags[index];
+                if (element.indexOf(tagMay) == 0) {
+                    tagTips = [...tagTips, element];
+                }
+            }
+            if (tagTips.length != 0) {
+                let getBounds = quillEditor.getBounds(sIndex);
+                selectionIndex = cIndex;
+                tagStartIndex = sIndex;
+                showTip = true;
+                tipLeft = getBounds.left;
+                tipTop = getBounds.top;
+                tipHeight = getBounds.height;
+            }
+        } else {
+            showTip = false;
+        }
+    }
+    function tipTagInsert(tag) {
+        quill.updateContents(
+            new Delta()
+                .retain(6) // Keep 'Hello '
+                .delete(5) // 'World' is deleted
+                .insert("Quill")
+            // Apply bold to exclamation mark
+        );
+    }
     $: imageFiles = joinFile(uploadimagefiles);
 
     $: {
@@ -268,9 +326,29 @@
 </script>
 
 <div
-    class="border-gray-200 border-solid border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white"
+    class="border-gray-200 border-solid border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white relative"
 >
     <div bind:this={editor} id="editor" class="list-decimal list-inside" />
+    {#if showTip}
+        <!-- content here -->
+        <div
+            class="rounded bg-gray-800 text-sm text-white w-auto absolute font-bold"
+            style="top:{tipTop + tipHeight}px;left:{tipLeft}px"
+        >
+            {#each tagTips as item}
+                <div
+                    class="hover:bg-gray-800 rounded-sm p-1"
+                    tabindex="0"
+                    on:click={() => {
+                        tipTagInsert(item);
+                    }}
+                >
+                    {item}
+                </div>
+            {/each}
+        </div>
+    {/if}
+
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
         {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
             <div
