@@ -32,6 +32,8 @@ module.exports = {
     textColor: ['group-hover', 'hover'],
     backgroundColor: ['group-hover', 'hover'],
     opacity: ['group-hover', 'hover'],
+    hidden: ['group-hover', 'hover'],
+    block: ['group-hover', 'hover'],
     extend: {
       opacity: ['disabled'],
     }

@@ -11,7 +11,7 @@
   class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100"
 >
   <div class="max-w-6xl min-w-0 w-full  flex ">
-    <SideLeft />
+    <SideLeft  />
     {#if $pagedd == "neno"}
       <SideRight />
     {:else if $pagedd == "setting"}

@@ -1,14 +1,21 @@
 <script>
-    import { tokoen } from "../store/store.js";
-    import { tags, pin, pins } from "../request/fetchApi";
+    import { tags, pin, pins, count } from "../request/fetchApi";
     import { pagedd } from "../store/store.js";
+    import GreenMap from "./GreenMap.svelte";
 
     import { onMount } from "svelte";
+    import dayjs from "dayjs";
+
+    let dayCount = 0;
+    let nenoCount = 0;
+    let countDate = 0;
+
     let allTags = [];
     let pinTags = [];
     let checkedIndex = $pagedd;
 
     onMount(() => {
+        countcount();
         getPins();
     });
 
@@ -17,7 +24,6 @@
             .then(async (respone) => {
                 let re = await respone.json();
                 let tempTags = re.body;
-                let aa = [];
                 pinTags.forEach((item) => {
                     let index = tempTags.indexOf(item.tag);
                     if (index != -1) {
@@ -63,6 +69,32 @@
                 console.log(reason);
             });
     }
+    function countcount(params) {
+        count()
+            .then(async (respone) => {
+                let re = await respone.json();
+                nenoCount = re.body.count;
+                delete re.body.countDate._id;
+
+                let a = {};
+                for (const key in re.body.countDate) {
+                    if (Object.hasOwnProperty.call(re.body.countDate, key)) {
+                        const element = re.body.countDate[key];
+                        console.log("element", key, element);
+                        a["" + key] = element;
+                    }
+                }
+                countDate = re.body.countDate;
+                if (Object.keys(countDate).length < 1) {
+                    dayCount = 0;
+                } else {
+                    dayCount = dayjs().diff(Object.keys(countDate)[0], "day");
+                }
+            })
+            .catch((reason) => {
+                console.log(reason);
+            });
+    }
 </script>
 
 <div class="hidden  sm:flex md:flex flex-col items-start" style="width:240px">
@@ -87,7 +119,23 @@
             <i class="ri-settings-fill" />
         </button>
     </div>
-    <div class="flex flex-col items-start text-sm text-gray-600 w-full">
+    <GreenMap {countDate} countDatalength={123} />
+
+    <div class="flex justify-around  w-full mt-4 text-gray-500">
+        <div class="font-bold text-lg">
+            <div class="text-xl">{nenoCount}</div>
+            NENO
+        </div>
+        <div class="font-bold text-lg">
+            <div class="text-xl">{allTags.length}</div>
+            TAGS
+        </div>
+        <div class="font-bold text-lg">
+            <div class="text-xl">{dayCount}</div>
+            DAY
+        </div>
+    </div>
+    <div class="flex flex-col items-start text-sm text-gray-600 w-full mt-2">
         <button
             on:click={() => {
                 $pagedd = "neno";

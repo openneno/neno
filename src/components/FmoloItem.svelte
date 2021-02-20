@@ -7,10 +7,10 @@
     import QuillEditor from "./QuillEditor.svelte";
     import { deleteOne } from "../request/fetchApi";
     import { createEventDispatcher } from "svelte";
+    import dayjs from "dayjs";
 
     const dispatch = createEventDispatcher();
 
-    import dayjs from "dayjs";
     export let _id = "";
     export let created_at = "2021-02-01 11:12:24";
     export let content = "";

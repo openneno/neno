@@ -47,6 +47,11 @@ export const qiniuToken = (data) => {
 export const setting = (data) => {
     return fetch(`${baseurl}/setting`, genergeParams(data))
 }
+export const count = (data) => {
+    return fetch(`${baseurl}/count`, genergeParams(data))
+}
+
+
 
 
 

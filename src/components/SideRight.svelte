@@ -6,7 +6,6 @@
     import ProgressLine from "./ProgressLine.svelte";
     import { fly } from "svelte/transition";
     import { pagedd } from "../store/store.js";
-
     let flowClient;
     let innerHeight = 0;
     let flowClientTop = 0;
@@ -26,6 +25,7 @@
     let searchItems = [];
 
     onMount(() => {
+
         load();
         flowClient.addEventListener("scroll", function () {
             if (
