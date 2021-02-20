@@ -110,7 +110,7 @@
                     showSlide();
                 }}
             >
-                <i class="ri-settings-fill" />
+                <i class="ri-function-fill" />
             </button>
         </div>
 

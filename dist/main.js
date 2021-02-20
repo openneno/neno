@@ -4331,7 +4331,7 @@
       return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isFastBuffer(obj.slice(0, 0))
     }
 
-    var quill$1 = createCommonjsModule(function (module, exports) {
+    var quill = createCommonjsModule(function (module, exports) {
     /*!
      * Quill Editor v1.3.7
      * https://quilljs.com/
@@ -15735,7 +15735,7 @@
     });
     });
 
-    var Quill = unwrapExports(quill$1);
+    var Quill = unwrapExports(quill);
 
     var sparkMd5 = createCommonjsModule(function (module, exports) {
     (function (factory) {
@@ -19500,23 +19500,24 @@
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[38] = list[i].file;
-    	child_ctx[39] = list[i].percent_completed;
-    	child_ctx[40] = list[i].uploadInfo;
-    	child_ctx[41] = list[i].timeStamp;
+    	child_ctx[42] = list[i].file;
+    	child_ctx[43] = list[i].percent_completed;
+    	child_ctx[44] = list[i].uploadInfo;
+    	child_ctx[45] = list[i].timeStamp;
     	return child_ctx;
     }
 
     function get_each_context_1$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[44] = list[i];
+    	child_ctx[48] = list[i];
+    	child_ctx[50] = i;
     	return child_ctx;
     }
 
-    // (335:4) {#if showTip}
+    // (383:4) {#if showTip}
     function create_if_block_4(ctx) {
     	let div;
-    	let each_value_1 = /*tagTips*/ ctx[6];
+    	let each_value_1 = /*tagTips*/ ctx[7];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -19532,10 +19533,10 @@
     				each_blocks[i].c();
     			}
 
-    			attr_dev(div, "class", "rounded bg-gray-800 text-sm text-white w-auto absolute font-bold");
-    			set_style(div, "top", /*tipTop*/ ctx[8] + /*tipHeight*/ ctx[9] + "px");
-    			set_style(div, "left", /*tipLeft*/ ctx[7] + "px");
-    			add_location(div, file$3, 336, 8, 11168);
+    			attr_dev(div, "class", "rounded bg-gray-800 text-sm text-white w-auto absolute font-bold p-1");
+    			set_style(div, "top", /*tipTop*/ ctx[10] + /*tipHeight*/ ctx[11] + "px");
+    			set_style(div, "left", /*tipLeft*/ ctx[9] + "px");
+    			add_location(div, file$3, 384, 8, 12683);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -19543,10 +19544,12 @@
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div, null);
     			}
+
+    			/*div_binding*/ ctx[27](div);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*tagTips*/ 64) {
-    				each_value_1 = /*tagTips*/ ctx[6];
+    			if (dirty[0] & /*tagTipsFocusIndex, tipTagInsert, tagTips*/ 33152) {
+    				each_value_1 = /*tagTips*/ ctx[7];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -19569,17 +19572,18 @@
     				each_blocks.length = each_value_1.length;
     			}
 
-    			if (dirty[0] & /*tipTop, tipHeight*/ 768) {
-    				set_style(div, "top", /*tipTop*/ ctx[8] + /*tipHeight*/ ctx[9] + "px");
+    			if (dirty[0] & /*tipTop, tipHeight*/ 3072) {
+    				set_style(div, "top", /*tipTop*/ ctx[10] + /*tipHeight*/ ctx[11] + "px");
     			}
 
-    			if (dirty[0] & /*tipLeft*/ 128) {
-    				set_style(div, "left", /*tipLeft*/ ctx[7] + "px");
+    			if (dirty[0] & /*tipLeft*/ 512) {
+    				set_style(div, "left", /*tipLeft*/ ctx[9] + "px");
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     			destroy_each(each_blocks, detaching);
+    			/*div_binding*/ ctx[27](null);
     		}
     	};
 
@@ -19587,24 +19591,24 @@
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(335:4) {#if showTip}",
+    		source: "(383:4) {#if showTip}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (341:12) {#each tagTips as item}
+    // (390:12) {#each tagTips as item, index}
     function create_each_block_1$2(ctx) {
     	let div;
-    	let t0_value = /*item*/ ctx[44] + "";
+    	let t0_value = /*item*/ ctx[48] + "";
     	let t0;
     	let t1;
     	let mounted;
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[23](/*item*/ ctx[44]);
+    		return /*click_handler*/ ctx[26](/*item*/ ctx[48]);
     	}
 
     	const block = {
@@ -19612,9 +19616,9 @@
     			div = element("div");
     			t0 = text(t0_value);
     			t1 = space();
-    			attr_dev(div, "class", "hover:bg-gray-800 rounded-sm p-1");
-    			attr_dev(div, "tabindex", "0");
-    			add_location(div, file$3, 341, 16, 11389);
+    			attr_dev(div, "class", "hover:bg-gray-800 rounded-sm p-1 bg");
+    			toggle_class(div, "bg-gray-400", /*index*/ ctx[50] == /*tagTipsFocusIndex*/ ctx[8]);
+    			add_location(div, file$3, 390, 16, 12950);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -19628,7 +19632,11 @@
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty[0] & /*tagTips*/ 64 && t0_value !== (t0_value = /*item*/ ctx[44] + "")) set_data_dev(t0, t0_value);
+    			if (dirty[0] & /*tagTips*/ 128 && t0_value !== (t0_value = /*item*/ ctx[48] + "")) set_data_dev(t0, t0_value);
+
+    			if (dirty[0] & /*tagTipsFocusIndex*/ 256) {
+    				toggle_class(div, "bg-gray-400", /*index*/ ctx[50] == /*tagTipsFocusIndex*/ ctx[8]);
+    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -19641,18 +19649,18 @@
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(341:12) {#each tagTips as item}",
+    		source: "(390:12) {#each tagTips as item, index}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (372:16) {#if percent_completed < 100 && percent_completed > 0}
+    // (421:16) {#if percent_completed < 100 && percent_completed > 0}
     function create_if_block_3(ctx) {
     	let div1;
     	let div0;
-    	let t0_value = /*percent_completed*/ ctx[39] + "";
+    	let t0_value = /*percent_completed*/ ctx[43] + "";
     	let t0;
     	let t1;
 
@@ -19663,9 +19671,9 @@
     			t0 = text(t0_value);
     			t1 = text("%");
     			attr_dev(div0, "class", "m-auto text-white");
-    			add_location(div0, file$3, 375, 24, 12969);
+    			add_location(div0, file$3, 424, 24, 14567);
     			attr_dev(div1, "class", " w-full  h-full box-border absolute top-0 bg-black  bg-opacity-25 focus:outline-none flex justify-around  items-center ");
-    			add_location(div1, file$3, 372, 20, 12763);
+    			add_location(div1, file$3, 421, 20, 14361);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -19674,7 +19682,7 @@
     			append_dev(div0, t1);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*imageFiles*/ 4 && t0_value !== (t0_value = /*percent_completed*/ ctx[39] + "")) set_data_dev(t0, t0_value);
+    			if (dirty[0] & /*imageFiles*/ 4 && t0_value !== (t0_value = /*percent_completed*/ ctx[43] + "")) set_data_dev(t0, t0_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div1);
@@ -19685,14 +19693,14 @@
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(372:16) {#if percent_completed < 100 && percent_completed > 0}",
+    		source: "(421:16) {#if percent_completed < 100 && percent_completed > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (389:16) {#if percent_completed == 100}
+    // (438:16) {#if percent_completed == 100}
     function create_if_block_2(ctx) {
     	let lable;
     	let div;
@@ -19704,11 +19712,11 @@
     			div = element("div");
     			i = element("i");
     			attr_dev(i, "class", "ri-check-line text-white");
-    			add_location(i, file$3, 405, 28, 14129);
+    			add_location(i, file$3, 454, 28, 15727);
     			attr_dev(div, "for", "");
     			set_style(div, "transform", "rotate(-45deg)");
     			set_style(div, "margin-top", "2px");
-    			add_location(div, file$3, 401, 24, 13949);
+    			add_location(div, file$3, 450, 24, 15547);
     			attr_dev(lable, "class", "block");
     			set_style(lable, "position", "absolute");
     			set_style(lable, "right", "-15px");
@@ -19719,7 +19727,7 @@
     			set_style(lable, "text-align", "center");
     			set_style(lable, "transform", "rotate(45deg)");
     			set_style(lable, "box-shadow", "0 0 1pc 1px rgb(0 0 0 / 20%)");
-    			add_location(lable, file$3, 389, 20, 13489);
+    			add_location(lable, file$3, 438, 20, 15087);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, lable, anchor);
@@ -19735,14 +19743,14 @@
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(389:16) {#if percent_completed == 100}",
+    		source: "(438:16) {#if percent_completed == 100}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (356:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
+    // (405:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
     function create_each_block$2(ctx) {
     	let div1;
     	let div0;
@@ -19762,8 +19770,8 @@
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*percent_completed*/ ctx[39] < 100 && /*percent_completed*/ ctx[39] > 0 && create_if_block_3(ctx);
-    	let if_block1 = /*percent_completed*/ ctx[39] == 100 && create_if_block_2(ctx);
+    	let if_block0 = /*percent_completed*/ ctx[43] < 100 && /*percent_completed*/ ctx[43] > 0 && create_if_block_3(ctx);
+    	let if_block1 = /*percent_completed*/ ctx[43] == 100 && create_if_block_2(ctx);
 
     	const block = {
     		c: function create() {
@@ -19782,24 +19790,24 @@
     			if (if_block1) if_block1.c();
     			t4 = space();
     			attr_dev(i0, "class", "m-auto ri-zoom-in-line ri-xl text-white");
-    			add_location(i0, file$3, 365, 24, 12374);
-    			add_location(button0, file$3, 364, 20, 12319);
+    			add_location(i0, file$3, 414, 24, 13972);
+    			add_location(button0, file$3, 413, 20, 13917);
     			attr_dev(i1, "class", "m-auto ri-delete-bin-line ri-xl text-white");
-    			add_location(i1, file$3, 368, 24, 12558);
+    			add_location(i1, file$3, 417, 24, 14156);
     			attr_dev(button1, "class", " ");
-    			add_location(button1, file$3, 367, 20, 12480);
+    			add_location(button1, file$3, 416, 20, 14078);
     			attr_dev(div0, "class", " w-16 h-16  box-border absolute top-0 opacity-0 bg-black hover:opacity-75 focus:outline-none flex justify-around  ");
-    			add_location(div0, file$3, 361, 16, 12130);
+    			add_location(div0, file$3, 410, 16, 13728);
     			attr_dev(img, "class", " w-full h-full object-cover");
 
-    			if (img.src !== (img_src_value = /*file*/ ctx[38] == null
-    			? /*uploadInfo*/ ctx[40].imgDomain + "/" + /*uploadInfo*/ ctx[40].key
-    			: getObjectURL(/*file*/ ctx[38]))) attr_dev(img, "src", img_src_value);
+    			if (img.src !== (img_src_value = /*file*/ ctx[42] == null
+    			? /*uploadInfo*/ ctx[44].imgDomain + "/" + /*uploadInfo*/ ctx[44].key
+    			: getObjectURL(/*file*/ ctx[42]))) attr_dev(img, "src", img_src_value);
 
     			attr_dev(img, "alt", "");
-    			add_location(img, file$3, 381, 16, 13153);
+    			add_location(img, file$3, 430, 16, 14751);
     			attr_dev(div1, "class", "w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden");
-    			add_location(div1, file$3, 356, 12, 11869);
+    			add_location(div1, file$3, 405, 12, 13467);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -19825,7 +19833,7 @@
     						button1,
     						"click",
     						function () {
-    							if (is_function(/*deleteImage*/ ctx[15](/*timeStamp*/ ctx[41]))) /*deleteImage*/ ctx[15](/*timeStamp*/ ctx[41]).apply(this, arguments);
+    							if (is_function(/*deleteImage*/ ctx[18](/*timeStamp*/ ctx[45]))) /*deleteImage*/ ctx[18](/*timeStamp*/ ctx[45]).apply(this, arguments);
     						},
     						false,
     						false,
@@ -19839,7 +19847,7 @@
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (/*percent_completed*/ ctx[39] < 100 && /*percent_completed*/ ctx[39] > 0) {
+    			if (/*percent_completed*/ ctx[43] < 100 && /*percent_completed*/ ctx[43] > 0) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
@@ -19852,13 +19860,13 @@
     				if_block0 = null;
     			}
 
-    			if (!current || dirty[0] & /*imageFiles*/ 4 && img.src !== (img_src_value = /*file*/ ctx[38] == null
-    			? /*uploadInfo*/ ctx[40].imgDomain + "/" + /*uploadInfo*/ ctx[40].key
-    			: getObjectURL(/*file*/ ctx[38]))) {
+    			if (!current || dirty[0] & /*imageFiles*/ 4 && img.src !== (img_src_value = /*file*/ ctx[42] == null
+    			? /*uploadInfo*/ ctx[44].imgDomain + "/" + /*uploadInfo*/ ctx[44].key
+    			: getObjectURL(/*file*/ ctx[42]))) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (/*percent_completed*/ ctx[39] == 100) {
+    			if (/*percent_completed*/ ctx[43] == 100) {
     				if (if_block1) ; else {
     					if_block1 = create_if_block_2(ctx);
     					if_block1.c();
@@ -19899,14 +19907,14 @@
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(356:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}",
+    		source: "(405:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (457:12) {#if canCancle}
+    // (506:12) {#if canCancle}
     function create_if_block_1$1(ctx) {
     	let button;
     	let mounted;
@@ -19917,13 +19925,13 @@
     			button = element("button");
     			button.textContent = "取消";
     			attr_dev(button, "class", "rounded-sm bg-white border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm");
-    			add_location(button, file$3, 457, 16, 16152);
+    			add_location(button, file$3, 506, 16, 17750);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*cancelInput*/ ctx[13], false, false, false);
+    				dispose = listen_dev(button, "click", /*cancelInput*/ ctx[16], false, false, false);
     				mounted = true;
     			}
     		},
@@ -19939,14 +19947,14 @@
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(457:12) {#if canCancle}",
+    		source: "(506:12) {#if canCancle}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (472:16) {:else}
+    // (521:16) {:else}
     function create_else_block(ctx) {
     	let t;
 
@@ -19968,14 +19976,14 @@
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(472:16) {:else}",
+    		source: "(521:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (470:16) {#if isSending}
+    // (519:16) {#if isSending}
     function create_if_block$2(ctx) {
     	let progressline;
     	let current;
@@ -20015,7 +20023,7 @@
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(470:16) {#if isSending}",
+    		source: "(519:16) {#if isSending}",
     		ctx
     	});
 
@@ -20078,7 +20086,7 @@
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*isSending*/ ctx[12]) return 0;
+    		if (/*isSending*/ ctx[14]) return 0;
     		return 1;
     	}
 
@@ -20128,53 +20136,53 @@
     			if_block2.c();
     			attr_dev(div0, "id", "editor");
     			attr_dev(div0, "class", "list-decimal list-inside");
-    			add_location(div0, file$3, 333, 4, 11037);
+    			add_location(div0, file$3, 381, 4, 12552);
     			attr_dev(div1, "class", "flex flex-wrap flex-row  mt-4  pl-3");
-    			add_location(div1, file$3, 354, 4, 11724);
+    			add_location(div1, file$3, 403, 4, 13322);
     			attr_dev(i0, "class", "ri-hashtag");
-    			add_location(i0, file$3, 416, 41, 14560);
+    			add_location(i0, file$3, 465, 41, 16158);
     			attr_dev(button0, "class", "rounded-sm hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button0, file$3, 414, 12, 14433);
+    			add_location(button0, file$3, 463, 12, 16031);
     			attr_dev(i1, "class", "ri-bold");
-    			add_location(i1, file$3, 419, 17, 14704);
+    			add_location(i1, file$3, 468, 17, 16302);
     			attr_dev(button1, "class", "ql-bold hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button1, file$3, 418, 12, 14621);
+    			add_location(button1, file$3, 467, 12, 16219);
     			attr_dev(i2, "class", "ri-list-check hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(i2, file$3, 424, 17, 14894);
+    			add_location(i2, file$3, 473, 17, 16492);
     			attr_dev(button2, "class", "ql-list hover:bg-gray-200 p-1 focus:outline-none");
     			button2.value = "bullet";
-    			add_location(button2, file$3, 421, 12, 14762);
+    			add_location(button2, file$3, 470, 12, 16360);
     			attr_dev(i3, "class", "ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(i3, file$3, 432, 17, 15172);
+    			add_location(i3, file$3, 481, 17, 16770);
     			attr_dev(button3, "class", "ql-list hover:bg-gray-200 p-1 focus:outline-none");
     			button3.value = "ordered";
-    			add_location(button3, file$3, 429, 12, 15039);
+    			add_location(button3, file$3, 478, 12, 16637);
     			attr_dev(i4, "class", "ri-underline");
-    			add_location(i4, file$3, 439, 17, 15425);
+    			add_location(i4, file$3, 488, 17, 17023);
     			attr_dev(button4, "class", "ql-underline hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button4, file$3, 437, 12, 15320);
+    			add_location(button4, file$3, 486, 12, 16918);
     			attr_dev(i5, "class", "ri-image-2-line ");
-    			add_location(i5, file$3, 443, 40, 15615);
+    			add_location(i5, file$3, 492, 40, 17213);
     			attr_dev(button5, "class", "rounded-sm hover:bg-gray-200 p-1 focus:outline-none ");
-    			add_location(button5, file$3, 441, 12, 15488);
+    			add_location(button5, file$3, 490, 12, 17086);
     			attr_dev(input, "class", "w-full  rounded-lg   p-2 bg-blue-400 text-white focus:outline-none");
     			attr_dev(input, "type", "file");
     			set_style(input, "display", "none");
     			attr_dev(input, "accept", "image/png, image/jpeg, image/gif, image/jpg");
     			input.multiple = true;
-    			add_location(input, file$3, 445, 12, 15682);
+    			add_location(input, file$3, 494, 12, 17280);
     			attr_dev(div2, "id", "toolbar");
     			attr_dev(div2, "class", "space-x-2");
-    			add_location(div2, file$3, 413, 8, 14363);
+    			add_location(div2, file$3, 462, 8, 15961);
     			attr_dev(button6, "class", "rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16");
-    			button6.disabled = button6_disabled_value = /*isContentEmpty*/ ctx[11] || /*isSending*/ ctx[12];
-    			add_location(button6, file$3, 462, 12, 16393);
+    			button6.disabled = button6_disabled_value = /*isContentEmpty*/ ctx[13] || /*isSending*/ ctx[14];
+    			add_location(button6, file$3, 511, 12, 17991);
     			attr_dev(div3, "class", "flex space-x-2");
-    			add_location(div3, file$3, 455, 8, 16077);
+    			add_location(div3, file$3, 504, 8, 17675);
     			attr_dev(div4, "class", " flex justify-between  pl-3 pr-3");
-    			add_location(div4, file$3, 412, 4, 14307);
+    			add_location(div4, file$3, 461, 4, 15905);
     			attr_dev(div5, "class", "border-gray-200 border-solid border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white relative");
-    			add_location(div5, file$3, 330, 0, 10905);
+    			add_location(div5, file$3, 378, 0, 12420);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20182,7 +20190,7 @@
     		m: function mount(target, anchor) {
     			insert_dev(target, div5, anchor);
     			append_dev(div5, div0);
-    			/*div0_binding*/ ctx[22](div0);
+    			/*div0_binding*/ ctx[25](div0);
     			append_dev(div5, t0);
     			if (if_block0) if_block0.m(div5, null);
     			append_dev(div5, t1);
@@ -20214,8 +20222,8 @@
     			append_dev(button5, i5);
     			append_dev(div2, t8);
     			append_dev(div2, input);
-    			/*input_binding*/ ctx[24](input);
-    			/*div2_binding*/ ctx[26](div2);
+    			/*input_binding*/ ctx[28](input);
+    			/*div2_binding*/ ctx[30](div2);
     			append_dev(div4, t9);
     			append_dev(div4, div3);
     			if (if_block1) if_block1.m(div3, null);
@@ -20226,10 +20234,10 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*insertHashTag*/ ctx[16], false, false, false),
-    					listen_dev(button5, "click", /*selectImages*/ ctx[14], false, false, false),
-    					listen_dev(input, "change", /*input_change_handler*/ ctx[25]),
-    					listen_dev(button6, "click", /*click_handler_1*/ ctx[27], false, false, false)
+    					listen_dev(button0, "click", /*insertHashTag*/ ctx[19], false, false, false),
+    					listen_dev(button5, "click", /*selectImages*/ ctx[17], false, false, false),
+    					listen_dev(input, "change", /*input_change_handler*/ ctx[29]),
+    					listen_dev(button6, "click", /*click_handler_1*/ ctx[31], false, false, false)
     				];
 
     				mounted = true;
@@ -20249,7 +20257,7 @@
     				if_block0 = null;
     			}
 
-    			if (dirty[0] & /*imageFiles, deleteImage*/ 32772) {
+    			if (dirty[0] & /*imageFiles, deleteImage*/ 262148) {
     				each_value = /*imageFiles*/ ctx[2];
     				validate_each_argument(each_value);
     				let i;
@@ -20312,7 +20320,7 @@
     				if_block2.m(button6, null);
     			}
 
-    			if (!current || dirty[0] & /*isContentEmpty, isSending*/ 6144 && button6_disabled_value !== (button6_disabled_value = /*isContentEmpty*/ ctx[11] || /*isSending*/ ctx[12])) {
+    			if (!current || dirty[0] & /*isContentEmpty, isSending*/ 24576 && button6_disabled_value !== (button6_disabled_value = /*isContentEmpty*/ ctx[13] || /*isSending*/ ctx[14])) {
     				prop_dev(button6, "disabled", button6_disabled_value);
     			}
     		},
@@ -20338,11 +20346,11 @@
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div5);
-    			/*div0_binding*/ ctx[22](null);
+    			/*div0_binding*/ ctx[25](null);
     			if (if_block0) if_block0.d();
     			destroy_each(each_blocks, detaching);
-    			/*input_binding*/ ctx[24](null);
-    			/*div2_binding*/ ctx[26](null);
+    			/*input_binding*/ ctx[28](null);
+    			/*div2_binding*/ ctx[30](null);
     			if (if_block1) if_block1.d();
     			if_blocks[current_block_type_index].d();
     			mounted = false;
@@ -20359,12 +20367,6 @@
     	});
 
     	return block;
-    }
-
-    function tipTagInsert(tag) {
-    	quill.updateContents(new Delta().retain(6).delete(5).insert("Quill")); // Keep 'Hello '
-    	// 'World' is deleted
-    	// Apply bold to exclamation mark
     }
 
     function viewImage(params) {
@@ -20393,9 +20395,9 @@
     	let $tagStrore;
     	let $settingStrore;
     	validate_store(tagStrore, "tagStrore");
-    	component_subscribe($$self, tagStrore, $$value => $$invalidate(31, $tagStrore = $$value));
+    	component_subscribe($$self, tagStrore, $$value => $$invalidate(35, $tagStrore = $$value));
     	validate_store(settingStrore, "settingStrore");
-    	component_subscribe($$self, settingStrore, $$value => $$invalidate(32, $settingStrore = $$value));
+    	component_subscribe($$self, settingStrore, $$value => $$invalidate(36, $settingStrore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("QuillEditor", slots, []);
     	let { content = "" } = $$props;
@@ -20408,9 +20410,11 @@
     	let toolbar = "";
     	let quillEditor;
     	let showTip = false;
+    	let tipClient = "";
     	let tagStartIndex = 0;
     	let selectionIndex = 0;
     	let tagTips = [];
+    	let tagTipsFocusIndex = 0;
     	let tipLeft = 0;
     	let tipTop = 0;
     	let tipHeight = 0;
@@ -20433,24 +20437,46 @@
     		quillEditor.focus();
 
     		if (content.length != 0) {
-    			$$invalidate(11, isContentEmpty = false);
+    			$$invalidate(13, isContentEmpty = false);
     		}
 
-    		quillEditor.on("text-change", function (delta, oldDelta, source) {
-    			$$invalidate(11, isContentEmpty = quillEditor.getText().length == 1);
-    			console.log(delta);
+    		$$invalidate(
+    			3,
+    			editor.onkeydown = function (event) {
+    				if ((event.code == "ArrowUp" || event.code == "ArrowDown" || event.keyCode == 13) && showTip) {
+    					if (event.code == "ArrowUp" && tagTipsFocusIndex > 0) {
+    						$$invalidate(8, tagTipsFocusIndex--, tagTipsFocusIndex);
+    					}
 
-    			if (delta.ops.length > 1 && delta.ops[1].insert == "\n") {
-    				$$invalidate(6, tagTips = []);
-    				$$invalidate(5, showTip = false);
-    			} else {
-    				toolTip();
-    			}
+    					if (event.code == "ArrowDown" && tagTipsFocusIndex < tagTips.length - 1) {
+    						$$invalidate(8, tagTipsFocusIndex++, tagTipsFocusIndex);
+    					}
+
+    					if (event.code == "Enter") {
+    						tipTagInsert(tagTips[tagTipsFocusIndex]);
+    						$$invalidate(5, showTip = false);
+    					}
+
+    					return false;
+    				}
+    			},
+    			editor
+    		);
+
+    		quillEditor.on("text-change", function (delta, oldDelta, source) {
+    			$$invalidate(13, isContentEmpty = quillEditor.getText().length == 1);
+
+    			// if (delta.ops.length > 1 && delta.ops[1].insert == "\n") {
+    			//     console.log(delta, oldDelta, source);
+    			//     showTip = false;
+    			// } else {
+    			//     toolTip();
+    			// }
+    			toolTip();
     		});
 
     		quillEditor.on("selection-change", function (range, oldRange, source) {
     			if (range) {
-    				console.log(range);
     				toolTip();
     			} else {
     				console.log("Cursor not in the editor");
@@ -20489,28 +20515,57 @@
 
     		if (sIndex != -1) {
     			let tagMay = text.substring(sIndex, cIndex);
-    			$$invalidate(6, tagTips = []);
+    			let lastTagTipslength = tagTips.length;
+    			$$invalidate(7, tagTips = []);
 
     			for (let index = 0; index < $tagStrore.allTags.length; index++) {
     				const element = $tagStrore.allTags[index];
 
     				if (element.indexOf(tagMay) == 0) {
-    					$$invalidate(6, tagTips = [...tagTips, element]);
+    					$$invalidate(7, tagTips = [...tagTips, element]);
     				}
     			}
 
+    			$$invalidate(7, tagTips = tagTips.sort((a, b) => {
+    				return b.length - a.length;
+    			}));
+
     			if (tagTips.length != 0) {
+    				if (tagTips.length <= tagTipsFocusIndex) {
+    					$$invalidate(8, tagTipsFocusIndex = tagTips.length - 1);
+    				}
+
     				let getBounds = quillEditor.getBounds(sIndex);
     				selectionIndex = cIndex;
     				tagStartIndex = sIndex;
     				$$invalidate(5, showTip = true);
-    				$$invalidate(7, tipLeft = getBounds.left);
-    				$$invalidate(8, tipTop = getBounds.top);
-    				$$invalidate(9, tipHeight = getBounds.height);
+    				$$invalidate(9, tipLeft = getBounds.left);
+    				$$invalidate(10, tipTop = getBounds.top);
+    				$$invalidate(11, tipHeight = getBounds.height);
     			}
     		} else {
     			$$invalidate(5, showTip = false);
     		}
+    	}
+
+    	function tipTagInsert(tag) {
+    		let deletelength = selectionIndex - tagStartIndex;
+    		let updateContents = { ops: [] };
+
+    		if (tagStartIndex != 0) {
+    			updateContents.ops = [{ retain: tagStartIndex }];
+    		}
+
+    		updateContents.ops = [
+    			...updateContents.ops,
+    			{ delete: deletelength },
+    			{ insert: tag },
+    			{ delete: 1 }
+    		];
+
+    		quillEditor.updateContents(updateContents);
+    		quillEditor.focus();
+    		quillEditor.setSelection(tagStartIndex + tag.length, 0, "api");
     	}
 
     	function joinFile(uploadimagefiles) {
@@ -20622,7 +20677,7 @@
 
     	function sendBiu() {
     		let sContent = editor.childNodes[0].innerHTML;
-    		$$invalidate(12, isSending = true);
+    		$$invalidate(14, isSending = true);
     		let cc = quillEditor.getContents();
     		let tags = [];
 
@@ -20664,7 +20719,7 @@
     			images: imagesInfo
     		}).then(async respone => {
     			let re = await respone.json();
-    			$$invalidate(12, isSending = false);
+    			$$invalidate(14, isSending = false);
 
     			if (re.errorMessage == undefined) {
     				quillEditor.setContents([]);
@@ -20672,7 +20727,7 @@
     				cancelInput();
     			}
     		}).catch(reason => {
-    			$$invalidate(12, isSending = false);
+    			$$invalidate(14, isSending = false);
     			console.log(reason);
     		});
     	}
@@ -20691,13 +20746,20 @@
     	}
 
     	const click_handler = item => {
-    		tipTagInsert();
+    		tipTagInsert(item);
     	};
+
+    	function div_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			tipClient = $$value;
+    			$$invalidate(6, tipClient);
+    		});
+    	}
 
     	function input_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
     			uploadimageNode = $$value;
-    			$$invalidate(10, uploadimageNode);
+    			$$invalidate(12, uploadimageNode);
     		});
     	}
 
@@ -20718,10 +20780,10 @@
     	};
 
     	$$self.$$set = $$props => {
-    		if ("content" in $$props) $$invalidate(18, content = $$props.content);
-    		if ("_id" in $$props) $$invalidate(19, _id = $$props._id);
-    		if ("parentId" in $$props) $$invalidate(20, parentId = $$props.parentId);
-    		if ("images" in $$props) $$invalidate(21, images = $$props.images);
+    		if ("content" in $$props) $$invalidate(21, content = $$props.content);
+    		if ("_id" in $$props) $$invalidate(22, _id = $$props._id);
+    		if ("parentId" in $$props) $$invalidate(23, parentId = $$props.parentId);
+    		if ("images" in $$props) $$invalidate(24, images = $$props.images);
     		if ("canCancle" in $$props) $$invalidate(0, canCancle = $$props.canCancle);
     	};
 
@@ -20747,9 +20809,11 @@
     		toolbar,
     		quillEditor,
     		showTip,
+    		tipClient,
     		tagStartIndex,
     		selectionIndex,
     		tagTips,
+    		tagTipsFocusIndex,
     		tipLeft,
     		tipTop,
     		tipHeight,
@@ -20775,26 +20839,28 @@
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("content" in $$props) $$invalidate(18, content = $$props.content);
-    		if ("_id" in $$props) $$invalidate(19, _id = $$props._id);
-    		if ("parentId" in $$props) $$invalidate(20, parentId = $$props.parentId);
-    		if ("images" in $$props) $$invalidate(21, images = $$props.images);
+    		if ("content" in $$props) $$invalidate(21, content = $$props.content);
+    		if ("_id" in $$props) $$invalidate(22, _id = $$props._id);
+    		if ("parentId" in $$props) $$invalidate(23, parentId = $$props.parentId);
+    		if ("images" in $$props) $$invalidate(24, images = $$props.images);
     		if ("canCancle" in $$props) $$invalidate(0, canCancle = $$props.canCancle);
     		if ("editor" in $$props) $$invalidate(3, editor = $$props.editor);
     		if ("toolbar" in $$props) $$invalidate(4, toolbar = $$props.toolbar);
     		if ("quillEditor" in $$props) quillEditor = $$props.quillEditor;
     		if ("showTip" in $$props) $$invalidate(5, showTip = $$props.showTip);
+    		if ("tipClient" in $$props) $$invalidate(6, tipClient = $$props.tipClient);
     		if ("tagStartIndex" in $$props) tagStartIndex = $$props.tagStartIndex;
     		if ("selectionIndex" in $$props) selectionIndex = $$props.selectionIndex;
-    		if ("tagTips" in $$props) $$invalidate(6, tagTips = $$props.tagTips);
-    		if ("tipLeft" in $$props) $$invalidate(7, tipLeft = $$props.tipLeft);
-    		if ("tipTop" in $$props) $$invalidate(8, tipTop = $$props.tipTop);
-    		if ("tipHeight" in $$props) $$invalidate(9, tipHeight = $$props.tipHeight);
-    		if ("uploadimageNode" in $$props) $$invalidate(10, uploadimageNode = $$props.uploadimageNode);
+    		if ("tagTips" in $$props) $$invalidate(7, tagTips = $$props.tagTips);
+    		if ("tagTipsFocusIndex" in $$props) $$invalidate(8, tagTipsFocusIndex = $$props.tagTipsFocusIndex);
+    		if ("tipLeft" in $$props) $$invalidate(9, tipLeft = $$props.tipLeft);
+    		if ("tipTop" in $$props) $$invalidate(10, tipTop = $$props.tipTop);
+    		if ("tipHeight" in $$props) $$invalidate(11, tipHeight = $$props.tipHeight);
+    		if ("uploadimageNode" in $$props) $$invalidate(12, uploadimageNode = $$props.uploadimageNode);
     		if ("uploadimagefiles" in $$props) $$invalidate(1, uploadimagefiles = $$props.uploadimagefiles);
     		if ("imageFiles" in $$props) $$invalidate(2, imageFiles = $$props.imageFiles);
-    		if ("isContentEmpty" in $$props) $$invalidate(11, isContentEmpty = $$props.isContentEmpty);
-    		if ("isSending" in $$props) $$invalidate(12, isSending = $$props.isSending);
+    		if ("isContentEmpty" in $$props) $$invalidate(13, isContentEmpty = $$props.isContentEmpty);
+    		if ("isSending" in $$props) $$invalidate(14, isSending = $$props.isSending);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -20837,13 +20903,16 @@
     		editor,
     		toolbar,
     		showTip,
+    		tipClient,
     		tagTips,
+    		tagTipsFocusIndex,
     		tipLeft,
     		tipTop,
     		tipHeight,
     		uploadimageNode,
     		isContentEmpty,
     		isSending,
+    		tipTagInsert,
     		cancelInput,
     		selectImages,
     		deleteImage,
@@ -20855,6 +20924,7 @@
     		images,
     		div0_binding,
     		click_handler,
+    		div_binding,
     		input_binding,
     		input_change_handler,
     		div2_binding,
@@ -20873,10 +20943,10 @@
     			create_fragment$3,
     			safe_not_equal,
     			{
-    				content: 18,
-    				_id: 19,
-    				parentId: 20,
-    				images: 21,
+    				content: 21,
+    				_id: 22,
+    				parentId: 23,
+    				images: 24,
     				canCancle: 0
     			},
     			[-1, -1]
@@ -23368,7 +23438,7 @@
     			t7 = space();
     			div4 = element("div");
     			if_block2.c();
-    			attr_dev(i0, "class", "ri-settings-fill");
+    			attr_dev(i0, "class", "ri-function-fill");
     			add_location(i0, file$7, 112, 16, 3862);
     			attr_dev(button, "class", "focus:outline-none text-gray-600   sm:hidden md:hidden ml-2");
     			add_location(button, file$7, 106, 17, 3648);

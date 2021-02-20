@@ -5,6 +5,7 @@
     import { cubicOut } from "svelte/easing";
 
     import Quill from "quill";
+
     import * as qiniu from "qiniu-js";
     import { addFmolo, qiniuToken } from "../request/fetchApi";
     import { settingStrore, tagStrore } from "../store/store.js";
@@ -24,10 +25,14 @@
 
     let quillEditor;
     let showTip = false;
+    let tipClient = "";
+
     let tagStartIndex = 0;
     let selectionIndex = 0;
 
     let tagTips = [];
+    let tagTipsFocusIndex = 0;
+
     let tipLeft = 0;
     let tipTop = 0;
     let tipHeight = 0;
@@ -53,19 +58,42 @@
         if (content.length != 0) {
             isContentEmpty = false;
         }
+        editor.onkeydown = function (event) {
+            if (
+                (event.code == "ArrowUp" ||
+                    event.code == "ArrowDown" ||
+                    event.keyCode == 13) &&
+                showTip
+            ) {
+                if (event.code == "ArrowUp" && tagTipsFocusIndex > 0) {
+                    tagTipsFocusIndex--;
+                }
+                if (
+                    event.code == "ArrowDown" &&
+                    tagTipsFocusIndex < tagTips.length - 1
+                ) {
+                    tagTipsFocusIndex++;
+                }
+                if (event.code == "Enter") {
+                    tipTagInsert(tagTips[tagTipsFocusIndex]);
+                    showTip = false;
+                }
+
+                return false;
+            }
+        };
         quillEditor.on("text-change", function (delta, oldDelta, source) {
             isContentEmpty = quillEditor.getText().length == 1;
-            console.log(delta);
-            if (delta.ops.length > 1 && delta.ops[1].insert == "\n") {
-                tagTips = [];
-                showTip = false;
-            } else {
-                toolTip();
-            }
+            // if (delta.ops.length > 1 && delta.ops[1].insert == "\n") {
+            //     console.log(delta, oldDelta, source);
+            //     showTip = false;
+            // } else {
+            //     toolTip();
+            // }
+            toolTip();
         });
         quillEditor.on("selection-change", function (range, oldRange, source) {
             if (range) {
-                console.log(range);
                 toolTip();
             } else {
                 console.log("Cursor not in the editor");
@@ -98,6 +126,8 @@
         let sIndex = text.lastIndexOf("#", cIndex);
         if (sIndex != -1) {
             let tagMay = text.substring(sIndex, cIndex);
+            let lastTagTipslength = tagTips.length;
+
             tagTips = [];
             for (let index = 0; index < $tagStrore.allTags.length; index++) {
                 const element = $tagStrore.allTags[index];
@@ -105,7 +135,14 @@
                     tagTips = [...tagTips, element];
                 }
             }
+            tagTips = tagTips.sort((a, b) => {
+                return b.length - a.length;
+            });
+
             if (tagTips.length != 0) {
+                if (tagTips.length <= tagTipsFocusIndex) {
+                    tagTipsFocusIndex = tagTips.length - 1;
+                }
                 let getBounds = quillEditor.getBounds(sIndex);
                 selectionIndex = cIndex;
                 tagStartIndex = sIndex;
@@ -119,14 +156,25 @@
         }
     }
     function tipTagInsert(tag) {
-        quill.updateContents(
-            new Delta()
-                .retain(6) // Keep 'Hello '
-                .delete(5) // 'World' is deleted
-                .insert("Quill")
-            // Apply bold to exclamation mark
-        );
+        let deletelength = selectionIndex - tagStartIndex;
+
+        let updateContents = {
+            ops: [],
+        };
+        if (tagStartIndex != 0) {
+            updateContents.ops = [{ retain: tagStartIndex }];
+        }
+        updateContents.ops = [
+            ...updateContents.ops,
+            { delete: deletelength },
+            { insert: tag },
+            { delete: 1 },
+        ];
+        quillEditor.updateContents(updateContents);
+        quillEditor.focus();
+        quillEditor.setSelection(tagStartIndex + tag.length, 0, "api");
     }
+
     $: imageFiles = joinFile(uploadimagefiles);
 
     $: {
@@ -335,13 +383,14 @@
     {#if showTip}
         <!-- content here -->
         <div
-            class="rounded bg-gray-800 text-sm text-white w-auto absolute font-bold"
+            bind:this={tipClient}
+            class="rounded bg-gray-800 text-sm text-white w-auto absolute font-bold p-1"
             style="top:{tipTop + tipHeight}px;left:{tipLeft}px"
         >
-            {#each tagTips as item}
+            {#each tagTips as item, index}
                 <div
-                    class="hover:bg-gray-800 rounded-sm p-1"
-                    tabindex="0"
+                    class="hover:bg-gray-800 rounded-sm p-1 bg"
+                    class:bg-gray-400={index == tagTipsFocusIndex}
                     on:click={() => {
                         tipTagInsert(item);
                     }}
