@@ -2,7 +2,6 @@
     import dayjs from "dayjs";
     import { onMount } from "svelte";
     export let countDate = {};
-    export let countDatalength = 0;
 
     let weekCount = 12;
     let weekDay = 7;
@@ -10,14 +9,11 @@
     let toDay = dayjs().format("YYYY-MM-DD");
 
     $: {
-        console.log(countDate);
-        name();
+        name(countDate);
     }
     function name(params) {
         let tmap = [];
         let startDay = weekCount * weekDay - (weekDay - dayjs().day() + 1);
-        console.log(countDate);
-        console.log(countDatalength);
         for (let week = 0; week < weekCount; week++) {
             let dmap = [];
             for (let day = 0; day < weekDay; day++) {
@@ -42,7 +38,6 @@
             tmap = [...tmap, dmap];
         }
         gmap = tmap;
-        console.log(gmap);
     }
 </script>
 

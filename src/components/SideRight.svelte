@@ -1,11 +1,15 @@
 <script>
-    import QuillEditor from "./QuillEditor.svelte";
-    import FmoloItem from "./FmoloItem.svelte";
     import { onMount } from "svelte";
-    import { getAllFmolo, search } from "../request/fetchApi";
-    import ProgressLine from "./ProgressLine.svelte";
     import { fly } from "svelte/transition";
     import { pagedd } from "../store/store.js";
+
+    import QuillEditor from "./QuillEditor.svelte";
+    import FmoloItem from "./FmoloItem.svelte";
+
+    import { getAllFmolo, search } from "../request/fetchApi";
+    import ProgressLine from "./ProgressLine.svelte";
+    import { showSlide } from "./SettingSlide.svelte";
+
     let flowClient;
     let innerHeight = 0;
     let flowClientTop = 0;
@@ -25,7 +29,6 @@
     let searchItems = [];
 
     onMount(() => {
-
         load();
         flowClient.addEventListener("scroll", function () {
             if (
@@ -100,7 +103,7 @@
             NENO <button
                 class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
                 on:click={() => {
-                    $pagedd = "setting";
+                    showSlide();
                 }}
             >
                 <i class="ri-settings-fill" />

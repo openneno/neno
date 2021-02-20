@@ -1,18 +1,15 @@
 <script>
     import { tags, pin, pins, count } from "../request/fetchApi";
-    import { pagedd } from "../store/store.js";
+    import { pagedd, countStrore } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
 
     import { onMount } from "svelte";
     import dayjs from "dayjs";
 
-    let dayCount = 0;
-    let nenoCount = 0;
-    let countDate = 0;
-
     let allTags = [];
     let pinTags = [];
     let checkedIndex = $pagedd;
+    let countDate = 0;
 
     onMount(() => {
         countcount();
@@ -31,6 +28,7 @@
                     }
                 });
                 allTags = tempTags;
+                $countStrore.tagCount = allTags.length;
             })
             .catch((reason) => {
                 console.log(reason);
@@ -73,23 +71,18 @@
         count()
             .then(async (respone) => {
                 let re = await respone.json();
-                nenoCount = re.body.count;
+                $countStrore.nenoCount = re.body.count;
                 delete re.body.countDate._id;
 
-                let a = {};
-                for (const key in re.body.countDate) {
-                    if (Object.hasOwnProperty.call(re.body.countDate, key)) {
-                        const element = re.body.countDate[key];
-                        console.log("element", key, element);
-                        a["" + key] = element;
-                    }
+                $countStrore.countDate = re.body.countDate;
+                let dayCount = 0;
+                if (Object.keys($countStrore.countDate).length >= 1) {
+                    dayCount = dayjs().diff(
+                        Object.keys($countStrore.countDate)[0],
+                        "day"
+                    );
                 }
-                countDate = re.body.countDate;
-                if (Object.keys(countDate).length < 1) {
-                    dayCount = 0;
-                } else {
-                    dayCount = dayjs().diff(Object.keys(countDate)[0], "day");
-                }
+                $countStrore.dayCount = dayCount;
             })
             .catch((reason) => {
                 console.log(reason);
@@ -97,7 +90,7 @@
     }
 </script>
 
-<div class="hidden  sm:flex md:flex flex-col items-start" style="width:240px">
+<div class="w-full">
     <div
         class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold"
     >
@@ -119,19 +112,19 @@
             <i class="ri-settings-fill" />
         </button>
     </div>
-    <GreenMap {countDate} countDatalength={123} />
+    <GreenMap countDate={$countStrore.countDate} />
 
     <div class="flex justify-around  w-full mt-4 text-gray-500">
         <div class="font-bold text-lg">
-            <div class="text-xl">{nenoCount}</div>
+            <div class="text-xl">{$countStrore.nenoCount}</div>
             NENO
         </div>
         <div class="font-bold text-lg">
-            <div class="text-xl">{allTags.length}</div>
+            <div class="text-xl">{$countStrore.tagCount}</div>
             TAGS
         </div>
         <div class="font-bold text-lg">
-            <div class="text-xl">{dayCount}</div>
+            <div class="text-xl">{$countStrore.dayCount}</div>
             DAY
         </div>
     </div>

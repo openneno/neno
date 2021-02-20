@@ -5,6 +5,8 @@
 <script>
     import { showFmolo } from "./FmoloDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
+    import { fade } from "svelte/transition";
+
     import { deleteOne } from "../request/fetchApi";
     import { createEventDispatcher } from "svelte";
     import dayjs from "dayjs";
@@ -105,8 +107,10 @@
                     on:blur|stopPropagation={() => {
                         setTimeout(() => {
                             toggleMore();
-                        }, 200);
+                        }, 150);
                     }}
+                    in:fade={{ duration: 100 }}
+                    out:fade={{ duration: 100 }}
                     bind:this={moreList}
                     class=" absolute w-16  bg-white shadow-xl rounded-lg flex flex-col justify-center  border-gray-200  border-solid space-y-1 pt-2 pb-2 focus:outline-none"
                     style="left:-16px;border-width:1px"

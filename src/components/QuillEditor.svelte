@@ -1,10 +1,14 @@
 <script>
     import { onMount } from "svelte";
+    import { createEventDispatcher } from "svelte";
+    import { fly } from "svelte/transition";
+    import {  cubicOut } from "svelte/easing";
+
     import Quill from "quill";
     import * as qiniu from "qiniu-js";
     import { addFmolo, qiniuToken } from "../request/fetchApi";
     import { settingStrore } from "../store/store.js";
-    import { createEventDispatcher } from "svelte";
+
     import ProgressLine from "./ProgressLine.svelte";
     export let content = "";
     export let _id = "";
@@ -270,6 +274,8 @@
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
         {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
             <div
+                in:fly={{ y: -100, duration: 500, easing: cubicOut }}
+                out:fly={{ y: -100, duration: 300 }}
                 class="w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden"
             >
                 <div
