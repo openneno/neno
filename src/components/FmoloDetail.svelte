@@ -97,6 +97,7 @@
                     parentId={fmoloDetail.parentId}
                     parent={fmoloDetail.parent}
                     images={fmoloDetail.images}
+                    tags={fmoloDetail.tags}
                 />
 
                 <div class=" pl-6 ">

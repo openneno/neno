@@ -3,13 +3,15 @@
 </script>
 
 <script>
-    import { showFmolo } from "./FmoloDetail.svelte";
-    import QuillEditor from "./QuillEditor.svelte";
+    import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
 
-    import { deleteOne } from "../request/fetchApi";
-    import { createEventDispatcher } from "svelte";
     import dayjs from "dayjs";
+
+    import { showFmolo } from "./FmoloDetail.svelte";
+    import QuillEditor from "./QuillEditor.svelte";
+    import { deleteOne } from "../request/fetchApi";
+    import { searchNenoByTag } from "../store/store.js";
 
     const dispatch = createEventDispatcher();
 
@@ -28,20 +30,15 @@
         aa.insertAdjacentHTML("afterbegin", content);
         return aa.textContent;
     }
-    let moreList;
-    let openMore = false;
+    let menuList;
+    let openMenu = false;
     let editMode = false;
 
-    function toggleMoreWindow(node) {
-        if (node == 2) {
-            openMore = false;
-        }
-    }
     function action(params) {
         params.focus();
     }
-    function toggleMore(node) {
-        openMore = !openMore;
+    function toggleMenu(node) {
+        openMenu = !openMenu;
     }
     function toggleEditMode(params) {
         editMode = !editMode;
@@ -60,6 +57,7 @@
             });
     }
     document.tagClick = (tag) => {
+        $searchNenoByTag.tag = tag.innerText;
         console.log("tagClick", tag.innerText);
     };
     function praseTag(rawContent, tags) {
@@ -84,7 +82,7 @@
         if (searchContent.length != 0) {
             pContent = pContent.replaceAll(
                 searchContent,
-                `<span class="bg-yellow-400">${searchContent}</span>`
+                `<span class="bg-yellow-300">${searchContent}</span>`
             );
         }
         return pContent;
@@ -97,21 +95,21 @@
             {dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")}
         </div>
         <div class="relative">
-            <button on:click={() => toggleMore(1)} class="focus:outline-none ">
+            <button on:click={() => toggleMenu(1)} class="focus:outline-none ">
                 <i class="ri-more-line" />
             </button>
-            {#if openMore == true}
+            {#if openMenu == true}
                 <div
                     use:action
                     tabindex="0"
                     on:blur|stopPropagation={() => {
                         setTimeout(() => {
-                            toggleMore();
+                            toggleMenu();
                         }, 150);
                     }}
                     in:fade={{ duration: 100 }}
                     out:fade={{ duration: 100 }}
-                    bind:this={moreList}
+                    bind:this={menuList}
                     class=" absolute w-16  bg-white shadow-xl rounded-lg flex flex-col justify-center  border-gray-200  border-solid space-y-1 pt-2 pb-2 focus:outline-none"
                     style="left:-16px;border-width:1px"
                 >

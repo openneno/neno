@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { fly } from "svelte/transition";
-    import { pagedd, searchNenoByDate } from "../store/store.js";
+    import { searchNenoByTag, searchNenoByDate } from "../store/store.js";
 
     import QuillEditor from "./QuillEditor.svelte";
     import FmoloItem from "./FmoloItem.svelte";
@@ -32,7 +32,11 @@
         load();
         searchNenoByDate.subscribe((value) => {
             console.log("searchNenoByDate", value);
-            searchNeno("", value.date);
+            searchNeno("", value.date, "");
+        });
+        searchNenoByTag.subscribe((value) => {
+            console.log("searchNenoByTag", value);
+            searchNeno("", "", value.tag);
         });
         flowClient.addEventListener("scroll", function () {
             if (
@@ -72,10 +76,18 @@
                 isLoding = false;
             });
     }
-    function searchNeno(searchText, searchDate) {
-        if (searchText.length != 0 || searchDate.length != 0) {
+    function searchNeno(searchText, searchDate, searchTag) {
+        if (
+            searchText.length != 0 ||
+            searchDate.length != 0 ||
+            searchTag.length != 0
+        ) {
             isLoding = true;
-            search({ content: searchText, created_at: searchDate })
+            search({
+                content: searchText,
+                created_at: searchDate,
+                tag: searchTag,
+            })
                 .then(function (response) {
                     if (response.ok) {
                         return response;

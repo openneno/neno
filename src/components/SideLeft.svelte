@@ -1,6 +1,12 @@
 <script>
     import { tags, pin, pins, count } from "../request/fetchApi";
-    import { pagedd, countStrore, tagStrore,searchNenoByDate } from "../store/store.js";
+    import {
+        pagedd,
+        countStrore,
+        tagStrore,
+        searchNenoByDate,
+        searchNenoByTag,
+    } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
 
     import { onMount } from "svelte";
@@ -8,8 +14,6 @@
 
     let allTags = [];
     let pinTags = [];
-    let checkedIndex = $pagedd;
-    let countDate = 0;
 
     onMount(() => {
         countcount();
@@ -107,17 +111,17 @@
             class="focus:outline-none"
             on:click={() => {
                 $pagedd = "setting";
-                checkedIndex = "setting";
             }}
         >
             <i class="ri-settings-fill" />
         </button>
     </div>
-    <GreenMap countDate={$countStrore.countDate} on:greenmapClick={(event)=>{
-        $searchNenoByDate.date=event.detail
-
-
-    }} />
+    <GreenMap
+        countDate={$countStrore.countDate}
+        on:greenmapClick={(event) => {
+            $searchNenoByDate.date = event.detail;
+        }}
+    />
 
     <div class="flex justify-around  w-full mt-4 text-gray-500">
         <div class="font-bold text-lg">
@@ -137,35 +141,29 @@
         <button
             on:click={() => {
                 $pagedd = "neno";
-                checkedIndex = "neno";
+                $searchNenoByTag.tag = "";
             }}
             class="{'    bu-op hover:text-white hover:bg-green-400 ' +
-                (checkedIndex == 'neno'
-                    ? 'bg-green-500 text-white'
-                    : '')}        "
+                ($pagedd == 'neno' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-quill-pen-fill mr-2" />NENO</button
         >
 
         <button
             on:click={() => {
-                checkedIndex = "daily";
+                $pagedd = "daily";
             }}
             class="{'    bu-op hover:text-white hover:bg-green-400 ' +
-                (checkedIndex == 'daily'
-                    ? 'bg-green-500 text-white'
-                    : '')}        "
+                ($pagedd == 'daily' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-calendar-event-fill mr-2" />每日回顾</button
         >
         <button
             on:click={() => {
-                checkedIndex = 2;
+                $pagedd = "luck";
             }}
             class="{'    bu-op hover:text-white hover:bg-green-400 ' +
-                (checkedIndex == 'luck'
-                    ? 'bg-green-500 text-white'
-                    : '')}        "
+                ($pagedd == 'luck' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-bubble-chart-fill mr-2" />随机漫步</button
         >
@@ -176,7 +174,12 @@
 
         {#each pinTags as { _id, tag }}
             <button
-                class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:bg-gray-200 flex justify-between text-sm"
+                class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm"
+                class:bg-green-500={$searchNenoByTag.tag == tag}
+                class:text-white={$searchNenoByTag.tag == tag}
+                on:click={() => {
+                    $searchNenoByTag.tag = tag;
+                }}
             >
                 {tag}
                 <button
@@ -196,7 +199,12 @@
 
         {#each allTags as tag}
             <button
-                class="rounded-r  group p-4 pt-2 pb-2 focus:outline-none w-full hover:bg-gray-200 flex justify-between text-sm"
+                class="rounded-r  group p-4 pt-2 pb-2 focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm"
+                class:bg-green-500={$searchNenoByTag.tag == tag}
+                class:text-white={$searchNenoByTag.tag == tag}
+                on:click={() => {
+                    $searchNenoByTag.tag = tag;
+                }}
             >
                 {tag}
                 <button

@@ -7,5 +7,7 @@ export const settingStrore = writable({ platform: "七牛", imgDomain: "http://i
 export const countStrore = writable({ tagCount: 0, nenoCount: 0, dayCount: 0, dateCount: {} });
 export const tagStrore = writable({ pinTags: [], allTags: [] });
 export const searchNenoByDate = writable({ date: "" });
+export const searchNenoByTag = writable({ tag: "" });
+
 
 
