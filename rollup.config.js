@@ -23,11 +23,13 @@ export default {
   plugins: [
     svelte({
       dev: !production,
-      preprocess: {
-        style: svelte_preprocess_postcss()
-      },
+      // preprocess: {
+      //   style: svelte_preprocess_postcss()
+      // },
+
+      preprocess: svelte_preprocess_postcss({ postcss: true }),
       css: css => {
-        css.write("dist/components.css");
+        css.write("components.css");
       },
       emitCss: true
     }),

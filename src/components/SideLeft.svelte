@@ -169,7 +169,7 @@
                 $pagedd = "neno";
                 $searchNenoByTag.tag = "";
             }}
-            class="{'    bu-op hover:text-white hover:bg-green-400 ' +
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
                 ($pagedd == 'neno' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-quill-pen-fill mr-2" />NENO</button
@@ -179,7 +179,7 @@
             on:click={() => {
                 $pagedd = "daily";
             }}
-            class="{'    bu-op hover:text-white hover:bg-green-400 ' +
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
                 ($pagedd == 'daily' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-calendar-event-fill mr-2" />每日回顾</button
@@ -188,7 +188,7 @@
             on:click={() => {
                 $pagedd = "luck";
             }}
-            class="{'    bu-op hover:text-white hover:bg-green-400 ' +
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
                 ($pagedd == 'luck' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-bubble-chart-fill mr-2" />随机漫步</button
@@ -240,10 +240,8 @@
     {/if}
 </div>
 
-<style lang="postcss">
-    .bu-op {
-        @apply w-full    flex  items-center justify-start  rounded-r  p-4 outline-none;
-    }
+<style >
+    
     ::-webkit-scrollbar {
         width: 0 !important;
     }

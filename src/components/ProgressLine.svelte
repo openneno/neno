@@ -40,7 +40,7 @@
     </div>
 </div>
 
-<style lang="postcss">
+<style type="text/postcss">
     .lds-ellipsis {
         display: inline-block;
         position: relative;

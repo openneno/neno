@@ -113,9 +113,9 @@
 </script>
 
 <svelte:window bind:innerHeight />
-<div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 w-0">
-    <div class="  flex flex-row items-center justify-between pr-4">
-        <div class="flex flex-row items-center ">
+<div class="  flex-1 flex flex-col justify-start  pt-4  w-0">
+    <div class="  flex flex-row items-center justify-between ">
+        <div class="flex flex-row items-center pl-4 ">
             NENO <button
                 class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
                 on:click={() => {
@@ -147,7 +147,7 @@
             />
         </div>
     </div>
-    <div class="p-4 ">
+    <div class="p-2 ">
         <QuillEditor
             on:update={(event) => {
                 nenoItems = [event.detail, ...nenoItems];

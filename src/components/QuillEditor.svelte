@@ -93,9 +93,7 @@
         quillEditor.on("selection-change", function (range, oldRange, source) {
             if (range) {
                 toolTip();
-            } else {
-                console.log("Cursor not in the editor");
-            }
+            } 
         });
         quillEditor.setSelection(quillEditor.getText().length);
         let tempfiles = [];
@@ -389,7 +387,7 @@
         >
             {#each tagTips as item, index}
                 <div
-                    class="hover:bg-gray-800 rounded-sm p-1 bg"
+                    class="hover:bg-gray-400 rounded-sm p-1 bg"
                     class:bg-gray-400={index == tagTipsFocusIndex}
                     on:click={() => {
                         tipTagInsert(item);

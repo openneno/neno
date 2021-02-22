@@ -1,6 +1,5 @@
 <script>
     import dayjs from "dayjs";
-    import { onMount } from "svelte";
     import { createEventDispatcher } from "svelte";
     export let countDate = {};
     const dispatch = createEventDispatcher();
@@ -83,8 +82,8 @@
             {/each}
         </div>
     {/each}
+    <div
+        class="border-soild bg-gray-300 bg-green-300  bg-green-400 border-green-500 bg-green-600 border-green-500 border-2 bg-gray-400 invisible"
+    />
     <div />
 </div>
-
-<style>
-</style>
