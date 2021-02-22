@@ -1,9 +1,10 @@
-import { tokoen } from "../store/store.js";
-let tokenen = ""
-tokoen.subscribe(value => {
-    tokenen = value;
+import { settingStrore } from "../store/store.js";
+let baseurl = ""
+settingStrore.subscribe(value => {
+    baseurl = value.domain;
+    console.log("settingStrore.subscribe",value);
 });
-const baseurl = "http://127.0.0.1:3000"
+// const baseurl = "http://127.0.0.1:3000"
 // const baseurl = "https://b9c21f2efdc44e2792d2ac7cbb8feff4.apig.cn-north-4.huaweicloudapis.com"
 // const baseurl = "https://fmolo.bijiduo.com"
 function genergeParams(data) {

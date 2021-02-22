@@ -8,6 +8,9 @@
 
     import * as qiniu from "qiniu-js";
     import { addFmolo, qiniuToken } from "../request/fetchApi";
+    import { getObjectURL } from "../utils/process";
+    import { showPictureView } from "./ViewPicture.svelte";
+
     import { settingStrore, tagStrore } from "../store/store.js";
 
     import ProgressLine from "./ProgressLine.svelte";
@@ -84,12 +87,7 @@
         };
         quillEditor.on("text-change", function (delta, oldDelta, source) {
             isContentEmpty = quillEditor.getText().length == 1;
-            // if (delta.ops.length > 1 && delta.ops[1].insert == "\n") {
-            //     console.log(delta, oldDelta, source);
-            //     showTip = false;
-            // } else {
-            //     toolTip();
-            // }
+
             toolTip();
         });
         quillEditor.on("selection-change", function (range, oldRange, source) {
@@ -225,7 +223,9 @@
     function selectImages(params) {
         uploadimageNode.click();
     }
-    function viewImage(params) {}
+    function viewImage(index) {
+        showPictureView(imageFiles, index);
+    }
     function deleteImage(timeStamp) {
         imageFiles = imageFiles.filter((item) => {
             return item.timeStamp != timeStamp;
@@ -243,21 +243,21 @@
         }
         quillEditor.insertText(index, "#");
     }
-    function getObjectURL(file) {
-        var url = null;
-        // 下面函数执行的效果是一样的，只是需要针对不同的浏览器执行不同的 js 函数而已
-        if (window.createObjectURL != undefined) {
-            // basic
-            url = window.createObjectURL(file);
-        } else if (window.URL != undefined) {
-            // mozilla(firefox)
-            url = window.URL.createObjectURL(file);
-        } else if (window.webkitURL != undefined) {
-            // webkit or chrome
-            url = window.webkitURL.createObjectURL(file);
-        }
-        return url;
-    }
+    // function getObjectURL(file) {
+    //     var url = null;
+    //     // 下面函数执行的效果是一样的，只是需要针对不同的浏览器执行不同的 js 函数而已
+    //     if (window.createObjectURL != undefined) {
+    //         // basic
+    //         url = window.createObjectURL(file);
+    //     } else if (window.URL != undefined) {
+    //         // mozilla(firefox)
+    //         url = window.URL.createObjectURL(file);
+    //     } else if (window.webkitURL != undefined) {
+    //         // webkit or chrome
+    //         url = window.webkitURL.createObjectURL(file);
+    //     }
+    //     return url;
+    // }
     function uploadPicQiniu(imageFile, index, token) {
         console.log(imageFile, imageFile.name, token);
         const observable = qiniu.upload(
@@ -402,7 +402,7 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }}
+        {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }, index}
             <div
                 in:fly={{ y: -100, duration: 500, easing: cubicOut }}
                 out:fly={{ y: -100, duration: 300 }}
@@ -411,7 +411,11 @@
                 <div
                     class=" w-16 h-16  box-border absolute top-0 opacity-0 bg-black hover:opacity-75 focus:outline-none flex justify-around  "
                 >
-                    <button on:click={viewImage}>
+                    <button
+                        on:click={() => {
+                            viewImage(index);
+                        }}
+                    >
                         <i class="m-auto ri-zoom-in-line ri-xl text-white" />
                     </button>
                     <button class=" " on:click={deleteImage(timeStamp)}>

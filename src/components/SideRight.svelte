@@ -76,7 +76,7 @@
                 isLoding = false;
             });
     }
-    function searchNeno(searchText, searchDate, searchTag) {
+    function searchNeno(searchText = "", searchDate = "", searchTag = "") {
         if (
             searchText.length != 0 ||
             searchDate.length != 0 ||

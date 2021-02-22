@@ -10,6 +10,7 @@
 
     import { showFmolo } from "./FmoloDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
+    import { showPictureView } from "./ViewPicture.svelte";
     import { deleteOne } from "../request/fetchApi";
     import { searchNenoByTag } from "../store/store.js";
 
@@ -57,7 +58,7 @@
             });
     }
     document.tagClick = (tag) => {
-        $searchNenoByTag.tag = tag.innerText;
+        $searchNenoByTag.tag = tag.innerText.trim();
         console.log("tagClick", tag.innerText);
     };
     function praseTag(rawContent, tags) {
@@ -164,6 +165,9 @@
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
         {#each images as { imgDomain, key }, index (index)}
             <img
+                on:click={() => {
+                    showPictureView(images,index);
+                }}
                 class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
                 src={imgDomain + "/" + key}
                 alt=""

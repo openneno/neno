@@ -8,6 +8,7 @@
         searchNenoByTag,
     } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
+    import TagExpand from "./TagExpand.svelte";
 
     import { onMount } from "svelte";
     import dayjs from "dayjs";
@@ -27,17 +28,42 @@
                 let tempTags = re.body;
                 $countStrore.tagCount = tempTags.length;
                 $tagStrore.allTags = tempTags;
-                pinTags.forEach((item) => {
-                    let index = tempTags.indexOf(item.tag);
-                    if (index != -1) {
-                        tempTags.splice(index, 1);
-                    }
-                });
-                allTags = tempTags;
+
+                // pinTags.forEach((item) => {
+                //     let index = tempTags.indexOf(item.tag);
+                //     if (index != -1) {
+                //         tempTags.splice(index, 1);
+                //     }
+                // });
+                // allTags = tempTags;
+                allTags = filterTag(tempTags);
             })
             .catch((reason) => {
                 console.log(reason);
             });
+    }
+    function filterTag(allTags) {
+        allTags = allTags.sort((a, b) => {
+            return a.length - b.length;
+        });
+        var filterSet = new Set();
+        let end = allTags.length - 1;
+        for (let index = 0; index < end; index++) {
+            let element = allTags[index];
+            var leftTags = allTags.slice(index + 1);
+            // console.log("leftTags", element, leftTags);
+            let lIndex = 0;
+            var left = "";
+            for (; lIndex < leftTags.length; lIndex++) {
+                left = leftTags[lIndex];
+                if (left.indexOf(element + "/") == 0) {
+                    element = left;
+                }
+            }
+            filterSet.add(element);
+        }
+
+        return Array.from(filterSet);
     }
 
     function getPins() {
@@ -95,12 +121,12 @@
     }
 </script>
 
-<div class="w-full">
+<div class="w-full flex flex-col overflow-auto h-screen">
     <div
         class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold"
     >
         <div class="flex  items-center justify-between">
-            FMOLOER
+            NENONEN
             <div
                 class="text-sm rounded-sm bg-red-300 text-white p-1 pt-0 pb-0 "
             >
@@ -170,7 +196,7 @@
     </div>
 
     {#if pinTags.length != 0}
-        <div class=" p-4 w-full text-sm">置顶</div>
+        <div class=" p-4 w-full text-sm text-yellow-500">置顶</div>
 
         {#each pinTags as { _id, tag }}
             <button
@@ -195,33 +221,30 @@
     {/if}
 
     {#if allTags.length != 0}
-        <div class="  p-4 pt-2 pb-2 w-full text-sm">标签</div>
+        <div class="  p-4 pt-2 pb-2 w-full text-sm text-blue-500">标签</div>
 
         {#each allTags as tag}
-            <button
-                class="rounded-r  group p-4 pt-2 pb-2 focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm"
-                class:bg-green-500={$searchNenoByTag.tag == tag}
-                class:text-white={$searchNenoByTag.tag == tag}
-                on:click={() => {
-                    $searchNenoByTag.tag = tag;
-                }}
-            >
+            <TagExpand
                 {tag}
-                <button
-                    class="focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2"
-                    on:click={() => {
-                        pinNeno(tag, true);
-                    }}
-                >
-                    <i class="ri-pushpin-2-fill" />
-                </button>
-            </button>
+                selectionTag={$searchNenoByTag.tag}
+                on:selectTag={(event) => {
+                    $searchNenoByTag.tag = event.detail;
+                    console.log("topselectTag", event.detail);
+                }}
+                on:pinTag={(event) => {
+                    pinNeno(event.detail, true);
+                    console.log("toppinTag", event.detail);
+                }}
+            />
         {/each}
     {/if}
 </div>
 
-<style type="text/postcss">
+<style lang="postcss">
     .bu-op {
         @apply w-full    flex  items-center justify-start  rounded-r  p-4 outline-none;
+    }
+    ::-webkit-scrollbar {
+        width: 0 !important;
     }
 </style>

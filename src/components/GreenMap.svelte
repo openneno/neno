@@ -10,9 +10,11 @@
     let toDay = dayjs().format("YYYY-MM-DD");
 
     $: {
-        name(countDate);
+        if (countDate != undefined) {
+            name(countDate);
+        }
     }
-    function name(params) {
+    function name(countDate) {
         let tmap = [];
         let startDay = weekCount * weekDay - (weekDay - dayjs().day() + 1);
         for (let week = 0; week < weekCount; week++) {
@@ -49,7 +51,10 @@
                 <div class="  relative flex justify-center items-center ">
                     <div
                         on:click={() => {
-                            dispatch("greenmapClick", day.date == toDay?"":day.date);
+                            dispatch(
+                                "greenmapClick",
+                                day.date == toDay ? "" : day.date
+                            );
                         }}
                         class="rounded-sm w-4 h-4 z-0 "
                         class:border-green-500={day.date == toDay}

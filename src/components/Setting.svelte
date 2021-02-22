@@ -7,6 +7,7 @@
 
     let platform = $settingStrore.platform;
     let imgDomain = $settingStrore.imgDomain;
+    let domain = $settingStrore.domain;
     let done = "";
 
     onMount(() => {
@@ -27,7 +28,10 @@
     function saveSetting() {
         $settingStrore.imgDomain = imgDomain;
         $settingStrore.platform = platform;
+        $settingStrore.domain = domain;
 
+        window.localStorage.setItem("domain", domain);
+        window.location.reload();
         setting($settingStrore)
             .then(async (respone) => {
                 done = "成功";
@@ -52,6 +56,15 @@
             <i class="ri-arrow-left-line" />
         </button>设置
     </div>
+    <div class="m-4">
+        <label for="">API域名</label>
+        <input
+            type="text"
+            bind:value={domain}
+            class="w-full border-2  mt-4 outline-white p-2"
+            placeholder="http://api.neno.topmini.top"
+        />
+    </div>
     <div class="m-4 flex flex-col">
         <label for="">图库平台</label>
         <select class="p-2 mt-4" bind:value={platform}>
@@ -68,6 +81,7 @@
             placeholder="http://img.fmolo.bijiduo.com"
         />
     </div>
+
     <div class="m-4">
         <button
             on:click={() => {

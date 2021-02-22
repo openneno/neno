@@ -3,8 +3,9 @@
   import SideRight from "./SideRight.svelte";
   import Setting from "./Setting.svelte";
   import SettingSlide from "./SettingSlide.svelte";
-
   import FmoloDetail from "./FmoloDetail.svelte";
+  import ViewPicture from "./ViewPicture.svelte";
+
   import { pagedd } from "../store/store.js";
 </script>
 
@@ -26,4 +27,5 @@
   </div>
   <FmoloDetail />
   <SettingSlide />
+  <ViewPicture />
 </div>
