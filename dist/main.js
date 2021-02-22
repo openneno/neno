@@ -1124,6 +1124,9 @@
     const count = (data) => {
         return fetch(`${baseurl}/count`, genergeParams(data))
     };
+    const rename = (data) => {
+        return fetch(`${baseurl}/rename`, genergeParams(data))
+    };
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1612,14 +1615,14 @@
     const { console: console_1 } = globals;
     const file$1 = "src\\components\\TagExpand.svelte";
 
-    // (41:8) {#if subTag.length != 0}
-    function create_if_block_1(ctx) {
+    // (60:12) {#if subTag.length != 0}
+    function create_if_block_2(ctx) {
     	let button;
     	let mounted;
     	let dispose;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*showSub*/ ctx[5]) return create_if_block_2;
+    		if (/*showSub*/ ctx[5]) return create_if_block_3;
     		return create_else_block;
     	}
 
@@ -1630,15 +1633,15 @@
     		c: function create() {
     			button = element("button");
     			if_block.c();
-    			attr_dev(button, "class", "focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2");
-    			add_location(button, file$1, 41, 12, 1259);
+    			attr_dev(button, "class", "focus:outline-none group-hover:opacity-100 opacity-0  pr-1");
+    			add_location(button, file$1, 60, 16, 1964);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
     			if_block.m(button, null);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", stop_propagation(/*click_handler_1*/ ctx[8]), false, false, true);
+    				dispose = listen_dev(button, "click", stop_propagation(/*click_handler_2*/ ctx[11]), false, false, true);
     				mounted = true;
     			}
     		},
@@ -1663,16 +1666,16 @@
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1.name,
+    		id: create_if_block_2.name,
     		type: "if",
-    		source: "(41:8) {#if subTag.length != 0}",
+    		source: "(60:12) {#if subTag.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (50:16) {:else}
+    // (69:20) {:else}
     function create_else_block(ctx) {
     	let i;
 
@@ -1680,7 +1683,7 @@
     		c: function create() {
     			i = element("i");
     			attr_dev(i, "class", "ri-arrow-down-s-line");
-    			add_location(i, file$1, 50, 20, 1617);
+    			add_location(i, file$1, 69, 24, 2353);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -1694,22 +1697,22 @@
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(50:16) {:else}",
+    		source: "(69:20) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (48:16) {#if showSub}
-    function create_if_block_2(ctx) {
+    // (67:20) {#if showSub}
+    function create_if_block_3(ctx) {
     	let i;
 
     	const block = {
     		c: function create() {
     			i = element("i");
     			attr_dev(i, "class", "ri-arrow-right-s-line");
-    			add_location(i, file$1, 48, 20, 1535);
+    			add_location(i, file$1, 67, 24, 2263);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -1721,16 +1724,112 @@
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2.name,
+    		id: create_if_block_3.name,
     		type: "if",
-    		source: "(48:16) {#if showSub}",
+    		source: "(67:20) {#if showSub}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (56:4) {#if subTag.length != 0 && showSub}
+    // (76:4) {#if isChangeTaging}
+    function create_if_block_1(ctx) {
+    	let div3;
+    	let div1;
+    	let div0;
+    	let i;
+    	let t0;
+    	let input;
+    	let t1;
+    	let div2;
+    	let button0;
+    	let t3;
+    	let button1;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			div3 = element("div");
+    			div1 = element("div");
+    			div0 = element("div");
+    			i = element("i");
+    			t0 = space();
+    			input = element("input");
+    			t1 = space();
+    			div2 = element("div");
+    			button0 = element("button");
+    			button0.textContent = "取消";
+    			t3 = space();
+    			button1 = element("button");
+    			button1.textContent = "确定";
+    			attr_dev(i, "class", "ri-hashtag");
+    			add_location(i, file$1, 80, 30, 2700);
+    			attr_dev(div0, "class", "");
+    			add_location(div0, file$1, 80, 16, 2686);
+    			attr_dev(input, "class", "focus:outline-none  h-8 p-2 pl-1 rounded-sm w-full text-gray-700");
+    			attr_dev(input, "type", "text");
+    			add_location(input, file$1, 81, 16, 2748);
+    			attr_dev(div1, "class", "flex items-center bg-gray-200 rounded-lg border-solid border-4  ");
+    			add_location(div1, file$1, 77, 12, 2559);
+    			attr_dev(button0, "class", "w-5/12 text-gray-700 bg-white rounded-sm border-solid border-4 ");
+    			add_location(button0, file$1, 89, 16, 3045);
+    			attr_dev(button1, "class", "w-5/12 bg-green-500 rounded-sm text-white");
+    			add_location(button1, file$1, 95, 16, 3321);
+    			attr_dev(div2, "class", "flex justify-between  w-full mt-2 ");
+    			add_location(div2, file$1, 88, 12, 2979);
+    			attr_dev(div3, "class", "pl-2");
+    			add_location(div3, file$1, 76, 8, 2527);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div3, anchor);
+    			append_dev(div3, div1);
+    			append_dev(div1, div0);
+    			append_dev(div0, i);
+    			append_dev(div1, t0);
+    			append_dev(div1, input);
+    			set_input_value(input, /*selfTag*/ ctx[6]);
+    			append_dev(div3, t1);
+    			append_dev(div3, div2);
+    			append_dev(div2, button0);
+    			append_dev(div2, t3);
+    			append_dev(div2, button1);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[13]),
+    					listen_dev(button0, "click", stop_propagation(/*click_handler_4*/ ctx[14]), false, false, true),
+    					listen_dev(button1, "click", stop_propagation(/*click_handler_5*/ ctx[15]), false, false, true)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*selfTag*/ 64 && input.value !== /*selfTag*/ ctx[6]) {
+    				set_input_value(input, /*selfTag*/ ctx[6]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div3);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(76:4) {#if isChangeTaging}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (114:4) {#if subTag.length != 0 && showSub}
     function create_if_block$1(ctx) {
     	let div;
     	let tagexpand;
@@ -1745,15 +1844,16 @@
     			$$inline: true
     		});
 
-    	tagexpand.$on("selectTag", /*selectTag_handler*/ ctx[10]);
-    	tagexpand.$on("pinTag", /*pinTag_handler*/ ctx[11]);
+    	tagexpand.$on("selectTag", /*selectTag_handler*/ ctx[16]);
+    	tagexpand.$on("pinTag", /*pinTag_handler*/ ctx[17]);
+    	tagexpand.$on("renameTag", /*renameTag_handler*/ ctx[18]);
 
     	const block = {
     		c: function create() {
     			div = element("div");
     			create_component(tagexpand.$$.fragment);
     			attr_dev(div, "class", "ml-2");
-    			add_location(div, file$1, 56, 8, 1778);
+    			add_location(div, file$1, 114, 8, 4038);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1786,7 +1886,7 @@
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(56:4) {#if subTag.length != 0 && showSub}",
+    		source: "(114:4) {#if subTag.length != 0 && showSub}",
     		ctx
     	});
 
@@ -1794,77 +1894,131 @@
     }
 
     function create_fragment$1(ctx) {
-    	let div;
-    	let button1;
+    	let div4;
+    	let button2;
+    	let div2;
+    	let div0;
+    	let i0;
     	let t0;
+    	let div1;
+
+    	let t1_value = (/*showTag*/ ctx[3].indexOf("#") == 0
+    	? /*showTag*/ ctx[3].substring(1)
+    	: /*showTag*/ ctx[3]) + "";
+
     	let t1;
-    	let button0;
-    	let i;
     	let t2;
+    	let div3;
+    	let button0;
+    	let i1;
     	let t3;
+    	let button1;
+    	let i2;
+    	let t4;
+    	let t5;
+    	let t6;
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*subTag*/ ctx[4].length != 0 && create_if_block_1(ctx);
-    	let if_block1 = /*subTag*/ ctx[4].length != 0 && /*showSub*/ ctx[5] && create_if_block$1(ctx);
+    	let if_block0 = /*subTag*/ ctx[4].length != 0 && create_if_block_2(ctx);
+    	let if_block1 = /*isChangeTaging*/ ctx[7] && create_if_block_1(ctx);
+    	let if_block2 = /*subTag*/ ctx[4].length != 0 && /*showSub*/ ctx[5] && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
-    			div = element("div");
-    			button1 = element("button");
-    			t0 = text(/*showTag*/ ctx[3]);
-    			t1 = space();
-    			button0 = element("button");
-    			i = element("i");
+    			div4 = element("div");
+    			button2 = element("button");
+    			div2 = element("div");
+    			div0 = element("div");
+    			i0 = element("i");
+    			t0 = space();
+    			div1 = element("div");
+    			t1 = text(t1_value);
     			t2 = space();
-    			if (if_block0) if_block0.c();
+    			div3 = element("div");
+    			button0 = element("button");
+    			i1 = element("i");
     			t3 = space();
+    			button1 = element("button");
+    			i2 = element("i");
+    			t4 = space();
+    			if (if_block0) if_block0.c();
+    			t5 = space();
     			if (if_block1) if_block1.c();
-    			attr_dev(i, "class", "ri-pushpin-fill");
-    			add_location(i, file$1, 38, 12, 1163);
-    			attr_dev(button0, "class", "focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2");
-    			add_location(button0, file$1, 32, 8, 925);
-    			attr_dev(button1, "class", "rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm");
-    			toggle_class(button1, "bg-green-500", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
-    			toggle_class(button1, "text-white", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
-    			add_location(button1, file$1, 23, 4, 548);
-    			add_location(div, file$1, 22, 0, 537);
+    			t6 = space();
+    			if (if_block2) if_block2.c();
+    			attr_dev(i0, "class", "ri-hashtag");
+    			add_location(i0, file$1, 35, 26, 1010);
+    			attr_dev(div0, "class", "");
+    			add_location(div0, file$1, 35, 12, 996);
+    			attr_dev(div1, "class", "ml-1");
+    			add_location(div1, file$1, 36, 12, 1054);
+    			attr_dev(div2, "class", "flex");
+    			add_location(div2, file$1, 34, 8, 964);
+    			attr_dev(i1, "class", "ri-edit-fill");
+    			add_location(i1, file$1, 48, 16, 1533);
+    			attr_dev(button0, "class", "focus:outline-none group-hover:opacity-100 opacity-0   pr-1");
+    			add_location(button0, file$1, 41, 12, 1215);
+    			attr_dev(i2, "class", "ri-pushpin-fill");
+    			add_location(i2, file$1, 56, 16, 1854);
+    			attr_dev(button1, "class", "focus:outline-none group-hover:opacity-100 opacity-0   pr-1");
+    			add_location(button1, file$1, 50, 12, 1596);
+    			add_location(div3, file$1, 40, 8, 1196);
+    			attr_dev(button2, "class", "rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm");
+    			toggle_class(button2, "bg-green-500", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
+    			toggle_class(button2, "text-white", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
+    			add_location(button2, file$1, 26, 4, 606);
+    			add_location(div4, file$1, 25, 0, 595);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, button1);
-    			append_dev(button1, t0);
-    			append_dev(button1, t1);
-    			append_dev(button1, button0);
-    			append_dev(button0, i);
-    			append_dev(button1, t2);
-    			if (if_block0) if_block0.m(button1, null);
-    			append_dev(div, t3);
-    			if (if_block1) if_block1.m(div, null);
+    			insert_dev(target, div4, anchor);
+    			append_dev(div4, button2);
+    			append_dev(button2, div2);
+    			append_dev(div2, div0);
+    			append_dev(div0, i0);
+    			append_dev(div2, t0);
+    			append_dev(div2, div1);
+    			append_dev(div1, t1);
+    			append_dev(button2, t2);
+    			append_dev(button2, div3);
+    			append_dev(div3, button0);
+    			append_dev(button0, i1);
+    			append_dev(div3, t3);
+    			append_dev(div3, button1);
+    			append_dev(button1, i2);
+    			append_dev(div3, t4);
+    			if (if_block0) if_block0.m(div3, null);
+    			append_dev(div4, t5);
+    			if (if_block1) if_block1.m(div4, null);
+    			append_dev(div4, t6);
+    			if (if_block2) if_block2.m(div4, null);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", stop_propagation(/*click_handler*/ ctx[7]), false, false, true),
-    					listen_dev(button1, "click", /*click_handler_2*/ ctx[9], false, false, false)
+    					listen_dev(button0, "click", stop_propagation(/*click_handler*/ ctx[9]), false, false, true),
+    					listen_dev(button1, "click", stop_propagation(/*click_handler_1*/ ctx[10]), false, false, true),
+    					listen_dev(button2, "click", /*click_handler_3*/ ctx[12], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (!current || dirty & /*showTag*/ 8) set_data_dev(t0, /*showTag*/ ctx[3]);
+    			if ((!current || dirty & /*showTag*/ 8) && t1_value !== (t1_value = (/*showTag*/ ctx[3].indexOf("#") == 0
+    			? /*showTag*/ ctx[3].substring(1)
+    			: /*showTag*/ ctx[3]) + "")) set_data_dev(t1, t1_value);
 
     			if (/*subTag*/ ctx[4].length != 0) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_1(ctx);
+    					if_block0 = create_if_block_2(ctx);
     					if_block0.c();
-    					if_block0.m(button1, null);
+    					if_block0.m(div3, null);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
@@ -1872,31 +2026,44 @@
     			}
 
     			if (dirty & /*selectionTag, tag*/ 3) {
-    				toggle_class(button1, "bg-green-500", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
+    				toggle_class(button2, "bg-green-500", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
     			}
 
     			if (dirty & /*selectionTag, tag*/ 3) {
-    				toggle_class(button1, "text-white", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
+    				toggle_class(button2, "text-white", /*selectionTag*/ ctx[1] == /*tag*/ ctx[0]);
+    			}
+
+    			if (/*isChangeTaging*/ ctx[7]) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+    				} else {
+    					if_block1 = create_if_block_1(ctx);
+    					if_block1.c();
+    					if_block1.m(div4, t6);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
     			}
 
     			if (/*subTag*/ ctx[4].length != 0 && /*showSub*/ ctx[5]) {
-    				if (if_block1) {
-    					if_block1.p(ctx, dirty);
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
 
     					if (dirty & /*subTag, showSub*/ 48) {
-    						transition_in(if_block1, 1);
+    						transition_in(if_block2, 1);
     					}
     				} else {
-    					if_block1 = create_if_block$1(ctx);
-    					if_block1.c();
-    					transition_in(if_block1, 1);
-    					if_block1.m(div, null);
+    					if_block2 = create_if_block$1(ctx);
+    					if_block2.c();
+    					transition_in(if_block2, 1);
+    					if_block2.m(div4, null);
     				}
-    			} else if (if_block1) {
+    			} else if (if_block2) {
     				group_outros();
 
-    				transition_out(if_block1, 1, 1, () => {
-    					if_block1 = null;
+    				transition_out(if_block2, 1, 1, () => {
+    					if_block2 = null;
     				});
 
     				check_outros();
@@ -1904,17 +2071,18 @@
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(if_block1);
+    			transition_in(if_block2);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(if_block1);
+    			transition_out(if_block2);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
+    			if (detaching) detach_dev(div4);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -1940,6 +2108,8 @@
     	let showTag = "";
     	let subTag = "";
     	let showSub = false;
+    	let selfTag = "";
+    	let isChangeTaging = false;
     	const dispatch = createEventDispatcher();
     	const writable_props = ["tag", "selectionTag", "parentTag"];
 
@@ -1948,15 +2118,43 @@
     	});
 
     	const click_handler = () => {
-    		dispatch("pinTag", parentTag + showTag);
+    		$$invalidate(7, isChangeTaging = !isChangeTaging);
+    		$$invalidate(6, selfTag = (parentTag + showTag).substring(1));
     	};
 
     	const click_handler_1 = () => {
-    		$$invalidate(5, showSub = !showSub);
+    		dispatch("pinTag", parentTag + showTag);
     	};
 
     	const click_handler_2 = () => {
+    		$$invalidate(5, showSub = !showSub);
+    	};
+
+    	const click_handler_3 = () => {
     		dispatch("selectTag", parentTag + showTag);
+    	};
+
+    	function input_input_handler() {
+    		selfTag = this.value;
+    		$$invalidate(6, selfTag);
+    	}
+
+    	const click_handler_4 = () => {
+    		$$invalidate(7, isChangeTaging = false);
+    	};
+
+    	const click_handler_5 = () => {
+    		dispatch("renameTag", {
+    			oldTag: parentTag + showTag,
+    			newTag: "#" + selfTag
+    		});
+
+    		console.log("确定renameTag", {
+    			oldTag: parentTag + showTag,
+    			newTag: "#" + selfTag
+    		});
+
+    		$$invalidate(7, isChangeTaging = false);
     	};
 
     	const selectTag_handler = event => {
@@ -1967,6 +2165,11 @@
     	const pinTag_handler = event => {
     		console.log("pinTag", event.detail);
     		dispatch("pinTag", event.detail);
+    	};
+
+    	const renameTag_handler = event => {
+    		console.log("renameTag", event.detail);
+    		dispatch("renameTag", event.detail);
     	};
 
     	$$self.$$set = $$props => {
@@ -1984,6 +2187,8 @@
     		showTag,
     		subTag,
     		showSub,
+    		selfTag,
+    		isChangeTaging,
     		dispatch
     	});
 
@@ -1994,6 +2199,8 @@
     		if ("showTag" in $$props) $$invalidate(3, showTag = $$props.showTag);
     		if ("subTag" in $$props) $$invalidate(4, subTag = $$props.subTag);
     		if ("showSub" in $$props) $$invalidate(5, showSub = $$props.showSub);
+    		if ("selfTag" in $$props) $$invalidate(6, selfTag = $$props.selfTag);
+    		if ("isChangeTaging" in $$props) $$invalidate(7, isChangeTaging = $$props.isChangeTaging);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -2022,12 +2229,19 @@
     		showTag,
     		subTag,
     		showSub,
+    		selfTag,
+    		isChangeTaging,
     		dispatch,
     		click_handler,
     		click_handler_1,
     		click_handler_2,
+    		click_handler_3,
+    		input_input_handler,
+    		click_handler_4,
+    		click_handler_5,
     		selectTag_handler,
-    		pinTag_handler
+    		pinTag_handler,
+    		renameTag_handler
     	];
     }
 
@@ -2076,18 +2290,18 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
+    	child_ctx[22] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[23] = list[i]._id;
-    	child_ctx[20] = list[i].tag;
+    	child_ctx[25] = list[i]._id;
+    	child_ctx[22] = list[i].tag;
     	return child_ctx;
     }
 
-    // (198:4) {#if pinTags.length != 0}
+    // (207:4) {#if pinTags.length != 0}
     function create_if_block_1$1(ctx) {
     	let div;
     	let t1;
@@ -2111,8 +2325,8 @@
     			}
 
     			each_1_anchor = empty();
-    			attr_dev(div, "class", " p-4 w-full text-sm text-yellow-500 svelte-p06up9");
-    			add_location(div, file$2, 198, 8, 6504);
+    			attr_dev(div, "class", " p-4 w-full text-sm text-yellow-500 svelte-1a4wo55");
+    			add_location(div, file$2, 207, 8, 6793);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2161,57 +2375,84 @@
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(198:4) {#if pinTags.length != 0}",
+    		source: "(207:4) {#if pinTags.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (201:8) {#each pinTags as { _id, tag }}
+    // (210:8) {#each pinTags as { _id, tag }}
     function create_each_block_1$1(ctx) {
     	let button1;
-    	let t0_value = /*tag*/ ctx[20] + "";
+    	let div2;
+    	let div0;
+    	let i0;
     	let t0;
+    	let div1;
+
+    	let t1_value = (/*tag*/ ctx[22].indexOf("#") == 0
+    	? /*tag*/ ctx[22].substring(1)
+    	: /*tag*/ ctx[22]) + "";
+
     	let t1;
-    	let button0;
-    	let i;
     	let t2;
+    	let button0;
+    	let i1;
+    	let t3;
     	let mounted;
     	let dispose;
 
     	function click_handler_4() {
-    		return /*click_handler_4*/ ctx[12](/*tag*/ ctx[20]);
+    		return /*click_handler_4*/ ctx[13](/*tag*/ ctx[22]);
     	}
 
     	function click_handler_5() {
-    		return /*click_handler_5*/ ctx[13](/*tag*/ ctx[20]);
+    		return /*click_handler_5*/ ctx[14](/*tag*/ ctx[22]);
     	}
 
     	const block = {
     		c: function create() {
     			button1 = element("button");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			button0 = element("button");
-    			i = element("i");
+    			div2 = element("div");
+    			div0 = element("div");
+    			i0 = element("i");
+    			t0 = space();
+    			div1 = element("div");
+    			t1 = text(t1_value);
     			t2 = space();
-    			attr_dev(i, "class", "ri-pushpin-fill svelte-p06up9");
-    			add_location(i, file$2, 216, 20, 7313);
-    			attr_dev(button0, "class", "focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2 svelte-p06up9");
-    			add_location(button0, file$2, 210, 16, 7063);
-    			attr_dev(button1, "class", "rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm svelte-p06up9");
-    			toggle_class(button1, "bg-green-500", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[20]);
-    			toggle_class(button1, "text-white", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[20]);
-    			add_location(button1, file$2, 201, 12, 6618);
+    			button0 = element("button");
+    			i1 = element("i");
+    			t3 = space();
+    			attr_dev(i0, "class", "ri-hashtag svelte-1a4wo55");
+    			add_location(i0, file$2, 219, 34, 7383);
+    			attr_dev(div0, "class", " svelte-1a4wo55");
+    			add_location(div0, file$2, 219, 20, 7369);
+    			attr_dev(div1, "class", "ml-1 svelte-1a4wo55");
+    			add_location(div1, file$2, 220, 20, 7435);
+    			attr_dev(div2, "class", "flex svelte-1a4wo55");
+    			add_location(div2, file$2, 218, 16, 7329);
+    			attr_dev(i1, "class", "ri-pushpin-fill svelte-1a4wo55");
+    			add_location(i1, file$2, 230, 20, 7847);
+    			attr_dev(button0, "class", "focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2 svelte-1a4wo55");
+    			add_location(button0, file$2, 224, 16, 7597);
+    			attr_dev(button1, "class", "rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm svelte-1a4wo55");
+    			toggle_class(button1, "bg-green-500", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[22]);
+    			toggle_class(button1, "text-white", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[22]);
+    			add_location(button1, file$2, 210, 12, 6907);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button1, anchor);
-    			append_dev(button1, t0);
-    			append_dev(button1, t1);
-    			append_dev(button1, button0);
-    			append_dev(button0, i);
+    			append_dev(button1, div2);
+    			append_dev(div2, div0);
+    			append_dev(div0, i0);
+    			append_dev(div2, t0);
+    			append_dev(div2, div1);
+    			append_dev(div1, t1);
     			append_dev(button1, t2);
+    			append_dev(button1, button0);
+    			append_dev(button0, i1);
+    			append_dev(button1, t3);
 
     			if (!mounted) {
     				dispose = [
@@ -2224,14 +2465,17 @@
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*pinTags*/ 2 && t0_value !== (t0_value = /*tag*/ ctx[20] + "")) set_data_dev(t0, t0_value);
+
+    			if (dirty & /*pinTags*/ 2 && t1_value !== (t1_value = (/*tag*/ ctx[22].indexOf("#") == 0
+    			? /*tag*/ ctx[22].substring(1)
+    			: /*tag*/ ctx[22]) + "")) set_data_dev(t1, t1_value);
 
     			if (dirty & /*$searchNenoByTag, pinTags*/ 34) {
-    				toggle_class(button1, "bg-green-500", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[20]);
+    				toggle_class(button1, "bg-green-500", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[22]);
     			}
 
     			if (dirty & /*$searchNenoByTag, pinTags*/ 34) {
-    				toggle_class(button1, "text-white", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[20]);
+    				toggle_class(button1, "text-white", /*$searchNenoByTag*/ ctx[5].tag == /*tag*/ ctx[22]);
     			}
     		},
     		d: function destroy(detaching) {
@@ -2245,14 +2489,14 @@
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(201:8) {#each pinTags as { _id, tag }}",
+    		source: "(210:8) {#each pinTags as { _id, tag }}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (223:4) {#if allTags.length != 0}
+    // (237:4) {#if allTags.length != 0}
     function create_if_block$2(ctx) {
     	let div;
     	let t1;
@@ -2281,8 +2525,8 @@
     			}
 
     			each_1_anchor = empty();
-    			attr_dev(div, "class", "  p-4 pt-2 pb-2 w-full text-sm text-blue-500 svelte-p06up9");
-    			add_location(div, file$2, 223, 8, 7463);
+    			attr_dev(div, "class", "  p-4 pt-2 pb-2 w-full text-sm text-blue-500 svelte-1a4wo55");
+    			add_location(div, file$2, 237, 8, 7997);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2296,7 +2540,7 @@
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*allTags, $searchNenoByTag, console, pinNeno*/ 97) {
+    			if (dirty & /*allTags, $searchNenoByTag, console, pinNeno, renameName*/ 225) {
     				each_value = /*allTags*/ ctx[0];
     				validate_each_argument(each_value);
     				let i;
@@ -2354,28 +2598,29 @@
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(223:4) {#if allTags.length != 0}",
+    		source: "(237:4) {#if allTags.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (226:8) {#each allTags as tag}
+    // (240:8) {#each allTags as tag}
     function create_each_block$1(ctx) {
     	let tagexpand;
     	let current;
 
     	tagexpand = new TagExpand({
     			props: {
-    				tag: /*tag*/ ctx[20],
+    				tag: /*tag*/ ctx[22],
     				selectionTag: /*$searchNenoByTag*/ ctx[5].tag
     			},
     			$$inline: true
     		});
 
-    	tagexpand.$on("selectTag", /*selectTag_handler*/ ctx[14]);
-    	tagexpand.$on("pinTag", /*pinTag_handler*/ ctx[15]);
+    	tagexpand.$on("selectTag", /*selectTag_handler*/ ctx[15]);
+    	tagexpand.$on("pinTag", /*pinTag_handler*/ ctx[16]);
+    	tagexpand.$on("renameTag", /*renameTag_handler*/ ctx[17]);
 
     	const block = {
     		c: function create() {
@@ -2387,7 +2632,7 @@
     		},
     		p: function update(ctx, dirty) {
     			const tagexpand_changes = {};
-    			if (dirty & /*allTags*/ 1) tagexpand_changes.tag = /*tag*/ ctx[20];
+    			if (dirty & /*allTags*/ 1) tagexpand_changes.tag = /*tag*/ ctx[22];
     			if (dirty & /*$searchNenoByTag*/ 32) tagexpand_changes.selectionTag = /*$searchNenoByTag*/ ctx[5].tag;
     			tagexpand.$set(tagexpand_changes);
     		},
@@ -2409,7 +2654,7 @@
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(226:8) {#each allTags as tag}",
+    		source: "(240:8) {#each allTags as tag}",
     		ctx
     	});
 
@@ -2475,7 +2720,7 @@
     			$$inline: true
     		});
 
-    	greenmap.$on("greenmapClick", /*greenmapClick_handler*/ ctx[8]);
+    	greenmap.$on("greenmapClick", /*greenmapClick_handler*/ ctx[9]);
     	let if_block0 = /*pinTags*/ ctx[1].length != 0 && create_if_block_1$1(ctx);
     	let if_block1 = /*allTags*/ ctx[0].length != 0 && create_if_block$2(ctx);
 
@@ -2525,58 +2770,58 @@
     			if (if_block0) if_block0.c();
     			t20 = space();
     			if (if_block1) if_block1.c();
-    			attr_dev(div0, "class", "text-sm rounded-sm bg-red-300 text-white p-1 pt-0 pb-0  svelte-p06up9");
-    			add_location(div0, file$2, 129, 12, 4036);
-    			attr_dev(div1, "class", "flex  items-center justify-between svelte-p06up9");
-    			add_location(div1, file$2, 127, 8, 3953);
-    			attr_dev(i0, "class", "ri-settings-fill svelte-p06up9");
-    			add_location(i0, file$2, 141, 12, 4361);
-    			attr_dev(button0, "class", "focus:outline-none svelte-p06up9");
-    			add_location(button0, file$2, 135, 8, 4204);
-    			attr_dev(div2, "class", "flex  items-center justify-between  text-gray-600 w-full p-4 font-bold svelte-p06up9");
-    			add_location(div2, file$2, 124, 4, 3844);
-    			attr_dev(div3, "class", "text-xl svelte-p06up9");
-    			add_location(div3, file$2, 153, 12, 4716);
-    			attr_dev(div4, "class", "font-bold text-lg svelte-p06up9");
-    			add_location(div4, file$2, 152, 8, 4671);
-    			attr_dev(div5, "class", "text-xl svelte-p06up9");
-    			add_location(div5, file$2, 157, 12, 4856);
-    			attr_dev(div6, "class", "font-bold text-lg svelte-p06up9");
-    			add_location(div6, file$2, 156, 8, 4811);
-    			attr_dev(div7, "class", "text-xl svelte-p06up9");
-    			add_location(div7, file$2, 161, 12, 4995);
-    			attr_dev(div8, "class", "font-bold text-lg svelte-p06up9");
-    			add_location(div8, file$2, 160, 8, 4950);
-    			attr_dev(div9, "class", "flex justify-around  w-full mt-4 text-gray-500 svelte-p06up9");
-    			add_location(div9, file$2, 151, 4, 4601);
-    			attr_dev(i1, "class", "ri-quill-pen-fill mr-2 svelte-p06up9");
-    			add_location(i1, file$2, 174, 12, 5562);
+    			attr_dev(div0, "class", "text-sm rounded-sm bg-red-300 text-white p-1 pt-0 pb-0  svelte-1a4wo55");
+    			add_location(div0, file$2, 138, 12, 4325);
+    			attr_dev(div1, "class", "flex  items-center justify-between svelte-1a4wo55");
+    			add_location(div1, file$2, 136, 8, 4242);
+    			attr_dev(i0, "class", "ri-settings-fill svelte-1a4wo55");
+    			add_location(i0, file$2, 150, 12, 4650);
+    			attr_dev(button0, "class", "focus:outline-none svelte-1a4wo55");
+    			add_location(button0, file$2, 144, 8, 4493);
+    			attr_dev(div2, "class", "flex  items-center justify-between  text-gray-600 w-full p-4 font-bold svelte-1a4wo55");
+    			add_location(div2, file$2, 133, 4, 4133);
+    			attr_dev(div3, "class", "text-xl svelte-1a4wo55");
+    			add_location(div3, file$2, 162, 12, 5005);
+    			attr_dev(div4, "class", "font-bold text-lg svelte-1a4wo55");
+    			add_location(div4, file$2, 161, 8, 4960);
+    			attr_dev(div5, "class", "text-xl svelte-1a4wo55");
+    			add_location(div5, file$2, 166, 12, 5145);
+    			attr_dev(div6, "class", "font-bold text-lg svelte-1a4wo55");
+    			add_location(div6, file$2, 165, 8, 5100);
+    			attr_dev(div7, "class", "text-xl svelte-1a4wo55");
+    			add_location(div7, file$2, 170, 12, 5284);
+    			attr_dev(div8, "class", "font-bold text-lg svelte-1a4wo55");
+    			add_location(div8, file$2, 169, 8, 5239);
+    			attr_dev(div9, "class", "flex justify-around  w-full mt-4 text-gray-500 svelte-1a4wo55");
+    			add_location(div9, file$2, 160, 4, 4890);
+    			attr_dev(i1, "class", "ri-quill-pen-fill mr-2 svelte-1a4wo55");
+    			add_location(i1, file$2, 183, 12, 5851);
 
     			attr_dev(button1, "class", button1_class_value = "" + ("     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 " + (/*$pagedd*/ ctx[3] == "neno"
     			? "bg-green-500 text-white"
-    			: "") + "        " + " svelte-p06up9"));
+    			: "") + "        " + " svelte-1a4wo55"));
 
-    			add_location(button1, file$2, 166, 8, 5179);
-    			attr_dev(i2, "class", "ri-calendar-event-fill mr-2 svelte-p06up9");
-    			add_location(i2, file$2, 184, 12, 5974);
+    			add_location(button1, file$2, 175, 8, 5468);
+    			attr_dev(i2, "class", "ri-calendar-event-fill mr-2 svelte-1a4wo55");
+    			add_location(i2, file$2, 193, 12, 6263);
 
     			attr_dev(button2, "class", button2_class_value = "" + ("     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 " + (/*$pagedd*/ ctx[3] == "daily"
     			? "bg-green-500 text-white"
-    			: "") + "        " + " svelte-p06up9"));
+    			: "") + "        " + " svelte-1a4wo55"));
 
-    			add_location(button2, file$2, 177, 8, 5633);
-    			attr_dev(i3, "class", "ri-bubble-chart-fill mr-2 svelte-p06up9");
-    			add_location(i3, file$2, 193, 12, 6387);
+    			add_location(button2, file$2, 186, 8, 5922);
+    			attr_dev(i3, "class", "ri-bubble-chart-fill mr-2 svelte-1a4wo55");
+    			add_location(i3, file$2, 202, 12, 6676);
 
     			attr_dev(button3, "class", button3_class_value = "" + ("     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 " + (/*$pagedd*/ ctx[3] == "luck"
     			? "bg-green-500 text-white"
-    			: "") + "        " + " svelte-p06up9"));
+    			: "") + "        " + " svelte-1a4wo55"));
 
-    			add_location(button3, file$2, 186, 8, 6048);
-    			attr_dev(div10, "class", "flex flex-col items-start text-sm text-gray-600 w-full mt-2 svelte-p06up9");
-    			add_location(div10, file$2, 165, 4, 5096);
-    			attr_dev(div11, "class", "w-full flex flex-col overflow-auto h-screen svelte-p06up9");
-    			add_location(div11, file$2, 123, 0, 3781);
+    			add_location(button3, file$2, 195, 8, 6337);
+    			attr_dev(div10, "class", "flex flex-col items-start text-sm text-gray-600 w-full mt-2 svelte-1a4wo55");
+    			add_location(div10, file$2, 174, 4, 5385);
+    			attr_dev(div11, "class", "w-full flex flex-col overflow-auto h-screen svelte-1a4wo55");
+    			add_location(div11, file$2, 132, 0, 4070);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2629,10 +2874,10 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*click_handler*/ ctx[7], false, false, false),
-    					listen_dev(button1, "click", /*click_handler_1*/ ctx[9], false, false, false),
-    					listen_dev(button2, "click", /*click_handler_2*/ ctx[10], false, false, false),
-    					listen_dev(button3, "click", /*click_handler_3*/ ctx[11], false, false, false)
+    					listen_dev(button0, "click", /*click_handler*/ ctx[8], false, false, false),
+    					listen_dev(button1, "click", /*click_handler_1*/ ctx[10], false, false, false),
+    					listen_dev(button2, "click", /*click_handler_2*/ ctx[11], false, false, false),
+    					listen_dev(button3, "click", /*click_handler_3*/ ctx[12], false, false, false)
     				];
 
     				mounted = true;
@@ -2648,19 +2893,19 @@
 
     			if (!current || dirty & /*$pagedd*/ 8 && button1_class_value !== (button1_class_value = "" + ("     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 " + (/*$pagedd*/ ctx[3] == "neno"
     			? "bg-green-500 text-white"
-    			: "") + "        " + " svelte-p06up9"))) {
+    			: "") + "        " + " svelte-1a4wo55"))) {
     				attr_dev(button1, "class", button1_class_value);
     			}
 
     			if (!current || dirty & /*$pagedd*/ 8 && button2_class_value !== (button2_class_value = "" + ("     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 " + (/*$pagedd*/ ctx[3] == "daily"
     			? "bg-green-500 text-white"
-    			: "") + "        " + " svelte-p06up9"))) {
+    			: "") + "        " + " svelte-1a4wo55"))) {
     				attr_dev(button2, "class", button2_class_value);
     			}
 
     			if (!current || dirty & /*$pagedd*/ 8 && button3_class_value !== (button3_class_value = "" + ("     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 " + (/*$pagedd*/ ctx[3] == "luck"
     			? "bg-green-500 text-white"
-    			: "") + "        " + " svelte-p06up9"))) {
+    			: "") + "        " + " svelte-1a4wo55"))) {
     				attr_dev(button3, "class", button3_class_value);
     			}
 
@@ -2772,7 +3017,7 @@
     	validate_store(countStrore, "countStrore");
     	component_subscribe($$self, countStrore, $$value => $$invalidate(2, $countStrore = $$value));
     	validate_store(tagStrore, "tagStrore");
-    	component_subscribe($$self, tagStrore, $$value => $$invalidate(16, $tagStrore = $$value));
+    	component_subscribe($$self, tagStrore, $$value => $$invalidate(18, $tagStrore = $$value));
     	validate_store(pagedd, "pagedd");
     	component_subscribe($$self, pagedd, $$value => $$invalidate(3, $pagedd = $$value));
     	validate_store(searchNenoByDate, "searchNenoByDate");
@@ -2859,6 +3104,17 @@
     		});
     	}
 
+    	function renameName(detail) {
+    		rename({
+    			oldTag: detail.oldTag,
+    			newTag: detail.newTag
+    		}).then(async respone => {
+    			getPins();
+    		}).catch(reason => {
+    			console.log(reason);
+    		});
+    	}
+
     	const writable_props = [];
 
     	Object_1.keys($$props).forEach(key => {
@@ -2904,11 +3160,17 @@
     		console.log("toppinTag", event.detail);
     	};
 
+    	const renameTag_handler = event => {
+    		console.log("toppinTag", event.detail);
+    		renameName(event.detail);
+    	};
+
     	$$self.$capture_state = () => ({
     		tags,
     		pin,
     		pins,
     		count,
+    		rename,
     		pagedd,
     		countStrore,
     		tagStrore,
@@ -2925,6 +3187,7 @@
     		getPins,
     		pinNeno,
     		countcount,
+    		renameName,
     		$countStrore,
     		$tagStrore,
     		$pagedd,
@@ -2949,6 +3212,7 @@
     		$searchNenoByDate,
     		$searchNenoByTag,
     		pinNeno,
+    		renameName,
     		click_handler,
     		greenmapClick_handler,
     		click_handler_1,
@@ -2957,7 +3221,8 @@
     		click_handler_4,
     		click_handler_5,
     		selectTag_handler,
-    		pinTag_handler
+    		pinTag_handler,
+    		renameTag_handler
     	];
     }
 
@@ -20551,10 +20816,10 @@
     	return child_ctx;
     }
 
-    // (381:4) {#if showTip}
+    // (366:4) {#if tagTips.length > 0}
     function create_if_block_4(ctx) {
     	let div;
-    	let each_value_1 = /*tagTips*/ ctx[7];
+    	let each_value_1 = /*tagTips*/ ctx[6];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -20571,9 +20836,9 @@
     			}
 
     			attr_dev(div, "class", "rounded bg-gray-800 text-sm text-white w-auto absolute font-bold p-1");
-    			set_style(div, "top", /*tipTop*/ ctx[10] + /*tipHeight*/ ctx[11] + "px");
-    			set_style(div, "left", /*tipLeft*/ ctx[9] + "px");
-    			add_location(div, file$5, 382, 8, 12574);
+    			set_style(div, "top", /*tipTop*/ ctx[9] + /*tipHeight*/ ctx[10] + "px");
+    			set_style(div, "left", /*tipLeft*/ ctx[8] + "px");
+    			add_location(div, file$5, 366, 8, 11916);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -20582,11 +20847,11 @@
     				each_blocks[i].m(div, null);
     			}
 
-    			/*div_binding*/ ctx[28](div);
+    			/*div_binding*/ ctx[27](div);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*tagTipsFocusIndex, tipTagInsert, tagTips*/ 33152) {
-    				each_value_1 = /*tagTips*/ ctx[7];
+    			if (dirty[0] & /*tagTipsFocusIndex, tipTagInsert, tagTips*/ 16576) {
+    				each_value_1 = /*tagTips*/ ctx[6];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -20609,18 +20874,18 @@
     				each_blocks.length = each_value_1.length;
     			}
 
-    			if (dirty[0] & /*tipTop, tipHeight*/ 3072) {
-    				set_style(div, "top", /*tipTop*/ ctx[10] + /*tipHeight*/ ctx[11] + "px");
+    			if (dirty[0] & /*tipTop, tipHeight*/ 1536) {
+    				set_style(div, "top", /*tipTop*/ ctx[9] + /*tipHeight*/ ctx[10] + "px");
     			}
 
-    			if (dirty[0] & /*tipLeft*/ 512) {
-    				set_style(div, "left", /*tipLeft*/ ctx[9] + "px");
+    			if (dirty[0] & /*tipLeft*/ 256) {
+    				set_style(div, "left", /*tipLeft*/ ctx[8] + "px");
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     			destroy_each(each_blocks, detaching);
-    			/*div_binding*/ ctx[28](null);
+    			/*div_binding*/ ctx[27](null);
     		}
     	};
 
@@ -20628,14 +20893,14 @@
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(381:4) {#if showTip}",
+    		source: "(366:4) {#if tagTips.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (388:12) {#each tagTips as item, index}
+    // (372:12) {#each tagTips as item, index}
     function create_each_block_1$2(ctx) {
     	let div;
     	let t0_value = /*item*/ ctx[50] + "";
@@ -20645,7 +20910,7 @@
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[27](/*item*/ ctx[50]);
+    		return /*click_handler*/ ctx[26](/*item*/ ctx[50]);
     	}
 
     	const block = {
@@ -20654,8 +20919,8 @@
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(div, "class", "hover:bg-gray-400 rounded-sm p-1 bg");
-    			toggle_class(div, "bg-gray-400", /*index*/ ctx[49] == /*tagTipsFocusIndex*/ ctx[8]);
-    			add_location(div, file$5, 388, 16, 12841);
+    			toggle_class(div, "bg-gray-400", /*index*/ ctx[49] == /*tagTipsFocusIndex*/ ctx[7]);
+    			add_location(div, file$5, 372, 16, 12183);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -20669,10 +20934,10 @@
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty[0] & /*tagTips*/ 128 && t0_value !== (t0_value = /*item*/ ctx[50] + "")) set_data_dev(t0, t0_value);
+    			if (dirty[0] & /*tagTips*/ 64 && t0_value !== (t0_value = /*item*/ ctx[50] + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty[0] & /*tagTipsFocusIndex*/ 256) {
-    				toggle_class(div, "bg-gray-400", /*index*/ ctx[49] == /*tagTipsFocusIndex*/ ctx[8]);
+    			if (dirty[0] & /*tagTipsFocusIndex*/ 128) {
+    				toggle_class(div, "bg-gray-400", /*index*/ ctx[49] == /*tagTipsFocusIndex*/ ctx[7]);
     			}
     		},
     		d: function destroy(detaching) {
@@ -20686,15 +20951,15 @@
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(388:12) {#each tagTips as item, index}",
+    		source: "(372:12) {#each tagTips as item, index}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (423:16) {#if percent_completed < 100 && percent_completed > 0}
-    function create_if_block_3(ctx) {
+    // (407:16) {#if percent_completed < 100 && percent_completed > 0}
+    function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
     	let t0_value = /*percent_completed*/ ctx[45] + "";
@@ -20708,9 +20973,9 @@
     			t0 = text(t0_value);
     			t1 = text("%");
     			attr_dev(div0, "class", "m-auto text-white");
-    			add_location(div0, file$5, 426, 24, 14584);
+    			add_location(div0, file$5, 410, 24, 13926);
     			attr_dev(div1, "class", " w-full  h-full box-border absolute top-0 bg-black  bg-opacity-25 focus:outline-none flex justify-around  items-center ");
-    			add_location(div1, file$5, 423, 20, 14378);
+    			add_location(div1, file$5, 407, 20, 13720);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -20728,16 +20993,16 @@
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3.name,
+    		id: create_if_block_3$1.name,
     		type: "if",
-    		source: "(423:16) {#if percent_completed < 100 && percent_completed > 0}",
+    		source: "(407:16) {#if percent_completed < 100 && percent_completed > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (440:16) {#if percent_completed == 100}
+    // (424:16) {#if percent_completed == 100}
     function create_if_block_2$1(ctx) {
     	let lable;
     	let div;
@@ -20749,11 +21014,11 @@
     			div = element("div");
     			i = element("i");
     			attr_dev(i, "class", "ri-check-line text-white");
-    			add_location(i, file$5, 456, 28, 15744);
+    			add_location(i, file$5, 440, 28, 15086);
     			attr_dev(div, "for", "");
     			set_style(div, "transform", "rotate(-45deg)");
     			set_style(div, "margin-top", "2px");
-    			add_location(div, file$5, 452, 24, 15564);
+    			add_location(div, file$5, 436, 24, 14906);
     			attr_dev(lable, "class", "block");
     			set_style(lable, "position", "absolute");
     			set_style(lable, "right", "-15px");
@@ -20764,7 +21029,7 @@
     			set_style(lable, "text-align", "center");
     			set_style(lable, "transform", "rotate(45deg)");
     			set_style(lable, "box-shadow", "0 0 1pc 1px rgb(0 0 0 / 20%)");
-    			add_location(lable, file$5, 440, 20, 15104);
+    			add_location(lable, file$5, 424, 20, 14446);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, lable, anchor);
@@ -20780,14 +21045,14 @@
     		block,
     		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(440:16) {#if percent_completed == 100}",
+    		source: "(424:16) {#if percent_completed == 100}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (403:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }
+    // (387:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }
     function create_each_block$3(ctx) {
     	let div1;
     	let div0;
@@ -20809,10 +21074,10 @@
     	let dispose;
 
     	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[29](/*index*/ ctx[49]);
+    		return /*click_handler_1*/ ctx[28](/*index*/ ctx[49]);
     	}
 
-    	let if_block0 = /*percent_completed*/ ctx[45] < 100 && /*percent_completed*/ ctx[45] > 0 && create_if_block_3(ctx);
+    	let if_block0 = /*percent_completed*/ ctx[45] < 100 && /*percent_completed*/ ctx[45] > 0 && create_if_block_3$1(ctx);
     	let if_block1 = /*percent_completed*/ ctx[45] == 100 && create_if_block_2$1(ctx);
 
     	const block = {
@@ -20832,14 +21097,14 @@
     			if (if_block1) if_block1.c();
     			t4 = space();
     			attr_dev(i0, "class", "m-auto ri-zoom-in-line ri-xl text-white");
-    			add_location(i0, file$5, 416, 24, 13989);
-    			add_location(button0, file$5, 411, 20, 13815);
+    			add_location(i0, file$5, 400, 24, 13331);
+    			add_location(button0, file$5, 395, 20, 13157);
     			attr_dev(i1, "class", "m-auto ri-delete-bin-line ri-xl text-white");
-    			add_location(i1, file$5, 419, 24, 14173);
+    			add_location(i1, file$5, 403, 24, 13515);
     			attr_dev(button1, "class", " ");
-    			add_location(button1, file$5, 418, 20, 14095);
+    			add_location(button1, file$5, 402, 20, 13437);
     			attr_dev(div0, "class", " w-16 h-16  box-border absolute top-0 opacity-0 bg-black hover:opacity-75 focus:outline-none flex justify-around  ");
-    			add_location(div0, file$5, 408, 16, 13626);
+    			add_location(div0, file$5, 392, 16, 12968);
     			attr_dev(img, "class", " w-full h-full object-cover");
 
     			if (img.src !== (img_src_value = /*file*/ ctx[44] == null
@@ -20847,9 +21112,9 @@
     			: getObjectURL(/*file*/ ctx[44]))) attr_dev(img, "src", img_src_value);
 
     			attr_dev(img, "alt", "");
-    			add_location(img, file$5, 432, 16, 14768);
+    			add_location(img, file$5, 416, 16, 14110);
     			attr_dev(div1, "class", "w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden");
-    			add_location(div1, file$5, 403, 12, 13365);
+    			add_location(div1, file$5, 387, 12, 12707);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -20875,7 +21140,7 @@
     						button1,
     						"click",
     						function () {
-    							if (is_function(/*deleteImage*/ ctx[19](/*timeStamp*/ ctx[47]))) /*deleteImage*/ ctx[19](/*timeStamp*/ ctx[47]).apply(this, arguments);
+    							if (is_function(/*deleteImage*/ ctx[18](/*timeStamp*/ ctx[47]))) /*deleteImage*/ ctx[18](/*timeStamp*/ ctx[47]).apply(this, arguments);
     						},
     						false,
     						false,
@@ -20893,7 +21158,7 @@
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_3(ctx);
+    					if_block0 = create_if_block_3$1(ctx);
     					if_block0.c();
     					if_block0.m(div1, t2);
     				}
@@ -20949,14 +21214,14 @@
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(403:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }",
+    		source: "(387:8) {#each imageFiles as { file, percent_completed, uploadInfo, timeStamp }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (508:12) {#if canCancle}
+    // (494:12) {#if canCancle}
     function create_if_block_1$2(ctx) {
     	let button;
     	let mounted;
@@ -20967,13 +21232,13 @@
     			button = element("button");
     			button.textContent = "取消";
     			attr_dev(button, "class", "rounded-sm bg-white border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm");
-    			add_location(button, file$5, 508, 16, 17767);
+    			add_location(button, file$5, 494, 16, 17170);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*cancelInput*/ ctx[16], false, false, false);
+    				dispose = listen_dev(button, "click", /*cancelInput*/ ctx[15], false, false, false);
     				mounted = true;
     			}
     		},
@@ -20989,14 +21254,14 @@
     		block,
     		id: create_if_block_1$2.name,
     		type: "if",
-    		source: "(508:12) {#if canCancle}",
+    		source: "(494:12) {#if canCancle}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (523:16) {:else}
+    // (509:16) {:else}
     function create_else_block$1(ctx) {
     	let t;
 
@@ -21018,14 +21283,14 @@
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(523:16) {:else}",
+    		source: "(509:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (521:16) {#if isSending}
+    // (507:16) {#if isSending}
     function create_if_block$4(ctx) {
     	let progressline;
     	let current;
@@ -21065,7 +21330,7 @@
     		block,
     		id: create_if_block$4.name,
     		type: "if",
-    		source: "(521:16) {#if isSending}",
+    		source: "(507:16) {#if isSending}",
     		ctx
     	});
 
@@ -21110,7 +21375,7 @@
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*showTip*/ ctx[5] && create_if_block_4(ctx);
+    	let if_block0 = /*tagTips*/ ctx[6].length > 0 && create_if_block_4(ctx);
     	let each_value = /*imageFiles*/ ctx[2];
     	validate_each_argument(each_value);
     	let each_blocks = [];
@@ -21128,7 +21393,7 @@
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*isSending*/ ctx[14]) return 0;
+    		if (/*isSending*/ ctx[13]) return 0;
     		return 1;
     	}
 
@@ -21178,53 +21443,53 @@
     			if_block2.c();
     			attr_dev(div0, "id", "editor");
     			attr_dev(div0, "class", "list-decimal list-inside");
-    			add_location(div0, file$5, 379, 4, 12443);
+    			add_location(div0, file$5, 364, 4, 11805);
     			attr_dev(div1, "class", "flex flex-wrap flex-row  mt-4  pl-3");
-    			add_location(div1, file$5, 401, 4, 13213);
+    			add_location(div1, file$5, 385, 4, 12555);
     			attr_dev(i0, "class", "ri-hashtag");
-    			add_location(i0, file$5, 467, 41, 16175);
+    			add_location(i0, file$5, 453, 41, 15566);
     			attr_dev(button0, "class", "rounded-sm hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button0, file$5, 465, 12, 16048);
+    			add_location(button0, file$5, 451, 12, 15439);
     			attr_dev(i1, "class", "ri-bold");
-    			add_location(i1, file$5, 470, 17, 16319);
+    			add_location(i1, file$5, 456, 17, 15710);
     			attr_dev(button1, "class", "ql-bold hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button1, file$5, 469, 12, 16236);
+    			add_location(button1, file$5, 455, 12, 15627);
     			attr_dev(i2, "class", "ri-list-check hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(i2, file$5, 475, 17, 16509);
+    			add_location(i2, file$5, 461, 17, 15900);
     			attr_dev(button2, "class", "ql-list hover:bg-gray-200 p-1 focus:outline-none");
     			button2.value = "bullet";
-    			add_location(button2, file$5, 472, 12, 16377);
+    			add_location(button2, file$5, 458, 12, 15768);
     			attr_dev(i3, "class", "ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(i3, file$5, 483, 17, 16787);
+    			add_location(i3, file$5, 469, 17, 16178);
     			attr_dev(button3, "class", "ql-list hover:bg-gray-200 p-1 focus:outline-none");
     			button3.value = "ordered";
-    			add_location(button3, file$5, 480, 12, 16654);
+    			add_location(button3, file$5, 466, 12, 16045);
     			attr_dev(i4, "class", "ri-underline");
-    			add_location(i4, file$5, 490, 17, 17040);
+    			add_location(i4, file$5, 476, 17, 16431);
     			attr_dev(button4, "class", "ql-underline hover:bg-gray-200 p-1 focus:outline-none");
-    			add_location(button4, file$5, 488, 12, 16935);
+    			add_location(button4, file$5, 474, 12, 16326);
     			attr_dev(i5, "class", "ri-image-2-line ");
-    			add_location(i5, file$5, 494, 40, 17230);
+    			add_location(i5, file$5, 480, 40, 16621);
     			attr_dev(button5, "class", "rounded-sm hover:bg-gray-200 p-1 focus:outline-none ");
-    			add_location(button5, file$5, 492, 12, 17103);
+    			add_location(button5, file$5, 478, 12, 16494);
     			attr_dev(input, "class", "w-full  rounded-lg   p-2 bg-blue-400 text-white focus:outline-none");
     			attr_dev(input, "type", "file");
     			set_style(input, "display", "none");
     			attr_dev(input, "accept", "image/png, image/jpeg, image/gif, image/jpg");
     			input.multiple = true;
-    			add_location(input, file$5, 496, 12, 17297);
+    			add_location(input, file$5, 482, 12, 16688);
     			attr_dev(div2, "id", "toolbar");
-    			attr_dev(div2, "class", "space-x-2");
-    			add_location(div2, file$5, 464, 8, 15978);
-    			attr_dev(button6, "class", "rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16");
-    			button6.disabled = button6_disabled_value = /*isContentEmpty*/ ctx[13] || /*isSending*/ ctx[14];
-    			add_location(button6, file$5, 513, 12, 18008);
-    			attr_dev(div3, "class", "flex space-x-2");
-    			add_location(div3, file$5, 506, 8, 17692);
-    			attr_dev(div4, "class", " flex justify-between  pl-3 pr-3");
-    			add_location(div4, file$5, 463, 4, 15922);
+    			attr_dev(div2, "class", "space-x-1");
+    			add_location(div2, file$5, 450, 8, 15369);
+    			attr_dev(button6, "class", "rounded-sm bg-green-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16");
+    			button6.disabled = button6_disabled_value = /*isContentEmpty*/ ctx[12] || /*isSending*/ ctx[13];
+    			add_location(button6, file$5, 499, 12, 17411);
+    			attr_dev(div3, "class", "flex space-x-2 justify-end");
+    			add_location(div3, file$5, 492, 8, 17083);
+    			attr_dev(div4, "class", " flex justify-between flex-col  sm:flex-row md:flex-row  pl-3 pr-3");
+    			add_location(div4, file$5, 447, 4, 15264);
     			attr_dev(div5, "class", "border-gray-200 border-solid border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white relative");
-    			add_location(div5, file$5, 376, 0, 12311);
+    			add_location(div5, file$5, 361, 0, 11673);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21232,7 +21497,7 @@
     		m: function mount(target, anchor) {
     			insert_dev(target, div5, anchor);
     			append_dev(div5, div0);
-    			/*div0_binding*/ ctx[26](div0);
+    			/*div0_binding*/ ctx[25](div0);
     			append_dev(div5, t0);
     			if (if_block0) if_block0.m(div5, null);
     			append_dev(div5, t1);
@@ -21264,8 +21529,8 @@
     			append_dev(button5, i5);
     			append_dev(div2, t8);
     			append_dev(div2, input);
-    			/*input_binding*/ ctx[30](input);
-    			/*div2_binding*/ ctx[32](div2);
+    			/*input_binding*/ ctx[29](input);
+    			/*div2_binding*/ ctx[31](div2);
     			append_dev(div4, t9);
     			append_dev(div4, div3);
     			if (if_block1) if_block1.m(div3, null);
@@ -21276,17 +21541,17 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*insertHashTag*/ ctx[20], false, false, false),
-    					listen_dev(button5, "click", /*selectImages*/ ctx[17], false, false, false),
-    					listen_dev(input, "change", /*input_change_handler*/ ctx[31]),
-    					listen_dev(button6, "click", /*click_handler_2*/ ctx[33], false, false, false)
+    					listen_dev(button0, "click", /*insertHashTag*/ ctx[19], false, false, false),
+    					listen_dev(button5, "click", /*selectImages*/ ctx[16], false, false, false),
+    					listen_dev(input, "change", /*input_change_handler*/ ctx[30]),
+    					listen_dev(button6, "click", /*click_handler_2*/ ctx[32], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (/*showTip*/ ctx[5]) {
+    			if (/*tagTips*/ ctx[6].length > 0) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
@@ -21299,7 +21564,7 @@
     				if_block0 = null;
     			}
 
-    			if (dirty[0] & /*imageFiles, deleteImage, viewImage*/ 786436) {
+    			if (dirty[0] & /*imageFiles, deleteImage, viewImage*/ 393220) {
     				each_value = /*imageFiles*/ ctx[2];
     				validate_each_argument(each_value);
     				let i;
@@ -21362,7 +21627,7 @@
     				if_block2.m(button6, null);
     			}
 
-    			if (!current || dirty[0] & /*isContentEmpty, isSending*/ 24576 && button6_disabled_value !== (button6_disabled_value = /*isContentEmpty*/ ctx[13] || /*isSending*/ ctx[14])) {
+    			if (!current || dirty[0] & /*isContentEmpty, isSending*/ 12288 && button6_disabled_value !== (button6_disabled_value = /*isContentEmpty*/ ctx[12] || /*isSending*/ ctx[13])) {
     				prop_dev(button6, "disabled", button6_disabled_value);
     			}
     		},
@@ -21388,11 +21653,11 @@
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div5);
-    			/*div0_binding*/ ctx[26](null);
+    			/*div0_binding*/ ctx[25](null);
     			if (if_block0) if_block0.d();
     			destroy_each(each_blocks, detaching);
-    			/*input_binding*/ ctx[30](null);
-    			/*div2_binding*/ ctx[32](null);
+    			/*input_binding*/ ctx[29](null);
+    			/*div2_binding*/ ctx[31](null);
     			if (if_block1) if_block1.d();
     			if_blocks[current_block_type_index].d();
     			mounted = false;
@@ -21457,24 +21722,24 @@
     		quillEditor.focus();
 
     		if (content.length != 0) {
-    			$$invalidate(13, isContentEmpty = false);
+    			$$invalidate(12, isContentEmpty = false);
     		}
 
     		$$invalidate(
     			3,
     			editor.onkeydown = function (event) {
-    				if ((event.code == "ArrowUp" || event.code == "ArrowDown" || event.keyCode == 13) && showTip) {
+    				if ((event.code == "ArrowUp" || event.code == "ArrowDown" || event.keyCode == 13) && tagTips.length > 0) {
     					if (event.code == "ArrowUp" && tagTipsFocusIndex > 0) {
-    						$$invalidate(8, tagTipsFocusIndex--, tagTipsFocusIndex);
+    						$$invalidate(7, tagTipsFocusIndex--, tagTipsFocusIndex);
     					}
 
     					if (event.code == "ArrowDown" && tagTipsFocusIndex < tagTips.length - 1) {
-    						$$invalidate(8, tagTipsFocusIndex++, tagTipsFocusIndex);
+    						$$invalidate(7, tagTipsFocusIndex++, tagTipsFocusIndex);
     					}
 
     					if (event.code == "Enter") {
     						tipTagInsert(tagTips[tagTipsFocusIndex]);
-    						$$invalidate(5, showTip = false);
+    						showTip = false;
     					}
 
     					return false;
@@ -21484,7 +21749,7 @@
     		);
 
     		quillEditor.on("text-change", function (delta, oldDelta, source) {
-    			$$invalidate(13, isContentEmpty = quillEditor.getText().length == 1);
+    			$$invalidate(12, isContentEmpty = quillEditor.getText().length == 1);
     			toolTip();
     		});
 
@@ -21526,36 +21791,35 @@
 
     		if (sIndex != -1) {
     			let tagMay = text.substring(sIndex, cIndex);
-    			let lastTagTipslength = tagTips.length;
-    			$$invalidate(7, tagTips = []);
+    			$$invalidate(6, tagTips = []);
 
     			for (let index = 0; index < $tagStrore.allTags.length; index++) {
     				const element = $tagStrore.allTags[index];
 
     				if (element.indexOf(tagMay) == 0) {
-    					$$invalidate(7, tagTips = [...tagTips, element]);
+    					$$invalidate(6, tagTips = [...tagTips, element]);
     				}
     			}
 
-    			$$invalidate(7, tagTips = tagTips.sort((a, b) => {
+    			$$invalidate(6, tagTips = tagTips.sort((a, b) => {
     				return b.length - a.length;
     			}));
 
     			if (tagTips.length != 0) {
     				if (tagTips.length <= tagTipsFocusIndex) {
-    					$$invalidate(8, tagTipsFocusIndex = tagTips.length - 1);
+    					$$invalidate(7, tagTipsFocusIndex = tagTips.length - 1);
     				}
 
     				let getBounds = quillEditor.getBounds(sIndex);
     				selectionIndex = cIndex;
     				tagStartIndex = sIndex;
-    				$$invalidate(5, showTip = true);
-    				$$invalidate(9, tipLeft = getBounds.left);
-    				$$invalidate(10, tipTop = getBounds.top);
-    				$$invalidate(11, tipHeight = getBounds.height);
+    				showTip = true;
+    				$$invalidate(8, tipLeft = getBounds.left);
+    				$$invalidate(9, tipTop = getBounds.top);
+    				$$invalidate(10, tipHeight = getBounds.height);
     			}
     		} else {
-    			$$invalidate(5, showTip = false);
+    			showTip = false;
     		}
     	}
 
@@ -21634,21 +21898,6 @@
     		quillEditor.insertText(index, "#");
     	}
 
-    	// function getObjectURL(file) {
-    	//     var url = null;
-    	//     // 下面函数执行的效果是一样的，只是需要针对不同的浏览器执行不同的 js 函数而已
-    	//     if (window.createObjectURL != undefined) {
-    	//         // basic
-    	//         url = window.createObjectURL(file);
-    	//     } else if (window.URL != undefined) {
-    	//         // mozilla(firefox)
-    	//         url = window.URL.createObjectURL(file);
-    	//     } else if (window.webkitURL != undefined) {
-    	//         // webkit or chrome
-    	//         url = window.webkitURL.createObjectURL(file);
-    	//     }
-    	//     return url;
-    	// }
     	function uploadPicQiniu(imageFile, index, token) {
     		console.log(imageFile, imageFile.name, token);
     		const observable = upload(imageFile.file, imageFile.file.name, token);
@@ -21707,7 +21956,7 @@
 
     	function sendBiu() {
     		let sContent = editor.childNodes[0].innerHTML;
-    		$$invalidate(14, isSending = true);
+    		$$invalidate(13, isSending = true);
     		let cc = quillEditor.getContents();
     		let tags = [];
 
@@ -21749,7 +21998,7 @@
     			images: imagesInfo
     		}).then(async respone => {
     			let re = await respone.json();
-    			$$invalidate(14, isSending = false);
+    			$$invalidate(13, isSending = false);
 
     			if (re.errorMessage == undefined) {
     				quillEditor.setContents([]);
@@ -21757,7 +22006,7 @@
     				cancelInput();
     			}
     		}).catch(reason => {
-    			$$invalidate(14, isSending = false);
+    			$$invalidate(13, isSending = false);
     			console.log(reason);
     		});
     	}
@@ -21782,7 +22031,7 @@
     	function div_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
     			tipClient = $$value;
-    			$$invalidate(6, tipClient);
+    			$$invalidate(5, tipClient);
     		});
     	}
 
@@ -21793,7 +22042,7 @@
     	function input_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
     			uploadimageNode = $$value;
-    			$$invalidate(12, uploadimageNode);
+    			$$invalidate(11, uploadimageNode);
     		});
     	}
 
@@ -21814,10 +22063,10 @@
     	};
 
     	$$self.$$set = $$props => {
-    		if ("content" in $$props) $$invalidate(22, content = $$props.content);
-    		if ("_id" in $$props) $$invalidate(23, _id = $$props._id);
-    		if ("parentId" in $$props) $$invalidate(24, parentId = $$props.parentId);
-    		if ("images" in $$props) $$invalidate(25, images = $$props.images);
+    		if ("content" in $$props) $$invalidate(21, content = $$props.content);
+    		if ("_id" in $$props) $$invalidate(22, _id = $$props._id);
+    		if ("parentId" in $$props) $$invalidate(23, parentId = $$props.parentId);
+    		if ("images" in $$props) $$invalidate(24, images = $$props.images);
     		if ("canCancle" in $$props) $$invalidate(0, canCancle = $$props.canCancle);
     	};
 
@@ -21874,28 +22123,28 @@
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("content" in $$props) $$invalidate(22, content = $$props.content);
-    		if ("_id" in $$props) $$invalidate(23, _id = $$props._id);
-    		if ("parentId" in $$props) $$invalidate(24, parentId = $$props.parentId);
-    		if ("images" in $$props) $$invalidate(25, images = $$props.images);
+    		if ("content" in $$props) $$invalidate(21, content = $$props.content);
+    		if ("_id" in $$props) $$invalidate(22, _id = $$props._id);
+    		if ("parentId" in $$props) $$invalidate(23, parentId = $$props.parentId);
+    		if ("images" in $$props) $$invalidate(24, images = $$props.images);
     		if ("canCancle" in $$props) $$invalidate(0, canCancle = $$props.canCancle);
     		if ("editor" in $$props) $$invalidate(3, editor = $$props.editor);
     		if ("toolbar" in $$props) $$invalidate(4, toolbar = $$props.toolbar);
     		if ("quillEditor" in $$props) quillEditor = $$props.quillEditor;
-    		if ("showTip" in $$props) $$invalidate(5, showTip = $$props.showTip);
-    		if ("tipClient" in $$props) $$invalidate(6, tipClient = $$props.tipClient);
+    		if ("showTip" in $$props) showTip = $$props.showTip;
+    		if ("tipClient" in $$props) $$invalidate(5, tipClient = $$props.tipClient);
     		if ("tagStartIndex" in $$props) tagStartIndex = $$props.tagStartIndex;
     		if ("selectionIndex" in $$props) selectionIndex = $$props.selectionIndex;
-    		if ("tagTips" in $$props) $$invalidate(7, tagTips = $$props.tagTips);
-    		if ("tagTipsFocusIndex" in $$props) $$invalidate(8, tagTipsFocusIndex = $$props.tagTipsFocusIndex);
-    		if ("tipLeft" in $$props) $$invalidate(9, tipLeft = $$props.tipLeft);
-    		if ("tipTop" in $$props) $$invalidate(10, tipTop = $$props.tipTop);
-    		if ("tipHeight" in $$props) $$invalidate(11, tipHeight = $$props.tipHeight);
-    		if ("uploadimageNode" in $$props) $$invalidate(12, uploadimageNode = $$props.uploadimageNode);
+    		if ("tagTips" in $$props) $$invalidate(6, tagTips = $$props.tagTips);
+    		if ("tagTipsFocusIndex" in $$props) $$invalidate(7, tagTipsFocusIndex = $$props.tagTipsFocusIndex);
+    		if ("tipLeft" in $$props) $$invalidate(8, tipLeft = $$props.tipLeft);
+    		if ("tipTop" in $$props) $$invalidate(9, tipTop = $$props.tipTop);
+    		if ("tipHeight" in $$props) $$invalidate(10, tipHeight = $$props.tipHeight);
+    		if ("uploadimageNode" in $$props) $$invalidate(11, uploadimageNode = $$props.uploadimageNode);
     		if ("uploadimagefiles" in $$props) $$invalidate(1, uploadimagefiles = $$props.uploadimagefiles);
     		if ("imageFiles" in $$props) $$invalidate(2, imageFiles = $$props.imageFiles);
-    		if ("isContentEmpty" in $$props) $$invalidate(13, isContentEmpty = $$props.isContentEmpty);
-    		if ("isSending" in $$props) $$invalidate(14, isSending = $$props.isSending);
+    		if ("isContentEmpty" in $$props) $$invalidate(12, isContentEmpty = $$props.isContentEmpty);
+    		if ("isSending" in $$props) $$invalidate(13, isSending = $$props.isSending);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -21937,7 +22186,6 @@
     		imageFiles,
     		editor,
     		toolbar,
-    		showTip,
     		tipClient,
     		tagTips,
     		tagTipsFocusIndex,
@@ -21980,10 +22228,10 @@
     			create_fragment$5,
     			safe_not_equal,
     			{
-    				content: 22,
-    				_id: 23,
-    				parentId: 24,
-    				images: 25,
+    				content: 21,
+    				_id: 22,
+    				parentId: 23,
+    				images: 24,
     				canCancle: 0
     			},
     			[-1, -1]
@@ -22733,18 +22981,18 @@
     			button3 = element("button");
     			button3.textContent = "删除";
     			attr_dev(button0, "class", "focus:outline-none hover:bg-gray-300 ");
-    			add_location(button0, file$7, 116, 20, 4164);
+    			add_location(button0, file$7, 116, 20, 4173);
     			attr_dev(button1, "class", "focus:outline-none hover:bg-gray-300 ");
-    			add_location(button1, file$7, 119, 20, 4299);
+    			add_location(button1, file$7, 119, 20, 4308);
     			attr_dev(button2, "class", "focus:outline-none hover:bg-gray-300");
-    			add_location(button2, file$7, 125, 20, 4551);
+    			add_location(button2, file$7, 125, 20, 4560);
     			attr_dev(button3, "class", "focus:outline-none hover:bg-gray-300");
-    			add_location(button3, file$7, 131, 20, 4807);
+    			add_location(button3, file$7, 131, 20, 4816);
     			attr_dev(div, "tabindex", "0");
     			attr_dev(div, "class", " absolute w-16  bg-white shadow-xl rounded-lg flex flex-col justify-center  border-gray-200  border-solid space-y-1 pt-2 pb-2 focus:outline-none");
     			set_style(div, "left", "-16px");
     			set_style(div, "border-width", "1px");
-    			add_location(div, file$7, 102, 16, 3482);
+    			add_location(div, file$7, 102, 16, 3491);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -22817,9 +23065,9 @@
     		c: function create() {
     			div = element("div");
     			p = element("p");
-    			add_location(p, file$7, 160, 12, 5681);
+    			add_location(p, file$7, 160, 12, 5690);
     			attr_dev(div, "class", "list-decimal text-sm text-red-300");
-    			add_location(div, file$7, 159, 8, 5620);
+    			add_location(div, file$7, 159, 8, 5629);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -22925,7 +23173,7 @@
     			attr_dev(img, "class", "w-32 h-32 rounded-md mr-2 mb-2 object-cover");
     			if (img.src !== (img_src_value = /*imgDomain*/ ctx[32] + "/" + /*key*/ ctx[33])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			add_location(img, file$7, 166, 12, 5878);
+    			add_location(img, file$7, 166, 12, 5887);
     			this.first = img;
     		},
     		m: function mount(target, anchor) {
@@ -22980,16 +23228,16 @@
     			div = element("div");
     			t1 = text(t1_value);
     			attr_dev(i, "class", "ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500");
-    			add_location(i, file$7, 183, 12, 6442);
+    			add_location(i, file$7, 183, 12, 6451);
     			attr_dev(div, "class", "text-gray-500 text-sm");
     			set_style(div, "-webkit-line-clamp", "1");
     			set_style(div, "text-overflow", "ellipsis");
     			set_style(div, "display", "-webkit-box");
     			set_style(div, "-webkit-box-orient", "vertical");
     			set_style(div, "overflow", "hidden");
-    			add_location(div, file$7, 186, 12, 6559);
+    			add_location(div, file$7, 186, 12, 6568);
     			attr_dev(button, "class", "flex items-center space-x-1  hover:shadow-sm focus:outline-none");
-    			add_location(button, file$7, 177, 8, 6231);
+    			add_location(button, file$7, 177, 8, 6240);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -23049,16 +23297,16 @@
     			t1 = text(t1_value);
     			t2 = space();
     			attr_dev(i, "class", "ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500");
-    			add_location(i, file$7, 206, 12, 7155);
+    			add_location(i, file$7, 206, 12, 7164);
     			attr_dev(div, "class", "text-gray-500 text-sm");
     			set_style(div, "-webkit-line-clamp", "1");
     			set_style(div, "text-overflow", "ellipsis");
     			set_style(div, "display", "-webkit-box");
     			set_style(div, "-webkit-box-orient", "vertical");
     			set_style(div, "overflow", "hidden");
-    			add_location(div, file$7, 209, 12, 7274);
+    			add_location(div, file$7, 209, 12, 7283);
     			attr_dev(button, "class", "flex items-center  space-x-1   hover:shadow-sm focus:outline-none");
-    			add_location(button, file$7, 200, 8, 6944);
+    			add_location(button, file$7, 200, 8, 6953);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -23179,19 +23427,19 @@
     			}
 
     			attr_dev(div0, "class", "text-sm text-gray-500");
-    			add_location(div0, file$7, 94, 8, 3134);
+    			add_location(div0, file$7, 94, 8, 3143);
     			attr_dev(i, "class", "ri-more-line");
-    			add_location(i, file$7, 99, 16, 3379);
+    			add_location(i, file$7, 99, 16, 3388);
     			attr_dev(button, "class", "focus:outline-none ");
-    			add_location(button, file$7, 98, 12, 3294);
+    			add_location(button, file$7, 98, 12, 3303);
     			attr_dev(div1, "class", "relative");
-    			add_location(div1, file$7, 97, 8, 3258);
+    			add_location(div1, file$7, 97, 8, 3267);
     			attr_dev(div2, "class", "flex justify-between");
-    			add_location(div2, file$7, 93, 4, 3090);
+    			add_location(div2, file$7, 93, 4, 3099);
     			attr_dev(div3, "class", "flex flex-wrap flex-row  mt-4  pl-3");
-    			add_location(div3, file$7, 164, 4, 5754);
+    			add_location(div3, file$7, 164, 4, 5763);
     			attr_dev(div4, "class", "w-full p-4 rounded-lg bg-white mb-4 shadow-sm  hover:shadow-lg");
-    			add_location(div4, file$7, 92, 0, 3008);
+    			add_location(div4, file$7, 92, 0, 3017);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -23437,7 +23685,7 @@
     				pContent += rawContent.substring(0, breakIndex);
 
     				//加上替换的内容
-    				pContent += `<span  style="padding:2px" class="  mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
+    				pContent += `<span  style="padding:2px" class=" leading-6 mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
 
@@ -24031,17 +24279,165 @@
 
     function get_each_context_1$4(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[22] = list[i];
+    	child_ctx[25] = list[i];
     	return child_ctx;
     }
 
     function get_each_context$6(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[22] = list[i];
+    	child_ctx[25] = list[i];
     	return child_ctx;
     }
 
-    // (157:4) {#if isLoding}
+    // (123:12) {:else}
+    function create_else_block_1(ctx) {
+    	let div2;
+    	let div0;
+    	let i0;
+    	let t0;
+    	let div1;
+    	let t1;
+    	let t2;
+    	let button;
+    	let i1;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			div2 = element("div");
+    			div0 = element("div");
+    			i0 = element("i");
+    			t0 = space();
+    			div1 = element("div");
+    			t1 = text(/*changeTag*/ ctx[6]);
+    			t2 = space();
+    			button = element("button");
+    			i1 = element("i");
+    			attr_dev(i0, "class", "ri-hashtag");
+    			add_location(i0, file$9, 126, 43, 4332);
+    			attr_dev(div0, "class", "mr-1 pt-1");
+    			add_location(div0, file$9, 126, 20, 4309);
+    			attr_dev(div1, "class", "font-bold w-auto mr-2");
+    			attr_dev(div1, "type", "text");
+    			add_location(div1, file$9, 127, 20, 4384);
+    			attr_dev(i1, "class", "ri-close-circle-fill text-gray-400");
+    			add_location(i1, file$9, 131, 24, 4580);
+    			attr_dev(button, "class", "focus:outline-none ");
+    			add_location(button, file$9, 130, 20, 4518);
+    			attr_dev(div2, "class", "flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1");
+    			add_location(div2, file$9, 123, 16, 4148);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div2, anchor);
+    			append_dev(div2, div0);
+    			append_dev(div0, i0);
+    			append_dev(div2, t0);
+    			append_dev(div2, div1);
+    			append_dev(div1, t1);
+    			append_dev(div2, t2);
+    			append_dev(div2, button);
+    			append_dev(button, i1);
+
+    			if (!mounted) {
+    				dispose = listen_dev(i1, "click", /*click_handler*/ ctx[13], false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*changeTag*/ 64) set_data_dev(t1, /*changeTag*/ ctx[6]);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div2);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block_1.name,
+    		type: "else",
+    		source: "(123:12) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (121:12) {#if changeTag == ""}
+    function create_if_block_4$1(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("NENO");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4$1.name,
+    		type: "if",
+    		source: "(121:12) {#if changeTag == \\\"\\\"}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (141:12) {#if changeTag == ""}
+    function create_if_block_3$2(ctx) {
+    	let button;
+    	let i;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			i = element("i");
+    			attr_dev(i, "class", "ri-function-fill");
+    			add_location(i, file$9, 147, 20, 5186);
+    			attr_dev(button, "class", "focus:outline-none text-gray-600   sm:hidden md:hidden ml-2");
+    			add_location(button, file$9, 141, 16, 4948);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, i);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", /*click_handler_1*/ ctx[14], false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3$2.name,
+    		type: "if",
+    		source: "(141:12) {#if changeTag == \\\"\\\"}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (183:4) {#if isLoding}
     function create_if_block_2$4(ctx) {
     	let div;
     	let progressline;
@@ -24054,7 +24450,7 @@
     			div = element("div");
     			create_component(progressline.$$.fragment);
     			attr_dev(div, "class", "w-full ");
-    			add_location(div, file$9, 157, 8, 5240);
+    			add_location(div, file$9, 183, 8, 6275);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -24089,14 +24485,14 @@
     		block,
     		id: create_if_block_2$4.name,
     		type: "if",
-    		source: "(157:4) {#if isLoding}",
+    		source: "(183:4) {#if isLoding}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (162:4) {#if isLodingError}
+    // (188:4) {#if isLodingError}
     function create_if_block_1$6(ctx) {
     	let div;
     	let button;
@@ -24109,16 +24505,16 @@
     			button = element("button");
     			button.textContent = "重新获取";
     			attr_dev(button, "class", " w-full rounded focus:outline-none m-aut bg-red-400  text-white  p-2  ");
-    			add_location(button, file$9, 163, 12, 5441);
+    			add_location(button, file$9, 189, 12, 6476);
     			attr_dev(div, "class", "w-full pl-4 pr-4");
-    			add_location(div, file$9, 162, 8, 5397);
+    			add_location(div, file$9, 188, 8, 6432);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
     			append_dev(div, button);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler_2*/ ctx[16], false, false, false);
+    				dispose = listen_dev(button, "click", /*click_handler_3*/ ctx[19], false, false, false);
     				mounted = true;
     			}
     		},
@@ -24134,22 +24530,22 @@
     		block,
     		id: create_if_block_1$6.name,
     		type: "if",
-    		source: "(162:4) {#if isLodingError}",
+    		source: "(188:4) {#if isLodingError}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (188:8) {:else}
+    // (214:8) {:else}
     function create_else_block$3(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
     	let current;
-    	let each_value_1 = /*searchItems*/ ctx[7];
+    	let each_value_1 = /*searchItems*/ ctx[8];
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*item*/ ctx[22]._id;
+    	const get_key = ctx => /*item*/ ctx[25]._id;
     	validate_each_keys(ctx, each_value_1, get_each_context_1$4, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -24175,8 +24571,8 @@
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*searchItems, searchText, nenoItems*/ 224) {
-    				each_value_1 = /*searchItems*/ ctx[7];
+    			if (dirty & /*searchItems, searchText, nenoItems*/ 416) {
+    				each_value_1 = /*searchItems*/ ctx[8];
     				validate_each_argument(each_value_1);
     				group_outros();
     				validate_each_keys(ctx, each_value_1, get_each_context_1$4, get_key);
@@ -24213,22 +24609,22 @@
     		block,
     		id: create_else_block$3.name,
     		type: "else",
-    		source: "(188:8) {:else}",
+    		source: "(214:8) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (177:8) {#if searchItems.length == 0}
+    // (203:8) {#if searchItems.length == 0}
     function create_if_block$8(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
     	let current;
-    	let each_value = /*nenoItems*/ ctx[6];
+    	let each_value = /*nenoItems*/ ctx[7];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*item*/ ctx[22]._id;
+    	const get_key = ctx => /*item*/ ctx[25]._id;
     	validate_each_keys(ctx, each_value, get_each_context$6, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -24254,8 +24650,8 @@
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*nenoItems*/ 64) {
-    				each_value = /*nenoItems*/ ctx[6];
+    			if (dirty & /*nenoItems*/ 128) {
+    				each_value = /*nenoItems*/ ctx[7];
     				validate_each_argument(each_value);
     				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context$6, get_key);
@@ -24292,19 +24688,19 @@
     		block,
     		id: create_if_block$8.name,
     		type: "if",
-    		source: "(177:8) {#if searchItems.length == 0}",
+    		source: "(203:8) {#if searchItems.length == 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (189:12) {#each searchItems as item (item._id)}
+    // (215:12) {#each searchItems as item (item._id)}
     function create_each_block_1$4(key_1, ctx) {
     	let first;
     	let fmoloitem;
     	let current;
-    	const fmoloitem_spread_levels = [/*item*/ ctx[22], { searchContent: /*searchText*/ ctx[5] }];
+    	const fmoloitem_spread_levels = [/*item*/ ctx[25], { searchContent: /*searchText*/ ctx[5] }];
     	let fmoloitem_props = {};
 
     	for (let i = 0; i < fmoloitem_spread_levels.length; i += 1) {
@@ -24312,7 +24708,7 @@
     	}
 
     	fmoloitem = new FmoloItem({ props: fmoloitem_props, $$inline: true });
-    	fmoloitem.$on("deleteOne", /*deleteOne_handler_1*/ ctx[18]);
+    	fmoloitem.$on("deleteOne", /*deleteOne_handler_1*/ ctx[21]);
 
     	const block = {
     		key: key_1,
@@ -24330,9 +24726,9 @@
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			const fmoloitem_changes = (dirty & /*searchItems, searchText*/ 160)
+    			const fmoloitem_changes = (dirty & /*searchItems, searchText*/ 288)
     			? get_spread_update(fmoloitem_spread_levels, [
-    					dirty & /*searchItems*/ 128 && get_spread_object(/*item*/ ctx[22]),
+    					dirty & /*searchItems*/ 256 && get_spread_object(/*item*/ ctx[25]),
     					dirty & /*searchText*/ 32 && { searchContent: /*searchText*/ ctx[5] }
     				])
     			: {};
@@ -24358,19 +24754,19 @@
     		block,
     		id: create_each_block_1$4.name,
     		type: "each",
-    		source: "(189:12) {#each searchItems as item (item._id)}",
+    		source: "(215:12) {#each searchItems as item (item._id)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (178:12) {#each nenoItems as item (item._id)}
+    // (204:12) {#each nenoItems as item (item._id)}
     function create_each_block$6(key_1, ctx) {
     	let first;
     	let fmoloitem;
     	let current;
-    	const fmoloitem_spread_levels = [/*item*/ ctx[22]];
+    	const fmoloitem_spread_levels = [/*item*/ ctx[25]];
     	let fmoloitem_props = {};
 
     	for (let i = 0; i < fmoloitem_spread_levels.length; i += 1) {
@@ -24378,7 +24774,7 @@
     	}
 
     	fmoloitem = new FmoloItem({ props: fmoloitem_props, $$inline: true });
-    	fmoloitem.$on("deleteOne", /*deleteOne_handler*/ ctx[17]);
+    	fmoloitem.$on("deleteOne", /*deleteOne_handler*/ ctx[20]);
 
     	const block = {
     		key: key_1,
@@ -24396,8 +24792,8 @@
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			const fmoloitem_changes = (dirty & /*nenoItems*/ 64)
-    			? get_spread_update(fmoloitem_spread_levels, [get_spread_object(/*item*/ ctx[22])])
+    			const fmoloitem_changes = (dirty & /*nenoItems*/ 128)
+    			? get_spread_update(fmoloitem_spread_levels, [get_spread_object(/*item*/ ctx[25])])
     			: {};
 
     			fmoloitem.$set(fmoloitem_changes);
@@ -24421,7 +24817,7 @@
     		block,
     		id: create_each_block$6.name,
     		type: "each",
-    		source: "(178:12) {#each nenoItems as item (item._id)}",
+    		source: "(204:12) {#each nenoItems as item (item._id)}",
     		ctx
     	});
 
@@ -24433,15 +24829,13 @@
     	let div2;
     	let div0;
     	let t0;
-    	let button;
-    	let i0;
     	let t1;
     	let div1;
-    	let i1;
+    	let i0;
     	let t2;
     	let input;
     	let t3;
-    	let i2;
+    	let i1;
     	let t4;
     	let div3;
     	let quilleditor;
@@ -24450,75 +24844,80 @@
     	let t7;
     	let div4;
     	let current_block_type_index;
-    	let if_block2;
+    	let if_block4;
     	let current;
     	let mounted;
     	let dispose;
-    	add_render_callback(/*onwindowresize*/ ctx[10]);
+    	add_render_callback(/*onwindowresize*/ ctx[12]);
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*changeTag*/ ctx[6] == "") return create_if_block_4$1;
+    		return create_else_block_1;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block0 = current_block_type(ctx);
+    	let if_block1 = /*changeTag*/ ctx[6] == "" && create_if_block_3$2(ctx);
     	quilleditor = new QuillEditor({ $$inline: true });
-    	quilleditor.$on("update", /*update_handler*/ ctx[15]);
-    	let if_block0 = /*isLoding*/ ctx[3] && create_if_block_2$4(ctx);
-    	let if_block1 = /*isLodingError*/ ctx[4] && create_if_block_1$6(ctx);
+    	quilleditor.$on("update", /*update_handler*/ ctx[18]);
+    	let if_block2 = /*isLoding*/ ctx[3] && create_if_block_2$4(ctx);
+    	let if_block3 = /*isLodingError*/ ctx[4] && create_if_block_1$6(ctx);
     	const if_block_creators = [create_if_block$8, create_else_block$3];
     	const if_blocks = [];
 
-    	function select_block_type(ctx, dirty) {
-    		if (/*searchItems*/ ctx[7].length == 0) return 0;
+    	function select_block_type_1(ctx, dirty) {
+    		if (/*searchItems*/ ctx[8].length == 0) return 0;
     		return 1;
     	}
 
-    	current_block_type_index = select_block_type(ctx);
-    	if_block2 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    	current_block_type_index = select_block_type_1(ctx);
+    	if_block4 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 
     	const block = {
     		c: function create() {
     			div5 = element("div");
     			div2 = element("div");
     			div0 = element("div");
-    			t0 = text("NENO ");
-    			button = element("button");
-    			i0 = element("i");
+    			if_block0.c();
+    			t0 = space();
+    			if (if_block1) if_block1.c();
     			t1 = space();
     			div1 = element("div");
-    			i1 = element("i");
+    			i0 = element("i");
     			t2 = space();
     			input = element("input");
     			t3 = space();
-    			i2 = element("i");
+    			i1 = element("i");
     			t4 = space();
     			div3 = element("div");
     			create_component(quilleditor.$$.fragment);
     			t5 = space();
-    			if (if_block0) if_block0.c();
+    			if (if_block2) if_block2.c();
     			t6 = space();
-    			if (if_block1) if_block1.c();
+    			if (if_block3) if_block3.c();
     			t7 = space();
     			div4 = element("div");
-    			if_block2.c();
-    			attr_dev(i0, "class", "ri-function-fill");
-    			add_location(i0, file$9, 124, 16, 4211);
-    			attr_dev(button, "class", "focus:outline-none text-gray-600   sm:hidden md:hidden ml-2");
-    			add_location(button, file$9, 118, 17, 3997);
+    			if_block4.c();
     			attr_dev(div0, "class", "flex flex-row items-center pl-4 ");
-    			add_location(div0, file$9, 117, 8, 3932);
-    			attr_dev(i1, "class", "ri-search-2-line text-gray-400");
-    			add_location(i1, file$9, 129, 12, 4368);
+    			add_location(div0, file$9, 119, 8, 4006);
+    			attr_dev(i0, "class", "ri-search-2-line text-gray-400");
+    			add_location(i0, file$9, 155, 12, 5403);
     			attr_dev(input, "class", " ml-2 bg-gray-200 focus:outline-none text-sm");
     			attr_dev(input, "type", "text");
-    			add_location(input, file$9, 130, 12, 4426);
-    			attr_dev(i2, "class", "ri-close-circle-fill text-gray-400");
-    			add_location(i2, file$9, 140, 12, 4790);
-    			attr_dev(div1, "class", "bg-gray-200 rounded-lg h-8 p-2 flex items-center");
-    			add_location(div1, file$9, 128, 8, 4292);
+    			add_location(input, file$9, 156, 12, 5461);
+    			attr_dev(i1, "class", "ri-close-circle-fill text-gray-400");
+    			add_location(i1, file$9, 166, 12, 5825);
+    			attr_dev(div1, "class", "bg-gray-200 rounded-lg h-8 p-2 flex items-center flex-shrink-0");
+    			add_location(div1, file$9, 152, 8, 5290);
     			attr_dev(div2, "class", "  flex flex-row items-center justify-between ");
-    			add_location(div2, file$9, 116, 4, 3863);
+    			add_location(div2, file$9, 118, 4, 3937);
     			attr_dev(div3, "class", "p-2 ");
-    			add_location(div3, file$9, 149, 4, 5034);
-    			attr_dev(div4, "class", "flex flex-col overflow-y-scroll p-4 ");
+    			add_location(div3, file$9, 175, 4, 6069);
+    			attr_dev(div4, "class", "flex flex-col overflow-y-scroll p-2 ");
     			set_style(div4, "height", /*innerHeight*/ ctx[1] - /*flowClientTop*/ ctx[2] + "px");
-    			add_location(div4, file$9, 171, 4, 5689);
+    			add_location(div4, file$9, 197, 4, 6724);
     			attr_dev(div5, "class", "  flex-1 flex flex-col justify-start  pt-4  w-0");
-    			add_location(div5, file$9, 115, 0, 3796);
+    			add_location(div5, file$9, 117, 0, 3870);
     		},
     		l: function claim(nodes) {
     			throw new Error_1("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24527,83 +24926,107 @@
     			insert_dev(target, div5, anchor);
     			append_dev(div5, div2);
     			append_dev(div2, div0);
+    			if_block0.m(div0, null);
     			append_dev(div0, t0);
-    			append_dev(div0, button);
-    			append_dev(button, i0);
+    			if (if_block1) if_block1.m(div0, null);
     			append_dev(div2, t1);
     			append_dev(div2, div1);
-    			append_dev(div1, i1);
+    			append_dev(div1, i0);
     			append_dev(div1, t2);
     			append_dev(div1, input);
     			set_input_value(input, /*searchText*/ ctx[5]);
     			append_dev(div1, t3);
-    			append_dev(div1, i2);
+    			append_dev(div1, i1);
     			append_dev(div5, t4);
     			append_dev(div5, div3);
     			mount_component(quilleditor, div3, null);
     			append_dev(div5, t5);
-    			if (if_block0) if_block0.m(div5, null);
+    			if (if_block2) if_block2.m(div5, null);
     			append_dev(div5, t6);
-    			if (if_block1) if_block1.m(div5, null);
+    			if (if_block3) if_block3.m(div5, null);
     			append_dev(div5, t7);
     			append_dev(div5, div4);
     			if_blocks[current_block_type_index].m(div4, null);
-    			/*div4_binding*/ ctx[19](div4);
+    			/*div4_binding*/ ctx[22](div4);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(window, "resize", /*onwindowresize*/ ctx[10]),
-    					listen_dev(button, "click", /*click_handler*/ ctx[11], false, false, false),
-    					listen_dev(input, "keydown", /*keydown_handler*/ ctx[12], false, false, false),
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[13]),
-    					listen_dev(i2, "click", /*click_handler_1*/ ctx[14], false, false, false)
+    					listen_dev(window, "resize", /*onwindowresize*/ ctx[12]),
+    					listen_dev(input, "keydown", /*keydown_handler*/ ctx[15], false, false, false),
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[16]),
+    					listen_dev(i1, "click", /*click_handler_2*/ ctx[17], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*searchText*/ 32 && input.value !== /*searchText*/ ctx[5]) {
-    				set_input_value(input, /*searchText*/ ctx[5]);
-    			}
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block0) {
+    				if_block0.p(ctx, dirty);
+    			} else {
+    				if_block0.d(1);
+    				if_block0 = current_block_type(ctx);
 
-    			if (/*isLoding*/ ctx[3]) {
     				if (if_block0) {
-    					if (dirty & /*isLoding*/ 8) {
-    						transition_in(if_block0, 1);
-    					}
-    				} else {
-    					if_block0 = create_if_block_2$4(ctx);
     					if_block0.c();
-    					transition_in(if_block0, 1);
-    					if_block0.m(div5, t6);
+    					if_block0.m(div0, t0);
     				}
-    			} else if (if_block0) {
-    				group_outros();
-
-    				transition_out(if_block0, 1, 1, () => {
-    					if_block0 = null;
-    				});
-
-    				check_outros();
     			}
 
-    			if (/*isLodingError*/ ctx[4]) {
+    			if (/*changeTag*/ ctx[6] == "") {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block_1$6(ctx);
+    					if_block1 = create_if_block_3$2(ctx);
     					if_block1.c();
-    					if_block1.m(div5, t7);
+    					if_block1.m(div0, null);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
     			}
 
+    			if (dirty & /*searchText*/ 32 && input.value !== /*searchText*/ ctx[5]) {
+    				set_input_value(input, /*searchText*/ ctx[5]);
+    			}
+
+    			if (/*isLoding*/ ctx[3]) {
+    				if (if_block2) {
+    					if (dirty & /*isLoding*/ 8) {
+    						transition_in(if_block2, 1);
+    					}
+    				} else {
+    					if_block2 = create_if_block_2$4(ctx);
+    					if_block2.c();
+    					transition_in(if_block2, 1);
+    					if_block2.m(div5, t6);
+    				}
+    			} else if (if_block2) {
+    				group_outros();
+
+    				transition_out(if_block2, 1, 1, () => {
+    					if_block2 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (/*isLodingError*/ ctx[4]) {
+    				if (if_block3) {
+    					if_block3.p(ctx, dirty);
+    				} else {
+    					if_block3 = create_if_block_1$6(ctx);
+    					if_block3.c();
+    					if_block3.m(div5, t7);
+    				}
+    			} else if (if_block3) {
+    				if_block3.d(1);
+    				if_block3 = null;
+    			}
+
     			let previous_block_index = current_block_type_index;
-    			current_block_type_index = select_block_type(ctx);
+    			current_block_type_index = select_block_type_1(ctx);
 
     			if (current_block_type_index === previous_block_index) {
     				if_blocks[current_block_type_index].p(ctx, dirty);
@@ -24615,17 +25038,17 @@
     				});
 
     				check_outros();
-    				if_block2 = if_blocks[current_block_type_index];
+    				if_block4 = if_blocks[current_block_type_index];
 
-    				if (!if_block2) {
-    					if_block2 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    					if_block2.c();
+    				if (!if_block4) {
+    					if_block4 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block4.c();
     				} else {
-    					if_block2.p(ctx, dirty);
+    					if_block4.p(ctx, dirty);
     				}
 
-    				transition_in(if_block2, 1);
-    				if_block2.m(div4, null);
+    				transition_in(if_block4, 1);
+    				if_block4.m(div4, null);
     			}
 
     			if (!current || dirty & /*innerHeight, flowClientTop*/ 6) {
@@ -24635,23 +25058,25 @@
     		i: function intro(local) {
     			if (current) return;
     			transition_in(quilleditor.$$.fragment, local);
-    			transition_in(if_block0);
     			transition_in(if_block2);
+    			transition_in(if_block4);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(quilleditor.$$.fragment, local);
-    			transition_out(if_block0);
     			transition_out(if_block2);
+    			transition_out(if_block4);
     			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div5);
-    			destroy_component(quilleditor);
-    			if (if_block0) if_block0.d();
+    			if_block0.d();
     			if (if_block1) if_block1.d();
+    			destroy_component(quilleditor);
+    			if (if_block2) if_block2.d();
+    			if (if_block3) if_block3.d();
     			if_blocks[current_block_type_index].d();
-    			/*div4_binding*/ ctx[19](null);
+    			/*div4_binding*/ ctx[22](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -24669,6 +25094,9 @@
     }
 
     function instance$9($$self, $$props, $$invalidate) {
+    	let $searchNenoByTag;
+    	validate_store(searchNenoByTag, "searchNenoByTag");
+    	component_subscribe($$self, searchNenoByTag, $$value => $$invalidate(9, $searchNenoByTag = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SideRight", slots, []);
     	let flowClient;
@@ -24678,6 +25106,7 @@
     	let isLodingError = false; //加载错误
     	let isEnd = false; //所有内容加载完毕
     	let searchText = "";
+    	let changeTag = "";
     	let page = 0;
     	let nenoItems = [];
     	let searchItems = [];
@@ -24692,6 +25121,7 @@
 
     		searchNenoByTag.subscribe(value => {
     			console.log("searchNenoByTag", value);
+    			$$invalidate(6, changeTag = value.tag.substring(1));
     			searchNeno("", "", value.tag);
     		});
 
@@ -24721,7 +25151,7 @@
     			}
 
     			re.body.forEach(element => {
-    				$$invalidate(6, nenoItems = [...nenoItems, element]);
+    				$$invalidate(7, nenoItems = [...nenoItems, element]);
     			});
 
     			$$invalidate(3, isLoding = false);
@@ -24749,7 +25179,7 @@
     			}).then(async respone => {
     				let re = await respone.json();
     				$$invalidate(3, isLoding = false);
-    				$$invalidate(7, searchItems = re.body);
+    				$$invalidate(8, searchItems = re.body);
     			}).catch(reason => {
     				console.log("reason", reason); // re.body.forEach((element) => {
     				//     searchItems = [...searchItems, element];
@@ -24758,7 +25188,7 @@
     				$$invalidate(3, isLoding = false);
     			});
     		} else {
-    			$$invalidate(7, searchItems = []);
+    			$$invalidate(8, searchItems = []);
     		}
     	}
 
@@ -24773,6 +25203,10 @@
     	}
 
     	const click_handler = () => {
+    		set_store_value(searchNenoByTag, $searchNenoByTag.tag = "", $searchNenoByTag);
+    	};
+
+    	const click_handler_1 = () => {
     		showSlide();
     	};
 
@@ -24787,27 +25221,27 @@
     		$$invalidate(5, searchText);
     	}
 
-    	const click_handler_1 = () => {
+    	const click_handler_2 = () => {
     		$$invalidate(5, searchText = "");
-    		$$invalidate(7, searchItems = []);
+    		$$invalidate(8, searchItems = []);
     	};
 
     	const update_handler = event => {
-    		$$invalidate(6, nenoItems = [event.detail, ...nenoItems]);
+    		$$invalidate(7, nenoItems = [event.detail, ...nenoItems]);
     	};
 
-    	const click_handler_2 = () => {
+    	const click_handler_3 = () => {
     		load();
     	};
 
     	const deleteOne_handler = event => {
-    		$$invalidate(6, nenoItems = nenoItems.filter(item => {
+    		$$invalidate(7, nenoItems = nenoItems.filter(item => {
     			return item._id != event.detail._id;
     		}));
     	};
 
     	const deleteOne_handler_1 = event => {
-    		$$invalidate(6, nenoItems = nenoItems.filter(item => {
+    		$$invalidate(7, nenoItems = nenoItems.filter(item => {
     			return item._id != event.detail._id;
     		}));
     	};
@@ -24837,11 +25271,13 @@
     		isLodingError,
     		isEnd,
     		searchText,
+    		changeTag,
     		page,
     		nenoItems,
     		searchItems,
     		load,
-    		searchNeno
+    		searchNeno,
+    		$searchNenoByTag
     	});
 
     	$$self.$inject_state = $$props => {
@@ -24852,9 +25288,10 @@
     		if ("isLodingError" in $$props) $$invalidate(4, isLodingError = $$props.isLodingError);
     		if ("isEnd" in $$props) isEnd = $$props.isEnd;
     		if ("searchText" in $$props) $$invalidate(5, searchText = $$props.searchText);
+    		if ("changeTag" in $$props) $$invalidate(6, changeTag = $$props.changeTag);
     		if ("page" in $$props) page = $$props.page;
-    		if ("nenoItems" in $$props) $$invalidate(6, nenoItems = $$props.nenoItems);
-    		if ("searchItems" in $$props) $$invalidate(7, searchItems = $$props.searchItems);
+    		if ("nenoItems" in $$props) $$invalidate(7, nenoItems = $$props.nenoItems);
+    		if ("searchItems" in $$props) $$invalidate(8, searchItems = $$props.searchItems);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -24879,17 +25316,20 @@
     		isLoding,
     		isLodingError,
     		searchText,
+    		changeTag,
     		nenoItems,
     		searchItems,
+    		$searchNenoByTag,
     		load,
     		searchNeno,
     		onwindowresize,
     		click_handler,
+    		click_handler_1,
     		keydown_handler,
     		input_input_handler,
-    		click_handler_1,
-    		update_handler,
     		click_handler_2,
+    		update_handler,
+    		click_handler_3,
     		deleteOne_handler,
     		deleteOne_handler_1,
     		div4_binding

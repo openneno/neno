@@ -17,6 +17,7 @@
     let isLodingError = false; //加载错误
     let isEnd = false; //所有内容加载完毕
     let searchText = "";
+    let changeTag = "";
     let page = 0;
     $: {
         if (flowClient != undefined) {
@@ -36,6 +37,7 @@
         });
         searchNenoByTag.subscribe((value) => {
             console.log("searchNenoByTag", value);
+            changeTag = value.tag.substring(1);
             searchNeno("", "", value.tag);
         });
         flowClient.addEventListener("scroll", function () {
@@ -116,17 +118,41 @@
 <div class="  flex-1 flex flex-col justify-start  pt-4  w-0">
     <div class="  flex flex-row items-center justify-between ">
         <div class="flex flex-row items-center pl-4 ">
-            NENO <button
-                class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
-                on:click={() => {
-                    showSlide();
-                }}
-            >
-                <i class="ri-function-fill" />
-            </button>
+            {#if changeTag == ""}
+                NENO
+            {:else}
+                <div
+                    class="flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1"
+                >
+                    <div class="mr-1 pt-1"><i class="ri-hashtag" /></div>
+                    <div class="font-bold w-auto mr-2" type="text">
+                        {changeTag}
+                    </div>
+                    <button class="focus:outline-none ">
+                        <i
+                            class="ri-close-circle-fill text-gray-400"
+                            on:click={() => {
+                                $searchNenoByTag.tag = "";
+                            }}
+                        />
+                    </button>
+                </div>
+            {/if}
+            {#if changeTag == ""}
+                <button
+                    class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
+                    on:click={() => {
+                        showSlide();
+                    }}
+                >
+                    <i class="ri-function-fill" />
+                </button>
+            {/if}
         </div>
 
-        <div class="bg-gray-200 rounded-lg h-8 p-2 flex items-center">
+        <div
+            class="bg-gray-200 rounded-lg h-8 p-2 flex items-center flex-shrink-0"
+        >
             <i class="ri-search-2-line text-gray-400" />
             <input
                 class=" ml-2 bg-gray-200 focus:outline-none text-sm"
@@ -171,7 +197,7 @@
     {/if}
     <div
         bind:this={flowClient}
-        class="flex flex-col overflow-y-scroll p-4 "
+        class="flex flex-col overflow-y-scroll p-2 "
         style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length == 0}

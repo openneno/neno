@@ -72,7 +72,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="  mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class=" leading-6 mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);

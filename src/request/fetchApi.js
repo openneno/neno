@@ -50,6 +50,10 @@ export const setting = (data) => {
 export const count = (data) => {
     return fetch(`${baseurl}/count`, genergeParams(data))
 }
+export const rename = (data) => {
+    return fetch(`${baseurl}/rename`, genergeParams(data))
+}
+
 
 
 

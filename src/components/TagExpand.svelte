@@ -7,6 +7,9 @@
     let showTag = "";
     let subTag = "";
     let showSub = false;
+    let selfTag = "";
+
+    let isChangeTaging = false;
 
     const dispatch = createEventDispatcher();
     $: {
@@ -29,30 +32,85 @@
             dispatch("selectTag", parentTag + showTag);
         }}
     >
-        {showTag}
-        <button
-            class="focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2"
-            on:click|stopPropagation={() => {
-                dispatch("pinTag", parentTag + showTag);
-            }}
-        >
-            <i class="ri-pushpin-fill" />
-        </button>
-        {#if subTag.length != 0}
+        <div class="flex">
+            <div class=""><i class="ri-hashtag" /></div>
+            <div class="ml-1">
+                {showTag.indexOf("#") == 0 ? showTag.substring(1) : showTag}
+            </div>
+        </div>
+        <div>
             <button
-                class="focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2"
+                class="focus:outline-none group-hover:opacity-100 opacity-0   pr-1"
                 on:click|stopPropagation={() => {
-                    showSub = !showSub;
+                    isChangeTaging = !isChangeTaging;
+                    selfTag = (parentTag + showTag).substring(1);
                 }}
             >
-                {#if showSub}
-                    <i class="ri-arrow-right-s-line" />
-                {:else}
-                    <i class="ri-arrow-down-s-line" />
-                {/if}
+                <i class="ri-edit-fill" />
             </button>
-        {/if}
+            <button
+                class="focus:outline-none group-hover:opacity-100 opacity-0   pr-1"
+                on:click|stopPropagation={() => {
+                    dispatch("pinTag", parentTag + showTag);
+                }}
+            >
+                <i class="ri-pushpin-fill" />
+            </button>
+
+            {#if subTag.length != 0}
+                <button
+                    class="focus:outline-none group-hover:opacity-100 opacity-0  pr-1"
+                    on:click|stopPropagation={() => {
+                        showSub = !showSub;
+                    }}
+                >
+                    {#if showSub}
+                        <i class="ri-arrow-right-s-line" />
+                    {:else}
+                        <i class="ri-arrow-down-s-line" />
+                    {/if}
+                </button>
+            {/if}
+        </div>
     </button>
+    {#if isChangeTaging}
+        <div class="pl-2">
+            <div
+                class="flex items-center bg-gray-200 rounded-lg border-solid border-4  "
+            >
+                <div class=""><i class="ri-hashtag" /></div>
+                <input
+                    class="focus:outline-none  h-8 p-2 pl-1 rounded-sm w-full text-gray-700"
+                    type="text"
+                    bind:value={selfTag}
+                />
+            </div>
+
+            <div class="flex justify-between  w-full mt-2 ">
+                <button
+                    class="w-5/12 text-gray-700 bg-white rounded-sm border-solid border-4 "
+                    on:click|stopPropagation={() => {
+                        isChangeTaging = false;
+                    }}>取消</button
+                >
+                <button
+                    class="w-5/12 bg-green-500 rounded-sm text-white"
+                    on:click|stopPropagation={() => {
+                        dispatch("renameTag", {
+                            oldTag: parentTag + showTag,
+                            newTag: "#" + selfTag,
+                        });
+                        console.log("确定renameTag", {
+                            oldTag: parentTag + showTag,
+                            newTag: "#" + selfTag,
+                        });
+
+                        isChangeTaging = false;
+                    }}>确定</button
+                >
+            </div>
+        </div>
+    {/if}
     {#if subTag.length != 0 && showSub}
         <div class="ml-2">
             <svelte:self
@@ -64,6 +122,10 @@
                 on:pinTag={(event) => {
                     console.log("pinTag", event.detail);
                     dispatch("pinTag", event.detail);
+                }}
+                on:renameTag={(event) => {
+                    console.log("renameTag", event.detail);
+                    dispatch("renameTag", event.detail);
                 }}
                 tag={subTag}
                 {selectionTag}

@@ -66,7 +66,7 @@
                 (event.code == "ArrowUp" ||
                     event.code == "ArrowDown" ||
                     event.keyCode == 13) &&
-                showTip
+                tagTips.length > 0
             ) {
                 if (event.code == "ArrowUp" && tagTipsFocusIndex > 0) {
                     tagTipsFocusIndex--;
@@ -93,7 +93,7 @@
         quillEditor.on("selection-change", function (range, oldRange, source) {
             if (range) {
                 toolTip();
-            } 
+            }
         });
         quillEditor.setSelection(quillEditor.getText().length);
         let tempfiles = [];
@@ -122,7 +122,6 @@
         let sIndex = text.lastIndexOf("#", cIndex);
         if (sIndex != -1) {
             let tagMay = text.substring(sIndex, cIndex);
-            let lastTagTipslength = tagTips.length;
 
             tagTips = [];
             for (let index = 0; index < $tagStrore.allTags.length; index++) {
@@ -241,21 +240,7 @@
         }
         quillEditor.insertText(index, "#");
     }
-    // function getObjectURL(file) {
-    //     var url = null;
-    //     // 下面函数执行的效果是一样的，只是需要针对不同的浏览器执行不同的 js 函数而已
-    //     if (window.createObjectURL != undefined) {
-    //         // basic
-    //         url = window.createObjectURL(file);
-    //     } else if (window.URL != undefined) {
-    //         // mozilla(firefox)
-    //         url = window.URL.createObjectURL(file);
-    //     } else if (window.webkitURL != undefined) {
-    //         // webkit or chrome
-    //         url = window.webkitURL.createObjectURL(file);
-    //     }
-    //     return url;
-    // }
+
     function uploadPicQiniu(imageFile, index, token) {
         console.log(imageFile, imageFile.name, token);
         const observable = qiniu.upload(
@@ -378,8 +363,7 @@
     class="border-gray-200 border-solid border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white relative"
 >
     <div bind:this={editor} id="editor" class="list-decimal list-inside" />
-    {#if showTip}
-        <!-- content here -->
+    {#if tagTips.length > 0}
         <div
             bind:this={tipClient}
             class="rounded bg-gray-800 text-sm text-white w-auto absolute font-bold p-1"
@@ -461,8 +445,10 @@
             </div>
         {/each}
     </div>
-    <div class=" flex justify-between  pl-3 pr-3">
-        <div id="toolbar" class="space-x-2" bind:this={toolbar}>
+    <div
+        class=" flex justify-between flex-col  sm:flex-row md:flex-row  pl-3 pr-3"
+    >
+        <div id="toolbar" class="space-x-1" bind:this={toolbar}>
             <button
                 class="rounded-sm hover:bg-gray-200 p-1 focus:outline-none"
                 on:click={insertHashTag}><i class="ri-hashtag" /></button
@@ -504,7 +490,7 @@
                 multiple
             />
         </div>
-        <div class="flex space-x-2">
+        <div class="flex space-x-2 justify-end">
             {#if canCancle}
                 <button
                     class="rounded-sm bg-white border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm"
@@ -512,7 +498,7 @@
                 >
             {/if}
             <button
-                class="rounded-sm bg-green-500 text-white pl-2 pr-2 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16"
+                class="rounded-sm bg-green-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16"
                 disabled={isContentEmpty || isSending}
                 on:click={() => {
                     sendBiu();

@@ -1,5 +1,5 @@
 <script>
-    import { tags, pin, pins, count } from "../request/fetchApi";
+    import { tags, pin, pins, count, rename } from "../request/fetchApi";
     import {
         pagedd,
         countStrore,
@@ -119,6 +119,15 @@
                 console.log(reason);
             });
     }
+    function renameName(detail) {
+        rename({ oldTag: detail.oldTag, newTag: detail.newTag })
+            .then(async (respone) => {
+                getPins();
+            })
+            .catch((reason) => {
+                console.log(reason);
+            });
+    }
 </script>
 
 <div class="w-full flex flex-col overflow-auto h-screen">
@@ -207,7 +216,12 @@
                     $searchNenoByTag.tag = tag;
                 }}
             >
-                {tag}
+                <div class="flex">
+                    <div class=""><i class="ri-hashtag" /></div>
+                    <div class="ml-1">
+                        {tag.indexOf("#") == 0 ? tag.substring(1) : tag}
+                    </div>
+                </div>
                 <button
                     class="focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2"
                     on:click={() => {
@@ -235,13 +249,16 @@
                     pinNeno(event.detail, true);
                     console.log("toppinTag", event.detail);
                 }}
+                on:renameTag={(event) => {
+                    console.log("toppinTag", event.detail);
+                    renameName(event.detail);
+                }}
             />
         {/each}
     {/if}
 </div>
 
-<style >
-    
+<style>
     ::-webkit-scrollbar {
         width: 0 !important;
     }
