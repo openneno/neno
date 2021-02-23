@@ -78,7 +78,7 @@
             type="text"
             bind:value={imgDomain}
             class="w-full border-2  mt-4 outline-white p-2"
-            placeholder="http://img.fmolo.bijiduo.com"
+            placeholder="填写你的在七牛云绑定的域名 (这个是我的http://img.neno.topmini.top)"
         />
     </div>
 
