@@ -14,6 +14,21 @@ NENO
 
 [在线体验](http://neno.topmini.top/)
 
+
+### 前端部署方式
+
+#### 马上部署
+
+    dist目录下面为打包好的文件
+    直接部署即可
+
+#### 自己打包
+```
+npm install
+node run build
+dist 目录下面为构建好的前端页面
+```
+
 ### Todo
 
 - [ ] 分享出图片  
@@ -24,3 +39,5 @@ NENO
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5%E7%A7%BB%E5%8A%A8%E7%AB%AF.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E7%88%B6%E7%BA%A7.png)
+![](https://github.com/Mran/neno/blob/master/readmepic/setting.png)
+

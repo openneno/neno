@@ -5,6 +5,7 @@
   import SettingSlide from "./SettingSlide.svelte";
   import FmoloDetail from "./FmoloDetail.svelte";
   import ViewPicture from "./ViewPicture.svelte";
+  import Daily from "./Daily.svelte";
 
   import { pagedd } from "../store/store.js";
 </script>
@@ -23,6 +24,8 @@
       <SideRight />
     {:else if $pagedd == "setting"}
       <Setting />
+    {:else}
+      <Daily />
     {/if}
   </div>
   <FmoloDetail />
