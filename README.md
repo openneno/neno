@@ -41,3 +41,11 @@ dist 目录下面为构建好的前端页面
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E7%88%B6%E7%BA%A7.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/setting.png)
 
+
+
+===========
+
+## License
+
+GPL
+
