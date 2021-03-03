@@ -158,9 +158,12 @@
         />
     {:else}
         <div
-            class="list-decimal text-sm text-red-300 ql-editor whitespace-no-wrap"
+            class="list-decimal text-sm text-red-300  ql-editor whitespace-no-wrap "
+            style="height:revert"
         >
-            <p class=" whitespace-no-wrap">{@html praseTag(content, tags)}</p>
+            <p class="whitespace-no-wrap ">
+                {@html praseTag(content, tags)}
+            </p>
         </div>
     {/if}
 
