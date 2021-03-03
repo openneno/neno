@@ -1,0 +1,407 @@
+<!DOCTYPE html><html lang="zh"><head><script>// polyfills
+if (!String.prototype.startsWith) {
+  String.prototype.startsWith = function (searchString, position) {
+    position = position || 0
+    return this.substr(position, searchString.length) === searchString
+  }
+}
+
+;(function () {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1)
+  }
+
+  var uid = function () {
+    return (
+      s4() +
+      s4() +
+      '-' +
+      s4() +
+      '-' +
+      s4() +
+      '-' +
+      s4() +
+      '-' +
+      s4() +
+      s4() +
+      s4()
+    )
+  }
+
+  function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object)
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object)
+      if (enumerableOnly)
+        symbols = symbols.filter(function (sym) {
+          return Object.getOwnPropertyDescriptor(object, sym).enumerable
+        })
+      keys.push.apply(keys, symbols)
+    }
+    return keys
+  }
+
+  function _objectSpread(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] != null ? arguments[i] : {}
+      if (i % 2) {
+        ownKeys(source, true).forEach(function (key) {
+          _defineProperty(target, key, source[key])
+        })
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(
+          target,
+          Object.getOwnPropertyDescriptors(source)
+        )
+      } else {
+        ownKeys(source).forEach(function (key) {
+          Object.defineProperty(
+            target,
+            key,
+            Object.getOwnPropertyDescriptor(source, key)
+          )
+        })
+      }
+    }
+    return target
+  }
+
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      })
+    } else {
+      obj[key] = value
+    }
+    return obj
+  }
+
+  if (!window.__TAURI__) {
+    window.__TAURI__ = {}
+  }
+
+  window.__TAURI__.transformCallback = function transformCallback(
+    callback,
+    once
+  ) {
+    var identifier = uid()
+
+    window[identifier] = function (result) {
+      if (once) {
+        delete window[identifier]
+      }
+
+      return callback && callback(result)
+    }
+
+    return identifier
+  }
+
+  window.__TAURI__.promisified = function promisified(args) {
+    var _this = this
+
+    return new Promise(function (resolve, reject) {
+      var callback = _this.transformCallback(function (r) {
+        resolve(r)
+        delete window[error]
+      }, true)
+      var error = _this.transformCallback(function (e) {
+        reject(e)
+        delete window[callback]
+      }, true)
+
+      window.__TAURI_INVOKE_HANDLER__(
+        _objectSpread(
+          {
+            callback: callback,
+            error: error
+          },
+          args
+        )
+      )
+    })
+  }
+
+  window.__TAURI__.loadAsset = function loadAsset(assetName, assetType) {
+    return this.promisified({
+      cmd: 'loadAsset',
+      asset: assetName,
+      assetType: assetType || 'unknown'
+    })
+  }
+
+  document.addEventListener(
+    'error',
+    function (e) {
+      var target = e.target
+      while (target != null) {
+        if (
+          target.matches
+            ? target.matches('img')
+            : target.msMatchesSelector('img')
+        ) {
+          window.__TAURI__.loadAsset(target.src, 'image').then(function (img) {
+            target.src = img
+          })
+          break
+        }
+        target = target.parentElement
+      }
+    },
+    true
+  )
+
+  // open <a href="..."> links with the Tauri API
+  function __openLinks() {
+    document.querySelector('body').addEventListener(
+      'click',
+      function (e) {
+        var target = e.target
+        while (target != null) {
+          if (
+            target.matches ? target.matches('a') : target.msMatchesSelector('a')
+          ) {
+            if (
+              target.href &&
+              target.href.startsWith('http') &&
+              target.target === '_blank'
+            ) {
+              window.__TAURI_INVOKE_HANDLER__({
+                cmd: 'open',
+                uri: target.href
+              })
+              e.preventDefault()
+            }
+            break
+          }
+          target = target.parentElement
+        }
+      },
+      true
+    )
+  }
+
+  if (
+    document.readyState === 'complete' ||
+    document.readyState === 'interactive'
+  ) {
+    __openLinks()
+  } else {
+    window.addEventListener(
+      'DOMContentLoaded',
+      function () {
+        __openLinks()
+      },
+      true
+    )
+  }
+
+  let permissionSettable = false
+  let permissionValue = 'default'
+
+  function isPermissionGranted() {
+    if (window.Notification.permission !== 'default') {
+      return Promise.resolve(window.Notification.permission === 'granted')
+    }
+    return window.__TAURI__.promisified({
+      cmd: 'isNotificationPermissionGranted'
+    })
+  }
+
+  function setNotificationPermission(value) {
+    permissionSettable = true
+    window.Notification.permission = value
+    permissionSettable = false
+  }
+
+  function requestPermission() {
+    return window.__TAURI__
+      .promisified({
+        cmd: 'requestNotificationPermission'
+      })
+      .then(function (permission) {
+        setNotificationPermission(permission)
+        return permission
+      })
+  }
+
+  function sendNotification(options) {
+    if (typeof options === 'object') {
+      Object.freeze(options)
+    }
+
+    isPermissionGranted().then(function (permission) {
+      if (permission) {
+        return window.__TAURI__.promisified({
+          cmd: 'notification',
+          options:
+            typeof options === 'string'
+              ? {
+                  title: options
+                }
+              : options
+        })
+      }
+    })
+  }
+
+  window.Notification = function (title, options) {
+    var opts = options || {}
+    sendNotification(
+      Object.assign(opts, {
+        title: title
+      })
+    )
+  }
+
+  window.Notification.requestPermission = requestPermission
+
+  Object.defineProperty(window.Notification, 'permission', {
+    enumerable: true,
+    get: function () {
+      return permissionValue
+    },
+    set: function (v) {
+      if (!permissionSettable) {
+        throw new Error('Readonly property')
+      }
+      permissionValue = v
+    }
+  })
+
+  isPermissionGranted().then(function (response) {
+    if (response === null) {
+      setNotificationPermission('default')
+    } else {
+      setNotificationPermission(response ? 'granted' : 'denied')
+    }
+  })
+
+  window.alert = function (message) {
+    window.__TAURI_INVOKE_HANDLER__({
+      cmd: 'messageDialog',
+      message: message
+    })
+  }
+
+  window.confirm = function (message) {
+    return window.__TAURI__.promisified({
+      cmd: 'askDialog',
+      message: message
+    })
+  }
+})()
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="//cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/neno.png">
+  <link rel="icon" type="image/png" sizes="128*128" href="/assets/neno.ico">
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/neno.png">
+  <link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/assets/neno.ico">
+  <meta name="msapplication-TileColor" content="#b91d47">
+  <meta name="msapplication-config" content="/assets/browserconfig.xml">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="sgtoilet">
+  <meta name="description" content="NENO for record">
+
+  <!-- Google / Search Engine Tags -->
+  <meta itemprop="name" content="NENO">
+  <meta itemprop="description" content="NENO for record ">
+  <!--Insert url for image to be used in search results-->
+  <meta itemprop="image" content="">
+
+  <!-- Facebook Meta Tags -->
+  <!--Insert url of site-->
+  <meta property="og:url" content="">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="NENO">
+  <meta property="og:description" content="NENO for record">
+  <!--Insert url for image to be used in facebook share post-->
+  <meta property="og:image" content="">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NENO">
+  <meta name="twitter:description" content="NENO for record">
+  <!--Insert url for image to be used in twitter share post-->
+  <meta name="twitter:image" content="">
+
+  <!--Set browser chrome theme color here-->
+  <meta name="theme-color" content="#f7fafc">
+  <!--Load google fonts here-->
+  <link href="https://fonts.googleapis.com/css?family=Oswald|Roboto&amp;display=swap" rel="stylesheet">
+  <title>NENO</title>
+  <style>
+    ol {
+      display: block;
+      list-style-type: decimal;
+      margin-block-start: 1em;
+      margin-block-end: 1em;
+      margin-inline-start: 0px;
+      margin-inline-end: 0px;
+      padding-inline-start: 40px;
+    }
+
+    ul {
+      display: block;
+      margin-block-start: 1em;
+      margin-block-end: 1em;
+      margin-inline-start: 0px;
+      margin-inline-end: 0px;
+      padding-inline-start: 40px;
+      list-style-type: disc;
+    }
+
+    ::-webkit-scrollbar {
+      width: 1px !important;
+      margin-left: 4px;
+      /* height: 5px!important; */
+    }
+    -webkit-tap-highlight-color: transparent;
+    ::-webkit-tap-highlight-color:rgba(0,0,0,0)
+    ::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3) !important;
+      border-radius: 100px !important;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: transparent !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #13B66A !important;
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background: #13B66A !important;
+    }
+  </style>
+<meta http-equiv="Content-Security-Policy" content="default-src blob: data: filesystem: ws: http: https: 'unsafe-eval' 'unsafe-inline'"></head>
+
+<body>
+  <noscript>
+    <div class="flex items-center h-full">
+      <h1 class="text-gray-600 px-8">
+        Oops! Javascript required here! Allow it and try again!
+      </h1>
+    </div>
+  </noscript>
+  <script src="main.js"></script>
+
+
+</body></html>
