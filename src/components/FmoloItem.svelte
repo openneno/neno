@@ -157,8 +157,10 @@
             }}
         />
     {:else}
-        <div class="list-decimal text-sm text-red-300">
-            <p>{@html praseTag(content, tags)}</p>
+        <div
+            class="list-decimal text-sm text-red-300 ql-editor whitespace-no-wrap"
+        >
+            <p class=" whitespace-no-wrap">{@html praseTag(content, tags)}</p>
         </div>
     {/if}
 
@@ -166,7 +168,7 @@
         {#each images as { imgDomain, key }, index (index)}
             <img
                 on:click={() => {
-                    showPictureView(images,index);
+                    showPictureView(images, index);
                 }}
                 class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
                 src={imgDomain + "/" + key}
