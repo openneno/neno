@@ -9,8 +9,9 @@
 <script>
     import { fly, fade } from "svelte/transition";
     import { getObjectURL } from "../utils/process";
+    import { getFileFromIndexedDB } from "../request/fetchApi";
 
-    import { onMount, onDestroy } from "svelte";
+    import { onMount } from "svelte";
     let show = false;
     let imageFilesIn = [];
     let showIndexIn = 0;
@@ -29,7 +30,24 @@
 
     function hidden() {
         show = false;
-        showLeft = false;
+    }
+    async function getPIcUrl(showImageInfo) {
+        if (showImageInfo.file == null) {
+            if (showImageInfo.uploadInfo == undefined) {
+                if (showImageInfo.platform == "indexedDB") {
+                    var url = await getFileFromIndexedDB(showImageInfo.key);
+                    return url.key;
+                } else return showImageInfo.imgDomain + "/" + showImageInfo.key; //网络加载
+            } else {
+                if (showImageInfo.uploadInfo.platform == "indexedDB") {
+                    var url = await getFileFromIndexedDB(showImageInfo.uploadInfo.key);
+                    return url.key;
+                } else
+                    return `${showImageInfo.uploadInfo.imgDomain}/${showImageInfo.uploadInfo.key}`; //预览模式已上传
+            }
+        } else {
+            return getObjectURL(showImageInfo.file); //预览模式未上传
+        }
     }
 </script>
 
@@ -46,39 +64,33 @@
             style="height:80vh"
             class=" w-auto   rounded relative overflow-hidden flex justify-center items-center"
         >
-            <img
-                class=" w-full max-h-full object-cover  shadow-lg"
-                src={showImageInfo.file == null
-                    ? showImageInfo.uploadInfo == undefined
-                        ? showImageInfo.imgDomain + "/" + showImageInfo.key
-                        : showImageInfo.uploadInfo.imgDomain +
-                          "/" +
-                          showImageInfo.uploadInfo.key
-                    : getObjectURL(showImageInfo.file)}
-                alt=""
-            />
+            {#await getPIcUrl(showImageInfo) then value}
+                <img
+                    class=" w-full  max-h-full object-cover  shadow-lg"
+                    src={value}
+                    alt=""
+                />
+            {/await}
         </div>
 
         <div
             class="flex flex-row justify-center items-baseline"
             style="height:20vh"
         >
-            {#each imageFilesIn as { file, uploadInfo, timeStamp, key, imgDomain }, index}
+            {#each imageFilesIn as item, index}
                 <div
                     class="w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden"
                     on:click|stopPropagation={() => {
                         showImageInfo = imageFilesIn[index];
                     }}
                 >
-                    <img
-                        class=" w-full h-full object-cover"
-                        src={file == null
-                            ? uploadInfo == undefined
-                                ? imgDomain + "/" + key
-                                : uploadInfo.imgDomain + "/" + uploadInfo.key
-                            : getObjectURL(file)}
-                        alt=""
-                    />
+                    {#await getPIcUrl(item) then value}
+                        <img
+                            class=" w-full h-full object-cover"
+                            src={value}
+                            alt=""
+                        />
+                    {/await}
                 </div>
             {/each}
         </div>

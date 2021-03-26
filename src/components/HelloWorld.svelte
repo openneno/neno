@@ -6,6 +6,7 @@
   import FmoloDetail from "./FmoloDetail.svelte";
   import ViewPicture from "./ViewPicture.svelte";
   import Daily from "./Daily.svelte";
+  import Share from "./Share.svelte";
 
   import { pagedd } from "../store/store.js";
 </script>
@@ -31,4 +32,5 @@
   <FmoloDetail />
   <SettingSlide />
   <ViewPicture />
+  <Share />
 </div>

@@ -7,7 +7,12 @@
     import Quill from "quill";
 
     import * as qiniu from "qiniu-js";
-    import { addFmolo, qiniuToken } from "../request/fetchApi";
+    import {
+        addFmolo,
+        qiniuToken,
+        uploadPicIndexedDB,
+        getFileFromIndexedDB,
+    } from "../request/fetchApi";
     import { getObjectURL } from "../utils/process";
     import { showPictureView } from "./ViewPicture.svelte";
 
@@ -178,16 +183,22 @@
             if (element.uploadingstatus == "未上传") {
                 element.uploadingstatus = "上传中";
                 // uploadPic(element, index);
-                qiniuToken()
-                    .then(async (respone) => {
-                        let re = await respone.json();
-                        if (re.errorMessage == undefined) {
-                            uploadPicQiniu(element, index, re.body);
-                        }
-                    })
-                    .catch((reason) => {
-                        console.log(reason);
-                    });
+                if ($settingStrore.offlineModel) {
+                    uploadPicLocal(element, index);
+                } else {
+                    qiniuToken()
+                        .then(async (respone) => {
+                            let re = await respone.json();
+                            if (re.errorMessage == undefined) {
+                                {
+                                    uploadPicQiniu(element, index, re.body);
+                                }
+                            }
+                        })
+                        .catch((reason) => {
+                            console.log(reason);
+                        });
+                }
             }
         }
     }
@@ -240,7 +251,14 @@
         }
         quillEditor.insertText(index, "#");
     }
+    async function uploadPicLocal(imageFile, index) {
+        console.log(imageFile);
 
+        var response = await uploadPicIndexedDB(imageFile.file);
+        imageFiles[index].uploadingstatus = "已上传";
+        imageFiles[index].uploadInfo.key = response.key;
+        imageFiles[index].uploadInfo.platform = "indexedDB";
+    }
     function uploadPicQiniu(imageFile, index, token) {
         console.log(imageFile, imageFile.name, token);
         const observable = qiniu.upload(
@@ -328,7 +346,7 @@
                 ...imagesInfo,
                 {
                     key: element.uploadInfo.key,
-                    platform: $settingStrore.platform,
+                    platform: element.uploadInfo.platform,
                     imgDomain: $settingStrore.imgDomain,
                     timeStamp: element.timeStamp,
                 },
@@ -343,8 +361,9 @@
             tags: tags,
             images: imagesInfo,
         })
-            .then(async (respone) => {
-                let re = await respone.json();
+            .then((respone) => {
+                console.log(respone);
+                let re = respone;
                 isSending = false;
                 if (re.errorMessage == undefined) {
                     quillEditor.setContents([]);
@@ -356,6 +375,17 @@
                 isSending = false;
                 console.log(reason);
             });
+    }
+    async function getPIcUrl(file, uploadInfo) {
+        if (file == null) {
+            if (uploadInfo.platform == "indexedDB") {
+                return (await getFileFromIndexedDB(uploadInfo.key)).key;
+            } else {
+                return uploadInfo.imgDomain + "/" + uploadInfo.key;
+            }
+        } else {
+            return getObjectURL(file);
+        }
     }
 </script>
 
@@ -413,14 +443,14 @@
                         </div>
                     </div>
                 {/if}
+                {#await getPIcUrl(file, uploadInfo) then value}
+                    <img
+                        class=" w-full h-full object-cover"
+                        src={value}
+                        alt=""
+                    />
+                {/await}
 
-                <img
-                    class=" w-full h-full object-cover"
-                    src={file == null
-                        ? uploadInfo.imgDomain + "/" + uploadInfo.key
-                        : getObjectURL(file)}
-                    alt=""
-                />
                 {#if percent_completed == 100}
                     <lable
                         class="block"

@@ -7,12 +7,13 @@
     import { fade } from "svelte/transition";
 
     import dayjs from "dayjs";
-
+    import { getObjectURL } from "../utils/process";
     import { showFmolo } from "./FmoloDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
     import { showPictureView } from "./ViewPicture.svelte";
-    import { deleteOne } from "../request/fetchApi";
+    import { deleteOne, getFileFromIndexedDB } from "../request/fetchApi";
     import { searchNenoByTag } from "../store/store.js";
+    import { showShareView } from "./Share.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -46,8 +47,8 @@
     }
     function deleteNeno(_id) {
         deleteOne({ _id: _id })
-            .then(async (respone) => {
-                let re = await respone.json();
+            .then((respone) => {
+                let re = respone;
                 let code = re.code;
                 if (code == 200) {
                     dispatch("deleteOne", { _id: _id });
@@ -72,7 +73,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class=" leading-6 mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="  whitespace-no-wrap leading-6 mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -87,6 +88,14 @@
             );
         }
         return pContent;
+    }
+    async function getImageurl(imgDomain, key, platform) {
+        if (platform == "indexedDB") {
+            var url = await getFileFromIndexedDB(key);
+            return url.key;
+        } else {
+            return imgDomain + "/" + key;
+        }
     }
 </script>
 
@@ -114,8 +123,21 @@
                     class=" absolute w-16  bg-white shadow-xl rounded-lg flex flex-col justify-center  border-gray-200  border-solid space-y-1 pt-2 pb-2 focus:outline-none"
                     style="left:-16px;border-width:1px"
                 >
-                    <button class="focus:outline-none hover:bg-gray-300 "
-                        >分享</button
+                    <button
+                        class="focus:outline-none hover:bg-gray-300 "
+                        on:click={() => {
+                            showShareView(
+                                _id,
+                                created_at,
+                                content,
+                                images,
+                                parent,
+                                parentId,
+                                children,
+                                searchContent,
+                                tags
+                            );
+                        }}>分享</button
                     >
                     <button
                         class="focus:outline-none hover:bg-gray-300 "
@@ -168,15 +190,17 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each images as { imgDomain, key }, index (index)}
-            <img
-                on:click={() => {
-                    showPictureView(images, index);
-                }}
-                class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
-                src={imgDomain + "/" + key}
-                alt=""
-            />
+        {#each images as { imgDomain, key, platform }, index (index)}
+            {#await getImageurl(imgDomain, key, platform) then value}
+                <img
+                    on:click={() => {
+                        showPictureView(images, index);
+                    }}
+                    class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
+                    src={value}
+                    alt=""
+                />
+            {/await}
         {/each}
     </div>
     {#if parent != undefined && parent != null}

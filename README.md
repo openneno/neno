@@ -14,7 +14,10 @@ NENO
 - 数据库MongoDB,可以使用[https://cloud.mongodb.com/](https://cloud.mongodb.com/)的免费500 Mb的存储空间
 - 理论上买一个域名即可免费私有化部署.
 
-[在线体验](http://neno.topmini.top/)
+[马上体验](http://neno.topmini.top/)
+- **支持完全离线使用**
+- **支持完整版数据导入导出**
+
 
 
 ### 前端部署方式
@@ -33,10 +36,12 @@ dist 目录下面为构建好的前端页面
 
 ### Todo
 
-- [ ] 分享出图片  
+- [x] 分享出图片  
+- [X] 完全基于浏览器的离线版本
 - [ ] 每日回顾
 - [ ] 随机漫步
 - [ ] go版本的后端
+
 
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5%E7%A7%BB%E5%8A%A8%E7%AB%AF.png)

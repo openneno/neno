@@ -1,7 +1,6 @@
 <script>
   import HelloWorld from "./components/HelloWorld.svelte";
   import Router from "./components/Router.svelte";
-  import { setting } from "./request/fetchApi";
   import { settingStrore, pagedd } from "./store/store.js";
   import { onMount } from "svelte";
 
@@ -9,33 +8,19 @@
     navigator.serviceWorker.register("/service-worker.js");
   }
   onMount(() => {
-    let domain = window.localStorage.getItem("domain");
-    if (domain == null) {
+    let setting = window.localStorage.getItem("settingStrore");
+    if (setting == null) {
       $pagedd = "setting";
     } else {
-      $settingStrore.domain = domain;
+      $settingStrore = JSON.parse(setting);
     }
-    setting()
-      .then(async (respone) => {
-        let re = await respone.json();
-
-        if (Object.keys(re.body).length == 0) {
-          setting($settingStrore).then(async (respone) => {});
-        } else {
-          $settingStrore = re.body;
-        }
-      })
-      .catch((reason) => {
-        console.log(reason);
-      });
   });
   async function test() {
     await sleep(1000);
-    sleep(1000).then((value) => {
-    });
+    sleep(1000).then((value) => {});
   }
 
-  function sleep(ms) {
+  function sleep(ms) {\
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -45,7 +30,7 @@
 <main class="overflow-y-hidden f h-screen">
   <Router />
 
-  {#await sleep(10) then value}
+  {#await sleep(50) then value}
     <HelloWorld />
   {/await}
 </main>

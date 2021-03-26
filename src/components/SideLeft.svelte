@@ -23,53 +23,61 @@
 
     function getTags() {
         tags()
-            .then(async (respone) => {
-                let re = await respone.json();
+            .then((respone) => {
+                let re = respone;
+                console.log(re);
                 let tempTags = re.body;
                 $countStrore.tagCount = tempTags.length;
                 $tagStrore.allTags = tempTags;
 
-                // pinTags.forEach((item) => {
-                //     let index = tempTags.indexOf(item.tag);
-                //     if (index != -1) {
-                //         tempTags.splice(index, 1);
-                //     }
-                // });
-                // allTags = tempTags;
-                allTags = filterTag(tempTags);
+                allTags = filterTagtree(tempTags);
             })
             .catch((reason) => {
                 console.log(reason);
             });
     }
-    function filterTag(allTags) {
-        allTags = allTags.sort((a, b) => {
-            return a.length - b.length;
-        });
-        var filterSet = new Set();
-        let end = allTags.length - 1;
-        for (let index = 0; index < end; index++) {
-            let element = allTags[index];
-            var leftTags = allTags.slice(index + 1);
-            // console.log("leftTags", element, leftTags);
-            let lIndex = 0;
-            var left = "";
-            for (; lIndex < leftTags.length; lIndex++) {
-                left = leftTags[lIndex];
-                if (left.indexOf(element + "/") == 0) {
-                    element = left;
-                }
-            }
-            filterSet.add(element);
-        }
+    function filterTagtree(allTags) {
+        let splitAllTags = [];
 
-        return Array.from(filterSet);
+        allTags.forEach((element) => {
+            splitAllTags = [...splitAllTags, element];
+        });
+
+        console.log(splitAllTags);
+        var tagP = [];
+        for (var tagIndex in splitAllTags) {
+            var tagSplit = splitAllTags[tagIndex].split("/");
+            var subtag = "";
+            for (var i in tagSplit) {
+                var simpletag = tagSplit[i];
+                var s = subtag ? subtag + "/" + simpletag : simpletag;
+                tagP[s] = {
+                    showTag: simpletag,
+                    tag: s,
+                    parentTag: subtag,
+                    children: [],
+                };
+                subtag = s;
+            }
+        }
+        console.log("tagP", tagP);
+
+        var subtag;
+        var c = [];
+        for (var index in tagP)
+            (subtag = tagP[index]).parentTag
+                ? tagP[subtag.parentTag].children.push(subtag)
+                : c.push(subtag);
+        console.log("pMap", c);
+
+        return c;
     }
 
     function getPins() {
         pins()
-            .then(async (respone) => {
-                let re = await respone.json();
+            .then((respone) => {
+                console.log(respone);
+                let re = respone;
                 pinTags = re.body;
                 getTags();
             })
@@ -91,8 +99,9 @@
         }
 
         pin({ tag: tag })
-            .then(async (respone) => {
-                let re = await respone.json();
+            .then((respone) => {
+                let re = respone;
+                console.log(re);
             })
             .catch((reason) => {
                 console.log(reason);
@@ -100,8 +109,8 @@
     }
     function countcount(params) {
         count()
-            .then(async (respone) => {
-                let re = await respone.json();
+            .then((respone) => {
+                let re = respone;
                 $countStrore.nenoCount = re.body.count;
                 delete re.body.countDate._id;
 
@@ -121,7 +130,7 @@
     }
     function renameName(detail) {
         rename({ oldTag: detail.oldTag, newTag: detail.newTag })
-            .then(async (respone) => {
+            .then((respone) => {
                 getPins();
             })
             .catch((reason) => {
@@ -134,13 +143,12 @@
     <div
         class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold"
     >
-        <div class="flex  items-center justify-between">
-            NENONEN
-            <div
-                class="text-sm rounded-sm bg-red-300 text-white p-1 pt-0 pb-0 "
+        <div class="flex  items-center justify-between space-x-2">
+            <div>NENO</div>
+
+            <a href="https://github.com/Mran/neno" target="_blank">
+                <i class="ri-github-fill ri-xl" /></a
             >
-                FREE
-            </div>
         </div>
         <button
             class="focus:outline-none"
@@ -239,7 +247,7 @@
 
         {#each allTags as tag}
             <TagExpand
-                {tag}
+                {...tag}
                 selectionTag={$searchNenoByTag.tag}
                 on:selectTag={(event) => {
                     $searchNenoByTag.tag = event.detail;

@@ -1,11 +1,12 @@
 <script>
     import { createEventDispatcher, onMount } from "svelte";
+    import App from "../App.svelte";
     export let tag = "";
     export let selectionTag = "";
     export let parentTag = "";
+    export let showTag = "";
 
-    let showTag = "";
-    let subTag = "";
+    export let children = [];
     let showSub = false;
     let selfTag = "";
 
@@ -13,13 +14,14 @@
 
     const dispatch = createEventDispatcher();
     $: {
-        let index = tag.indexOf("/");
-        if (index == -1) {
-            showTag = tag;
-        } else {
-            showTag = tag.substring(0, index);
-            subTag = tag.substring(index + 1);
-        }
+        console.log(
+            tag,
+            showTag,
+            parentTag,
+            children,
+            showTag.indexOf("#"),
+            showTag.indexOf("#") == 0 ? showTag.substring(1) : showTag
+        );
     }
 </script>
 
@@ -29,7 +31,7 @@
         class:bg-green-500={selectionTag == tag}
         class:text-white={selectionTag == tag}
         on:click={() => {
-            dispatch("selectTag", parentTag + showTag);
+            dispatch("selectTag", tag);
         }}
     >
         <div class="flex">
@@ -43,7 +45,7 @@
                 class="focus:outline-none group-hover:opacity-100 opacity-0   pr-1"
                 on:click|stopPropagation={() => {
                     isChangeTaging = !isChangeTaging;
-                    selfTag = (parentTag + showTag).substring(1);
+                    selfTag = tag.substring(1);
                 }}
             >
                 <i class="ri-edit-fill" />
@@ -51,13 +53,13 @@
             <button
                 class="focus:outline-none group-hover:opacity-100 opacity-0   pr-1"
                 on:click|stopPropagation={() => {
-                    dispatch("pinTag", parentTag + showTag);
+                    dispatch("pinTag", tag);
                 }}
             >
                 <i class="ri-pushpin-fill" />
             </button>
 
-            {#if subTag.length != 0}
+            {#if children.length != 0}
                 <button
                     class="focus:outline-none group-hover:opacity-100 opacity-0  pr-1"
                     on:click|stopPropagation={() => {
@@ -97,11 +99,11 @@
                     class="w-5/12 bg-green-500 rounded-sm text-white"
                     on:click|stopPropagation={() => {
                         dispatch("renameTag", {
-                            oldTag: parentTag + showTag,
+                            oldTag: tag,
                             newTag: "#" + selfTag,
                         });
                         console.log("确定renameTag", {
-                            oldTag: parentTag + showTag,
+                            oldTag: tag,
                             newTag: "#" + selfTag,
                         });
 
@@ -111,26 +113,27 @@
             </div>
         </div>
     {/if}
-    {#if subTag.length != 0 && showSub}
-        <div class="ml-2">
-            <svelte:self
-                on:selectTag={(event) => {
-                    console.log("selectTag", event.detail);
+    {#if children.length != 0 && showSub}
+        {#each children as item}
+            <div class="ml-2">
+                <svelte:self
+                    on:selectTag={(event) => {
+                        console.log("selectTag", event.detail);
 
-                    dispatch("selectTag", event.detail);
-                }}
-                on:pinTag={(event) => {
-                    console.log("pinTag", event.detail);
-                    dispatch("pinTag", event.detail);
-                }}
-                on:renameTag={(event) => {
-                    console.log("renameTag", event.detail);
-                    dispatch("renameTag", event.detail);
-                }}
-                tag={subTag}
-                {selectionTag}
-                parentTag={parentTag + showTag + "/"}
-            />
-        </div>
+                        dispatch("selectTag", event.detail);
+                    }}
+                    on:pinTag={(event) => {
+                        console.log("pinTag", event.detail);
+                        dispatch("pinTag", event.detail);
+                    }}
+                    on:renameTag={(event) => {
+                        console.log("renameTag", event.detail);
+                        dispatch("renameTag", event.detail);
+                    }}
+                    {...item}
+                    {selectionTag}
+                />
+            </div>
+        {/each}
     {/if}
 </div>

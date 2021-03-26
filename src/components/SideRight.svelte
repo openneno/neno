@@ -56,14 +56,9 @@
         isLoding = true;
         isLodingError = false;
         getAllFmolo({ page: page })
-            .then(function (response) {
-                if (response.ok) {
-                    return response;
-                }
-                throw new Error("Network response was not ok.");
-            })
-            .then(async (respone) => {
-                let re = await respone.json();
+            
+            .then( (respone) => {
+                let re = respone;
                 if (re.body.length == 0) {
                     isEnd = true;
                 }

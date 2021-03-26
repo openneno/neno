@@ -1,47 +1,64 @@
 <script>
     import { onMount } from "svelte";
 
-    import { setting } from "../request/fetchApi";
+    import { exportIndexedDB, importIndexedDB } from "../request/fetchApi";
     import { settingStrore } from "../store/store.js";
     import { pagedd } from "../store/store.js";
 
     let platform = $settingStrore.platform;
     let imgDomain = $settingStrore.imgDomain;
     let domain = $settingStrore.domain;
+    let model = $settingStrore.offlineModel;
+
     let done = "";
+    let importFile = "";
+    let uploadNode = "";
 
     onMount(() => {
-        setting()
-            .then(async (respone) => {
-                let re = await respone.json();
-                if (Object.keys(re.body).length == 0) {
-                    console.log($settingStrore);
-                    setting($settingStrore).then(async (respone) => {});
-                } else {
-                    $settingStrore = re.body;
-                }
-            })
-            .catch((reason) => {
-                console.log(reason);
-            });
+        console.log(model);
     });
+    $: {
+        console.log(importFile);
+        // await importIndexedDB();
+        if (importFile != "") {
+            let reader = new FileReader();
+            reader.readAsText(importFile[0]);
+            reader.onload = async (oFREvent) => {
+                // 读取完毕从中取值
+                let pointsTxt = oFREvent.target.result;
+                let alldata = JSON.parse(pointsTxt);
+                console.log(alldata);
+                await importIndexedDB(alldata.body);
+                // window.location.reload();
+            };
+        }
+    }
     function saveSetting() {
         $settingStrore.imgDomain = imgDomain;
         $settingStrore.platform = platform;
         $settingStrore.domain = domain;
-
-        window.localStorage.setItem("domain", domain);
+        $settingStrore.offlineModel = model;
+        console.log($settingStrore);
+        window.localStorage.setItem(
+            "settingStrore",
+            JSON.stringify($settingStrore)
+        );
         window.location.reload();
-        setting($settingStrore)
-            .then(async (respone) => {
-                done = "成功";
-                setTimeout(() => {
-                    done = "";
-                }, 1500);
-            })
-            .catch((reason) => {
-                console.log(reason);
-            });
+    }
+    async function exportData() {
+        let alldata = await exportIndexedDB();
+        let stringAllData = JSON.stringify(alldata);
+        console.log(stringAllData);
+        var blob = new Blob([stringAllData], { type: "application/json" });
+        var objectURL = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objectURL;
+        link.download = "nenodata.txt";
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+    }
+    async function importNeno(params) {
+        uploadNode.click();
     }
 </script>
 
@@ -57,14 +74,43 @@
         </button>设置
     </div>
     <div class="m-4">
-        <label for="">API域名</label>
-        <input
-            type="text"
-            bind:value={domain}
-            class="w-full border-2  mt-4 outline-white p-2"
-            placeholder="http://api.neno.topmini.top"
-        />
+        <label for="">离线模式</label>
+        <div class="flex items-center space-x-4 p-2 mt-4">
+            <input
+                type="checkbox"
+                bind:checked={model}
+                placeholder="使用离线模式"
+            />
+            <div>使用离线模式</div>
+        </div>
     </div>
+
+    <div class="m-4">
+        <label for="">导入/导出离线数据</label>
+        <div class="flex items-center space-x-4">
+            <button
+                class="w-full border-2  mt-4 outline-white p-2"
+                on:click={() => {
+                    importNeno();
+                }}>导入</button
+            >
+            <input
+                type="file"
+                bind:this={uploadNode}
+                bind:files={importFile}
+                style="display:none"
+                accept=".txt"
+                class="w-full border-2  mt-4 outline-white p-2"
+            />
+            <button
+                class="w-full border-2  mt-4 outline-white p-2"
+                on:click={() => {
+                    exportData();
+                }}>导出</button
+            >
+        </div>
+    </div>
+
     <div class="m-4 flex flex-col">
         <label for="">图库平台</label>
         <select class="p-2 mt-4" bind:value={platform}>

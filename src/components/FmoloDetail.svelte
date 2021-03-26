@@ -35,8 +35,8 @@
     function getDetail(_id) {
         isLoding = true;
         detail({ _id: _id })
-            .then(async (respone) => {
-                let re = await respone.json();
+            .then((respone) => {
+                let re = respone;
                 fmoloDetail = re.body;
 
                 console.log(fmoloDetail);
