@@ -20,7 +20,7 @@
     sleep(1000).then((value) => {});
   }
 
-  function sleep(ms) {\
+  function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
