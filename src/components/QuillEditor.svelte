@@ -183,7 +183,7 @@
             if (element.uploadingstatus == "未上传") {
                 element.uploadingstatus = "上传中";
                 // uploadPic(element, index);
-                if ($settingStrore.offlineModel) {
+                if ($settingStrore.useMode=="离线模式") {
                     uploadPicLocal(element, index);
                 } else {
                     qiniuToken()
@@ -355,6 +355,7 @@
 
         addFmolo({
             content: sContent,
+            pureContent:editor.childNodes[0].innerText,
             _id: _id,
             parentId: parentId,
             source: "web",

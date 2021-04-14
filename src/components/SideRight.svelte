@@ -56,8 +56,7 @@
         isLoding = true;
         isLodingError = false;
         getAllFmolo({ page: page })
-            
-            .then( (respone) => {
+            .then((respone) => {
                 let re = respone;
                 if (re.body.length == 0) {
                     isEnd = true;
@@ -85,20 +84,12 @@
                 created_at: searchDate,
                 tag: searchTag,
             })
-                .then(function (response) {
-                    if (response.ok) {
-                        return response;
-                    }
-                    throw new Error("Network response was not ok.");
-                })
                 .then(async (respone) => {
-                    let re = await respone.json();
+                    let re = respone;
                     isLoding = false;
                     searchItems = re.body;
-                    // re.body.forEach((element) => {
-                    //     searchItems = [...searchItems, element];
-                    // });
                 })
+
                 .catch((reason) => {
                     console.log("reason", reason);
                     isLoding = false;
@@ -111,6 +102,11 @@
 
 <svelte:window bind:innerHeight />
 <div class="  flex-1 flex flex-col justify-start  pt-4  w-0">
+    <img
+        src="https://raw.githubusercontent.com/Mran/Logseq/master/Logseq.png"
+        class="w-64 hidden"
+        alt=""
+    />
     <div class="  flex flex-row items-center justify-between ">
         <div class="flex flex-row items-center pl-4 ">
             {#if changeTag == ""}
