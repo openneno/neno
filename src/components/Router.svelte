@@ -61,17 +61,8 @@
           refresToken: $githubStrore.refresh_token,
         }).then((respone) => {
           console.log(respone);
-          if (respone.access_token) {
-            $githubStrore.githubName = respone.githubName;
-            $githubStrore.access_token = respone.access_token;
-            $githubStrore.refresh_token = respone.refresh_token;
-            $githubStrore.refresh_token_expires_in =
-              respone.refresh_token_expires_in;
-            window.localStorage.setItem(
-              "githubStrore",
-              JSON.stringify($githubStrore)
-            );
-            if (respone.nenoinkId == "") {
+          if (respone.body.access_token) {
+            if (respone.body.nenoinkId == "") {
               window.location.replace(
                 "https://github.com/apps/nenoink/installations/new"
               );
@@ -79,9 +70,9 @@
             }
           } else {
             //重新授权
-            window.location.replace(
-              "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
-            );
+            // window.location.replace(
+            //   "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
+            // );
           }
         });
       }

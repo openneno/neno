@@ -289,6 +289,12 @@ export const deleteOne = async (data) => {
 
     }
 }
+export const deleteOneFromIndexedDB = async (data) => {
+    (await db).delete('nenoitem', data._id);
+    return new Promise(async (resolve, rej) => {
+        return resolve({ body: {}, code: 200 })
+    })
+}
 export const tags = async (data) => {
 
     if (useMode == "github") {

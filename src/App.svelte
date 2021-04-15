@@ -6,17 +6,26 @@
     pagedd,
     githubStrore,
     pushToGithubTag,
+    searchNenoByDate,
   } from "./store/store.js";
   import { onMount } from "svelte";
   import {
     pushToGithub,
     getContentSha,
     cloneGithubRepo,
+    compare2Commits,
+    getLastCommitRecord,
+    getGithubContent,
   } from "./request/githubApi";
+  import {
+    insertToIndexedDB,
+    deleteOneFromIndexedDB,
+  } from "./request/fetchApi";
+  import { is_empty } from "svelte/internal";
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/service-worker.js");
-  }
+  // if ("serviceWorker" in navigator) {
+  //   navigator.serviceWorker.register("/service-worker.js");
+  // }
   onMount(() => {
     let setting = window.localStorage.getItem("settingStrore");
     let github = window.localStorage.getItem("githubStrore");
@@ -27,15 +36,63 @@
       $settingStrore = JSON.parse(setting);
     }
     github && ($githubStrore = JSON.parse(github));
+    //打开的时候进行同步
+    trySyncGithub();
   });
+  githubStrore.subscribe((value) => {
+    if (value.access_token) {
+      window.localStorage.setItem(
+        "githubStrore",
+        JSON.stringify($githubStrore)
+      );
+    }
+  });
+  async function trySyncGithub() {
+    if ($githubStrore.access_token != "" && $githubStrore.repoName != "") {
+      // 先检查老数据,第一次就获取所有的数据
 
+      if ($githubStrore.lastCommitSha == "") {
+        await cloneGithubRepo("");
+        $searchNenoByDate.date = "refresh";
+      }
+      {
+        var lastCommitData = await getLastCommitRecord();
+        if (
+          $githubStrore.lastCommitSha != "" &&
+          lastCommitData.body.commit.sha != $githubStrore.lastCommitSha
+        ) {
+          var comparResult = await compare2Commits({
+            base: $githubStrore.lastCommitSha,
+            head: lastCommitData.body.commit.sha,
+          });
+          var fileChange = comparResult.body.files;
+          for (let index = 0; index < fileChange.length; index++) {
+            const element = fileChange[index];
+            if (element.filename.indexOf(".json") == 35) {
+              if (element.status != "removed") {
+                var nenoBodyRaw = (
+                  await getGithubContent({ path: encodeURI(element.filename) })
+                ).body;
+                var nenoData = {};
+                try {
+                  nenoData = JSON.parse(nenoBodyRaw);
+                } catch (error) {}
+                if (!is_empty(nenoData)) insertToIndexedDB(nenoData);
+              }else{
+               await deleteOneFromIndexedDB({_id:element.filename.substring(11,35)})
+              }
+            }
+          }
+          $searchNenoByDate.date = "refresh";
+        }
+        $githubStrore.lastCommitSha = lastCommitData.body.commit.sha;
+      }
+    }
+  }
   pushToGithubTag.subscribe(async (value) => {
     if (value.timestmp != 0 && $githubStrore.access_token != "") {
       console.log(JSON.stringify(value.data));
-      // 先检查老数据,第一次就获取所有的数据
-      if ($githubStrore.lastCommitSha == "") {
-        await cloneGithubRepo("");
-      }
+
       await getContentSha({
         branch: $githubStrore.branch,
         fileName: `${value.data.created_at.substring(0, 10)}/${
@@ -55,10 +112,6 @@
         console.log("pushToGithubTagdata", data);
 
         $githubStrore.lastCommitSha = data.body.commit.sha;
-        window.localStorage.setItem(
-          "githubStrore",
-          JSON.stringify($githubStrore)
-        );
       });
     }
   });

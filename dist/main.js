@@ -49,6 +49,11 @@
         const unsub = store.subscribe(...callbacks);
         return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
     }
+    function get_store_value(store) {
+        let value;
+        subscribe(store, _ => value = _)();
+        return value;
+    }
     function component_subscribe(component, store, callback) {
         component.$$.on_destroy.push(subscribe(store, callback));
     }
@@ -1766,6 +1771,12 @@
             return await (await fetch(`${baseurl}/delete`, genergeParams(data))).json()
 
         }
+    };
+    const deleteOneFromIndexedDB = async (data) => {
+        (await db).delete('nenoitem', data._id);
+        return new Promise(async (resolve, rej) => {
+            return resolve({ body: {}, code: 200 })
+        })
     };
     const tags = async (data) => {
 
@@ -33331,6 +33342,684 @@
     	}
     }
 
+    // shim for using process in browser
+    // based off https://github.com/defunctzombie/node-process/blob/master/browser.js
+
+    function defaultSetTimout() {
+        throw new Error('setTimeout has not been defined');
+    }
+    function defaultClearTimeout () {
+        throw new Error('clearTimeout has not been defined');
+    }
+    var cachedSetTimeout = defaultSetTimout;
+    var cachedClearTimeout = defaultClearTimeout;
+    if (typeof global$1.setTimeout === 'function') {
+        cachedSetTimeout = setTimeout;
+    }
+    if (typeof global$1.clearTimeout === 'function') {
+        cachedClearTimeout = clearTimeout;
+    }
+
+    function runTimeout(fun) {
+        if (cachedSetTimeout === setTimeout) {
+            //normal enviroments in sane situations
+            return setTimeout(fun, 0);
+        }
+        // if setTimeout wasn't available but was latter defined
+        if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+            cachedSetTimeout = setTimeout;
+            return setTimeout(fun, 0);
+        }
+        try {
+            // when when somebody has screwed with setTimeout but no I.E. maddness
+            return cachedSetTimeout(fun, 0);
+        } catch(e){
+            try {
+                // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+                return cachedSetTimeout.call(null, fun, 0);
+            } catch(e){
+                // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+                return cachedSetTimeout.call(this, fun, 0);
+            }
+        }
+
+
+    }
+    function runClearTimeout(marker) {
+        if (cachedClearTimeout === clearTimeout) {
+            //normal enviroments in sane situations
+            return clearTimeout(marker);
+        }
+        // if clearTimeout wasn't available but was latter defined
+        if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+            cachedClearTimeout = clearTimeout;
+            return clearTimeout(marker);
+        }
+        try {
+            // when when somebody has screwed with setTimeout but no I.E. maddness
+            return cachedClearTimeout(marker);
+        } catch (e){
+            try {
+                // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+                return cachedClearTimeout.call(null, marker);
+            } catch (e){
+                // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+                // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+                return cachedClearTimeout.call(this, marker);
+            }
+        }
+
+
+
+    }
+    var queue = [];
+    var draining = false;
+    var currentQueue;
+    var queueIndex = -1;
+
+    function cleanUpNextTick() {
+        if (!draining || !currentQueue) {
+            return;
+        }
+        draining = false;
+        if (currentQueue.length) {
+            queue = currentQueue.concat(queue);
+        } else {
+            queueIndex = -1;
+        }
+        if (queue.length) {
+            drainQueue();
+        }
+    }
+
+    function drainQueue() {
+        if (draining) {
+            return;
+        }
+        var timeout = runTimeout(cleanUpNextTick);
+        draining = true;
+
+        var len = queue.length;
+        while(len) {
+            currentQueue = queue;
+            queue = [];
+            while (++queueIndex < len) {
+                if (currentQueue) {
+                    currentQueue[queueIndex].run();
+                }
+            }
+            queueIndex = -1;
+            len = queue.length;
+        }
+        currentQueue = null;
+        draining = false;
+        runClearTimeout(timeout);
+    }
+    function nextTick(fun) {
+        var args = new Array(arguments.length - 1);
+        if (arguments.length > 1) {
+            for (var i = 1; i < arguments.length; i++) {
+                args[i - 1] = arguments[i];
+            }
+        }
+        queue.push(new Item(fun, args));
+        if (queue.length === 1 && !draining) {
+            runTimeout(drainQueue);
+        }
+    }
+    // v8 likes predictible objects
+    function Item(fun, array) {
+        this.fun = fun;
+        this.array = array;
+    }
+    Item.prototype.run = function () {
+        this.fun.apply(null, this.array);
+    };
+    var title = 'browser';
+    var platform = 'browser';
+    var browser = true;
+    var env = {};
+    var argv = [];
+    var version = ''; // empty string to avoid regexp issues
+    var versions = {};
+    var release = {};
+    var config = {};
+
+    function noop$1() {}
+
+    var on = noop$1;
+    var addListener = noop$1;
+    var once = noop$1;
+    var off = noop$1;
+    var removeListener = noop$1;
+    var removeAllListeners = noop$1;
+    var emit = noop$1;
+
+    function binding(name) {
+        throw new Error('process.binding is not supported');
+    }
+
+    function cwd () { return '/' }
+    function chdir (dir) {
+        throw new Error('process.chdir is not supported');
+    }function umask() { return 0; }
+
+    // from https://github.com/kumavis/browser-process-hrtime/blob/master/index.js
+    var performance = global$1.performance || {};
+    var performanceNow =
+      performance.now        ||
+      performance.mozNow     ||
+      performance.msNow      ||
+      performance.oNow       ||
+      performance.webkitNow  ||
+      function(){ return (new Date()).getTime() };
+
+    // generate timestamp or delta
+    // see http://nodejs.org/api/process.html#process_process_hrtime
+    function hrtime(previousTimestamp){
+      var clocktime = performanceNow.call(performance)*1e-3;
+      var seconds = Math.floor(clocktime);
+      var nanoseconds = Math.floor((clocktime%1)*1e9);
+      if (previousTimestamp) {
+        seconds = seconds - previousTimestamp[0];
+        nanoseconds = nanoseconds - previousTimestamp[1];
+        if (nanoseconds<0) {
+          seconds--;
+          nanoseconds += 1e9;
+        }
+      }
+      return [seconds,nanoseconds]
+    }
+
+    var startTime = new Date();
+    function uptime() {
+      var currentTime = new Date();
+      var dif = currentTime - startTime;
+      return dif / 1000;
+    }
+
+    var process = {
+      nextTick: nextTick,
+      title: title,
+      browser: browser,
+      env: env,
+      argv: argv,
+      version: version,
+      versions: versions,
+      on: on,
+      addListener: addListener,
+      once: once,
+      off: off,
+      removeListener: removeListener,
+      removeAllListeners: removeAllListeners,
+      emit: emit,
+      binding: binding,
+      cwd: cwd,
+      chdir: chdir,
+      umask: umask,
+      hrtime: hrtime,
+      platform: platform,
+      release: release,
+      config: config,
+      uptime: uptime
+    };
+
+    var formatRegExp = /%[sdj%]/g;
+    function format(f) {
+      if (!isString(f)) {
+        var objects = [];
+        for (var i = 0; i < arguments.length; i++) {
+          objects.push(inspect(arguments[i]));
+        }
+        return objects.join(' ');
+      }
+
+      var i = 1;
+      var args = arguments;
+      var len = args.length;
+      var str = String(f).replace(formatRegExp, function(x) {
+        if (x === '%%') return '%';
+        if (i >= len) return x;
+        switch (x) {
+          case '%s': return String(args[i++]);
+          case '%d': return Number(args[i++]);
+          case '%j':
+            try {
+              return JSON.stringify(args[i++]);
+            } catch (_) {
+              return '[Circular]';
+            }
+          default:
+            return x;
+        }
+      });
+      for (var x = args[i]; i < len; x = args[++i]) {
+        if (isNull(x) || !isObject(x)) {
+          str += ' ' + x;
+        } else {
+          str += ' ' + inspect(x);
+        }
+      }
+      return str;
+    }
+
+    /**
+     * Echos the value of a value. Trys to print the value out
+     * in the best way possible given the different types.
+     *
+     * @param {Object} obj The object to print out.
+     * @param {Object} opts Optional options object that alters the output.
+     */
+    /* legacy: obj, showHidden, depth, colors*/
+    function inspect(obj, opts) {
+      // default options
+      var ctx = {
+        seen: [],
+        stylize: stylizeNoColor
+      };
+      // legacy...
+      if (arguments.length >= 3) ctx.depth = arguments[2];
+      if (arguments.length >= 4) ctx.colors = arguments[3];
+      if (isBoolean(opts)) {
+        // legacy...
+        ctx.showHidden = opts;
+      } else if (opts) {
+        // got an "options" object
+        _extend(ctx, opts);
+      }
+      // set default options
+      if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+      if (isUndefined(ctx.depth)) ctx.depth = 2;
+      if (isUndefined(ctx.colors)) ctx.colors = false;
+      if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+      if (ctx.colors) ctx.stylize = stylizeWithColor;
+      return formatValue(ctx, obj, ctx.depth);
+    }
+
+    // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+    inspect.colors = {
+      'bold' : [1, 22],
+      'italic' : [3, 23],
+      'underline' : [4, 24],
+      'inverse' : [7, 27],
+      'white' : [37, 39],
+      'grey' : [90, 39],
+      'black' : [30, 39],
+      'blue' : [34, 39],
+      'cyan' : [36, 39],
+      'green' : [32, 39],
+      'magenta' : [35, 39],
+      'red' : [31, 39],
+      'yellow' : [33, 39]
+    };
+
+    // Don't use 'blue' not visible on cmd.exe
+    inspect.styles = {
+      'special': 'cyan',
+      'number': 'yellow',
+      'boolean': 'yellow',
+      'undefined': 'grey',
+      'null': 'bold',
+      'string': 'green',
+      'date': 'magenta',
+      // "name": intentionally not styling
+      'regexp': 'red'
+    };
+
+
+    function stylizeWithColor(str, styleType) {
+      var style = inspect.styles[styleType];
+
+      if (style) {
+        return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+               '\u001b[' + inspect.colors[style][1] + 'm';
+      } else {
+        return str;
+      }
+    }
+
+
+    function stylizeNoColor(str, styleType) {
+      return str;
+    }
+
+
+    function arrayToHash(array) {
+      var hash = {};
+
+      array.forEach(function(val, idx) {
+        hash[val] = true;
+      });
+
+      return hash;
+    }
+
+
+    function formatValue(ctx, value, recurseTimes) {
+      // Provide a hook for user-specified inspect functions.
+      // Check that value is an object with an inspect function on it
+      if (ctx.customInspect &&
+          value &&
+          isFunction(value.inspect) &&
+          // Filter out the util module, it's inspect function is special
+          value.inspect !== inspect &&
+          // Also filter out any prototype objects using the circular check.
+          !(value.constructor && value.constructor.prototype === value)) {
+        var ret = value.inspect(recurseTimes, ctx);
+        if (!isString(ret)) {
+          ret = formatValue(ctx, ret, recurseTimes);
+        }
+        return ret;
+      }
+
+      // Primitive types cannot have properties
+      var primitive = formatPrimitive(ctx, value);
+      if (primitive) {
+        return primitive;
+      }
+
+      // Look up the keys of the object.
+      var keys = Object.keys(value);
+      var visibleKeys = arrayToHash(keys);
+
+      if (ctx.showHidden) {
+        keys = Object.getOwnPropertyNames(value);
+      }
+
+      // IE doesn't make error fields non-enumerable
+      // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+      if (isError(value)
+          && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+        return formatError(value);
+      }
+
+      // Some type of object without properties can be shortcutted.
+      if (keys.length === 0) {
+        if (isFunction(value)) {
+          var name = value.name ? ': ' + value.name : '';
+          return ctx.stylize('[Function' + name + ']', 'special');
+        }
+        if (isRegExp(value)) {
+          return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+        }
+        if (isDate(value)) {
+          return ctx.stylize(Date.prototype.toString.call(value), 'date');
+        }
+        if (isError(value)) {
+          return formatError(value);
+        }
+      }
+
+      var base = '', array = false, braces = ['{', '}'];
+
+      // Make Array say that they are Array
+      if (isArray$1(value)) {
+        array = true;
+        braces = ['[', ']'];
+      }
+
+      // Make functions say that they are functions
+      if (isFunction(value)) {
+        var n = value.name ? ': ' + value.name : '';
+        base = ' [Function' + n + ']';
+      }
+
+      // Make RegExps say that they are RegExps
+      if (isRegExp(value)) {
+        base = ' ' + RegExp.prototype.toString.call(value);
+      }
+
+      // Make dates with properties first say the date
+      if (isDate(value)) {
+        base = ' ' + Date.prototype.toUTCString.call(value);
+      }
+
+      // Make error with message first say the error
+      if (isError(value)) {
+        base = ' ' + formatError(value);
+      }
+
+      if (keys.length === 0 && (!array || value.length == 0)) {
+        return braces[0] + base + braces[1];
+      }
+
+      if (recurseTimes < 0) {
+        if (isRegExp(value)) {
+          return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+        } else {
+          return ctx.stylize('[Object]', 'special');
+        }
+      }
+
+      ctx.seen.push(value);
+
+      var output;
+      if (array) {
+        output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+      } else {
+        output = keys.map(function(key) {
+          return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+        });
+      }
+
+      ctx.seen.pop();
+
+      return reduceToSingleString(output, base, braces);
+    }
+
+
+    function formatPrimitive(ctx, value) {
+      if (isUndefined(value))
+        return ctx.stylize('undefined', 'undefined');
+      if (isString(value)) {
+        var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                                 .replace(/'/g, "\\'")
+                                                 .replace(/\\"/g, '"') + '\'';
+        return ctx.stylize(simple, 'string');
+      }
+      if (isNumber(value))
+        return ctx.stylize('' + value, 'number');
+      if (isBoolean(value))
+        return ctx.stylize('' + value, 'boolean');
+      // For some reason typeof null is "object", so special case here.
+      if (isNull(value))
+        return ctx.stylize('null', 'null');
+    }
+
+
+    function formatError(value) {
+      return '[' + Error.prototype.toString.call(value) + ']';
+    }
+
+
+    function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+      var output = [];
+      for (var i = 0, l = value.length; i < l; ++i) {
+        if (hasOwnProperty(value, String(i))) {
+          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+              String(i), true));
+        } else {
+          output.push('');
+        }
+      }
+      keys.forEach(function(key) {
+        if (!key.match(/^\d+$/)) {
+          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+              key, true));
+        }
+      });
+      return output;
+    }
+
+
+    function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+      var name, str, desc;
+      desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+      if (desc.get) {
+        if (desc.set) {
+          str = ctx.stylize('[Getter/Setter]', 'special');
+        } else {
+          str = ctx.stylize('[Getter]', 'special');
+        }
+      } else {
+        if (desc.set) {
+          str = ctx.stylize('[Setter]', 'special');
+        }
+      }
+      if (!hasOwnProperty(visibleKeys, key)) {
+        name = '[' + key + ']';
+      }
+      if (!str) {
+        if (ctx.seen.indexOf(desc.value) < 0) {
+          if (isNull(recurseTimes)) {
+            str = formatValue(ctx, desc.value, null);
+          } else {
+            str = formatValue(ctx, desc.value, recurseTimes - 1);
+          }
+          if (str.indexOf('\n') > -1) {
+            if (array) {
+              str = str.split('\n').map(function(line) {
+                return '  ' + line;
+              }).join('\n').substr(2);
+            } else {
+              str = '\n' + str.split('\n').map(function(line) {
+                return '   ' + line;
+              }).join('\n');
+            }
+          }
+        } else {
+          str = ctx.stylize('[Circular]', 'special');
+        }
+      }
+      if (isUndefined(name)) {
+        if (array && key.match(/^\d+$/)) {
+          return str;
+        }
+        name = JSON.stringify('' + key);
+        if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+          name = name.substr(1, name.length - 2);
+          name = ctx.stylize(name, 'name');
+        } else {
+          name = name.replace(/'/g, "\\'")
+                     .replace(/\\"/g, '"')
+                     .replace(/(^"|"$)/g, "'");
+          name = ctx.stylize(name, 'string');
+        }
+      }
+
+      return name + ': ' + str;
+    }
+
+
+    function reduceToSingleString(output, base, braces) {
+      var length = output.reduce(function(prev, cur) {
+        if (cur.indexOf('\n') >= 0) ;
+        return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+      }, 0);
+
+      if (length > 60) {
+        return braces[0] +
+               (base === '' ? '' : base + '\n ') +
+               ' ' +
+               output.join(',\n  ') +
+               ' ' +
+               braces[1];
+      }
+
+      return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+    }
+
+
+    // NOTE: These type checking functions intentionally don't use `instanceof`
+    // because it is fragile and can be easily faked with `Object.create()`.
+    function isArray$1(ar) {
+      return Array.isArray(ar);
+    }
+
+    function isBoolean(arg) {
+      return typeof arg === 'boolean';
+    }
+
+    function isNull(arg) {
+      return arg === null;
+    }
+
+    function isNumber(arg) {
+      return typeof arg === 'number';
+    }
+
+    function isString(arg) {
+      return typeof arg === 'string';
+    }
+
+    function isUndefined(arg) {
+      return arg === void 0;
+    }
+
+    function isRegExp(re) {
+      return isObject(re) && objectToString(re) === '[object RegExp]';
+    }
+
+    function isObject(arg) {
+      return typeof arg === 'object' && arg !== null;
+    }
+
+    function isDate(d) {
+      return isObject(d) && objectToString(d) === '[object Date]';
+    }
+
+    function isError(e) {
+      return isObject(e) &&
+          (objectToString(e) === '[object Error]' || e instanceof Error);
+    }
+
+    function isFunction(arg) {
+      return typeof arg === 'function';
+    }
+
+    function objectToString(o) {
+      return Object.prototype.toString.call(o);
+    }
+
+
+    function pad(n) {
+      return n < 10 ? '0' + n.toString(10) : n.toString(10);
+    }
+
+
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+                  'Oct', 'Nov', 'Dec'];
+
+    // 26 Feb 16:19:34
+    function timestamp() {
+      var d = new Date();
+      var time = [pad(d.getHours()),
+                  pad(d.getMinutes()),
+                  pad(d.getSeconds())].join(':');
+      return [d.getDate(), months[d.getMonth()], time].join(' ');
+    }
+
+
+    // log is just a thin wrapper to console.log that prepends a timestamp
+    function log() {
+      console.log('%s - %s', timestamp(), format.apply(null, arguments));
+    }
+
+    function _extend(origin, add) {
+      // Don't do anything if add isn't an object
+      if (!add || !isObject(add)) return origin;
+
+      var keys = Object.keys(add);
+      var i = keys.length;
+      while (i--) {
+        origin[keys[i]] = add[keys[i]];
+      }
+      return origin;
+    }
+    function hasOwnProperty(obj, prop) {
+      return Object.prototype.hasOwnProperty.call(obj, prop);
+    }
+
     /* src\components\SideRight.svelte generated by Svelte v3.32.3 */
 
     const { console: console_1$8 } = globals;
@@ -33348,7 +34037,7 @@
     	return child_ctx;
     }
 
-    // (114:12) {:else}
+    // (129:12) {:else}
     function create_else_block_1(ctx) {
     	let div2;
     	let div0;
@@ -33369,23 +34058,23 @@
     			i0 = element("i");
     			t0 = space();
     			div1 = element("div");
-    			t1 = text(/*changeTag*/ ctx[6]);
+    			t1 = text(/*changeTag*/ ctx[7]);
     			t2 = space();
     			button = element("button");
     			i1 = element("i");
     			attr_dev(i0, "class", "ri-hashtag");
-    			add_location(i0, file$a, 117, 43, 3836);
+    			add_location(i0, file$a, 132, 43, 4249);
     			attr_dev(div0, "class", "mr-1 pt-1");
-    			add_location(div0, file$a, 117, 20, 3813);
+    			add_location(div0, file$a, 132, 20, 4226);
     			attr_dev(div1, "class", "font-bold w-auto mr-2");
     			attr_dev(div1, "type", "text");
-    			add_location(div1, file$a, 118, 20, 3888);
+    			add_location(div1, file$a, 133, 20, 4301);
     			attr_dev(i1, "class", "ri-close-circle-fill text-gray-400");
-    			add_location(i1, file$a, 122, 24, 4084);
+    			add_location(i1, file$a, 137, 24, 4497);
     			attr_dev(button, "class", "focus:outline-none ");
-    			add_location(button, file$a, 121, 20, 4022);
+    			add_location(button, file$a, 136, 20, 4435);
     			attr_dev(div2, "class", "flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1");
-    			add_location(div2, file$a, 114, 16, 3652);
+    			add_location(div2, file$a, 129, 16, 4065);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -33404,7 +34093,7 @@
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*changeTag*/ 64) set_data_dev(t1, /*changeTag*/ ctx[6]);
+    			if (dirty & /*changeTag*/ 128) set_data_dev(t1, /*changeTag*/ ctx[7]);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div2);
@@ -33417,14 +34106,14 @@
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(114:12) {:else}",
+    		source: "(129:12) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (112:12) {#if changeTag == ""}
+    // (127:12) {#if changeTag == ""}
     function create_if_block_4$1(ctx) {
     	let t;
 
@@ -33445,14 +34134,14 @@
     		block,
     		id: create_if_block_4$1.name,
     		type: "if",
-    		source: "(112:12) {#if changeTag == \\\"\\\"}",
+    		source: "(127:12) {#if changeTag == \\\"\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (132:12) {#if changeTag == ""}
+    // (147:12) {#if changeTag == ""}
     function create_if_block_3$2(ctx) {
     	let button;
     	let i;
@@ -33464,9 +34153,9 @@
     			button = element("button");
     			i = element("i");
     			attr_dev(i, "class", "ri-function-fill");
-    			add_location(i, file$a, 138, 20, 4690);
+    			add_location(i, file$a, 153, 20, 5103);
     			attr_dev(button, "class", "focus:outline-none text-gray-600   sm:hidden md:hidden ml-2");
-    			add_location(button, file$a, 132, 16, 4452);
+    			add_location(button, file$a, 147, 16, 4865);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -33489,14 +34178,14 @@
     		block,
     		id: create_if_block_3$2.name,
     		type: "if",
-    		source: "(132:12) {#if changeTag == \\\"\\\"}",
+    		source: "(147:12) {#if changeTag == \\\"\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (174:4) {#if isLoding}
+    // (189:4) {#if isLoding}
     function create_if_block_2$4(ctx) {
     	let div;
     	let progressline;
@@ -33509,7 +34198,7 @@
     			div = element("div");
     			create_component(progressline.$$.fragment);
     			attr_dev(div, "class", "w-full ");
-    			add_location(div, file$a, 174, 8, 5779);
+    			add_location(div, file$a, 189, 8, 6192);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -33544,14 +34233,14 @@
     		block,
     		id: create_if_block_2$4.name,
     		type: "if",
-    		source: "(174:4) {#if isLoding}",
+    		source: "(189:4) {#if isLoding}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (179:4) {#if isLodingError}
+    // (194:4) {#if isLodingError}
     function create_if_block_1$6(ctx) {
     	let div;
     	let button;
@@ -33564,9 +34253,9 @@
     			button = element("button");
     			button.textContent = "重新获取";
     			attr_dev(button, "class", " w-full rounded focus:outline-none m-aut bg-red-400  text-white  p-2  ");
-    			add_location(button, file$a, 180, 12, 5980);
+    			add_location(button, file$a, 195, 12, 6393);
     			attr_dev(div, "class", "w-full pl-4 pr-4");
-    			add_location(div, file$a, 179, 8, 5936);
+    			add_location(div, file$a, 194, 8, 6349);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -33589,14 +34278,14 @@
     		block,
     		id: create_if_block_1$6.name,
     		type: "if",
-    		source: "(179:4) {#if isLodingError}",
+    		source: "(194:4) {#if isLodingError}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (205:8) {:else}
+    // (220:8) {:else}
     function create_else_block$3(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -33630,7 +34319,7 @@
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*searchItems, searchText, nenoItems*/ 416) {
+    			if (dirty & /*searchItems, searchText, nenoItems*/ 322) {
     				each_value_1 = /*searchItems*/ ctx[8];
     				validate_each_argument(each_value_1);
     				group_outros();
@@ -33668,20 +34357,20 @@
     		block,
     		id: create_else_block$3.name,
     		type: "else",
-    		source: "(205:8) {:else}",
+    		source: "(220:8) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (194:8) {#if searchItems.length == 0}
+    // (209:8) {#if searchItems.length == 0}
     function create_if_block$9(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
     	let current;
-    	let each_value = /*nenoItems*/ ctx[7];
+    	let each_value = /*nenoItems*/ ctx[1];
     	validate_each_argument(each_value);
     	const get_key = ctx => /*item*/ ctx[25]._id;
     	validate_each_keys(ctx, each_value, get_each_context$8, get_key);
@@ -33709,8 +34398,8 @@
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*nenoItems*/ 128) {
-    				each_value = /*nenoItems*/ ctx[7];
+    			if (dirty & /*nenoItems*/ 2) {
+    				each_value = /*nenoItems*/ ctx[1];
     				validate_each_argument(each_value);
     				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context$8, get_key);
@@ -33747,19 +34436,19 @@
     		block,
     		id: create_if_block$9.name,
     		type: "if",
-    		source: "(194:8) {#if searchItems.length == 0}",
+    		source: "(209:8) {#if searchItems.length == 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (206:12) {#each searchItems as item (item._id)}
+    // (221:12) {#each searchItems as item (item._id)}
     function create_each_block_1$4(key_1, ctx) {
     	let first;
     	let fmoloitem;
     	let current;
-    	const fmoloitem_spread_levels = [/*item*/ ctx[25], { searchContent: /*searchText*/ ctx[5] }];
+    	const fmoloitem_spread_levels = [/*item*/ ctx[25], { searchContent: /*searchText*/ ctx[6] }];
     	let fmoloitem_props = {};
 
     	for (let i = 0; i < fmoloitem_spread_levels.length; i += 1) {
@@ -33785,10 +34474,10 @@
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			const fmoloitem_changes = (dirty & /*searchItems, searchText*/ 288)
+    			const fmoloitem_changes = (dirty & /*searchItems, searchText*/ 320)
     			? get_spread_update(fmoloitem_spread_levels, [
     					dirty & /*searchItems*/ 256 && get_spread_object(/*item*/ ctx[25]),
-    					dirty & /*searchText*/ 32 && { searchContent: /*searchText*/ ctx[5] }
+    					dirty & /*searchText*/ 64 && { searchContent: /*searchText*/ ctx[6] }
     				])
     			: {};
 
@@ -33813,14 +34502,14 @@
     		block,
     		id: create_each_block_1$4.name,
     		type: "each",
-    		source: "(206:12) {#each searchItems as item (item._id)}",
+    		source: "(221:12) {#each searchItems as item (item._id)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (195:12) {#each nenoItems as item (item._id)}
+    // (210:12) {#each nenoItems as item (item._id)}
     function create_each_block$8(key_1, ctx) {
     	let first;
     	let fmoloitem;
@@ -33851,7 +34540,7 @@
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			const fmoloitem_changes = (dirty & /*nenoItems*/ 128)
+    			const fmoloitem_changes = (dirty & /*nenoItems*/ 2)
     			? get_spread_update(fmoloitem_spread_levels, [get_spread_object(/*item*/ ctx[25])])
     			: {};
 
@@ -33876,7 +34565,7 @@
     		block,
     		id: create_each_block$8.name,
     		type: "each",
-    		source: "(195:12) {#each nenoItems as item (item._id)}",
+    		source: "(210:12) {#each nenoItems as item (item._id)}",
     		ctx
     	});
 
@@ -33913,17 +34602,17 @@
     	add_render_callback(/*onwindowresize*/ ctx[12]);
 
     	function select_block_type(ctx, dirty) {
-    		if (/*changeTag*/ ctx[6] == "") return create_if_block_4$1;
+    		if (/*changeTag*/ ctx[7] == "") return create_if_block_4$1;
     		return create_else_block_1;
     	}
 
     	let current_block_type = select_block_type(ctx);
     	let if_block0 = current_block_type(ctx);
-    	let if_block1 = /*changeTag*/ ctx[6] == "" && create_if_block_3$2(ctx);
+    	let if_block1 = /*changeTag*/ ctx[7] == "" && create_if_block_3$2(ctx);
     	quilleditor = new QuillEditor({ $$inline: true });
     	quilleditor.$on("update", /*update_handler*/ ctx[18]);
-    	let if_block2 = /*isLoding*/ ctx[3] && create_if_block_2$4(ctx);
-    	let if_block3 = /*isLodingError*/ ctx[4] && create_if_block_1$6(ctx);
+    	let if_block2 = /*isLoding*/ ctx[4] && create_if_block_2$4(ctx);
+    	let if_block3 = /*isLodingError*/ ctx[5] && create_if_block_1$6(ctx);
     	const if_block_creators = [create_if_block$9, create_else_block$3];
     	const if_blocks = [];
 
@@ -33965,27 +34654,27 @@
     			if (img.src !== (img_src_value = "https://raw.githubusercontent.com/Mran/Logseq/master/Logseq.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "w-64 hidden");
     			attr_dev(img, "alt", "");
-    			add_location(img, file$a, 104, 4, 3299);
+    			add_location(img, file$a, 119, 4, 3712);
     			attr_dev(div0, "class", "flex flex-row items-center pl-4 ");
-    			add_location(div0, file$a, 110, 8, 3510);
+    			add_location(div0, file$a, 125, 8, 3923);
     			attr_dev(i0, "class", "ri-search-2-line text-gray-400");
-    			add_location(i0, file$a, 146, 12, 4907);
+    			add_location(i0, file$a, 161, 12, 5320);
     			attr_dev(input, "class", " ml-2 bg-gray-200 focus:outline-none text-sm");
     			attr_dev(input, "type", "text");
-    			add_location(input, file$a, 147, 12, 4965);
+    			add_location(input, file$a, 162, 12, 5378);
     			attr_dev(i1, "class", "ri-close-circle-fill text-gray-400");
-    			add_location(i1, file$a, 157, 12, 5329);
+    			add_location(i1, file$a, 172, 12, 5742);
     			attr_dev(div1, "class", "bg-gray-200 rounded-lg h-8 p-2 flex items-center flex-shrink-0");
-    			add_location(div1, file$a, 143, 8, 4794);
+    			add_location(div1, file$a, 158, 8, 5207);
     			attr_dev(div2, "class", "  flex flex-row items-center justify-between ");
-    			add_location(div2, file$a, 109, 4, 3441);
+    			add_location(div2, file$a, 124, 4, 3854);
     			attr_dev(div3, "class", "p-2 ");
-    			add_location(div3, file$a, 166, 4, 5573);
+    			add_location(div3, file$a, 181, 4, 5986);
     			attr_dev(div4, "class", "flex flex-col overflow-y-scroll p-2 ");
-    			set_style(div4, "height", /*innerHeight*/ ctx[1] - /*flowClientTop*/ ctx[2] + "px");
-    			add_location(div4, file$a, 188, 4, 6228);
+    			set_style(div4, "height", /*innerHeight*/ ctx[2] - /*flowClientTop*/ ctx[3] + "px");
+    			add_location(div4, file$a, 203, 4, 6641);
     			attr_dev(div5, "class", "  flex-1 flex flex-col justify-start  pt-4  w-0");
-    			add_location(div5, file$a, 103, 0, 3232);
+    			add_location(div5, file$a, 118, 0, 3645);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -34004,7 +34693,7 @@
     			append_dev(div1, i0);
     			append_dev(div1, t3);
     			append_dev(div1, input);
-    			set_input_value(input, /*searchText*/ ctx[5]);
+    			set_input_value(input, /*searchText*/ ctx[6]);
     			append_dev(div1, t4);
     			append_dev(div1, i1);
     			append_dev(div5, t5);
@@ -34044,7 +34733,7 @@
     				}
     			}
 
-    			if (/*changeTag*/ ctx[6] == "") {
+    			if (/*changeTag*/ ctx[7] == "") {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
@@ -34057,13 +34746,13 @@
     				if_block1 = null;
     			}
 
-    			if (dirty & /*searchText*/ 32 && input.value !== /*searchText*/ ctx[5]) {
-    				set_input_value(input, /*searchText*/ ctx[5]);
+    			if (dirty & /*searchText*/ 64 && input.value !== /*searchText*/ ctx[6]) {
+    				set_input_value(input, /*searchText*/ ctx[6]);
     			}
 
-    			if (/*isLoding*/ ctx[3]) {
+    			if (/*isLoding*/ ctx[4]) {
     				if (if_block2) {
-    					if (dirty & /*isLoding*/ 8) {
+    					if (dirty & /*isLoding*/ 16) {
     						transition_in(if_block2, 1);
     					}
     				} else {
@@ -34082,7 +34771,7 @@
     				check_outros();
     			}
 
-    			if (/*isLodingError*/ ctx[4]) {
+    			if (/*isLodingError*/ ctx[5]) {
     				if (if_block3) {
     					if_block3.p(ctx, dirty);
     				} else {
@@ -34121,8 +34810,8 @@
     				if_block4.m(div4, null);
     			}
 
-    			if (!current || dirty & /*innerHeight, flowClientTop*/ 6) {
-    				set_style(div4, "height", /*innerHeight*/ ctx[1] - /*flowClientTop*/ ctx[2] + "px");
+    			if (!current || dirty & /*innerHeight, flowClientTop*/ 12) {
+    				set_style(div4, "height", /*innerHeight*/ ctx[2] - /*flowClientTop*/ ctx[3] + "px");
     			}
     		},
     		i: function intro(local) {
@@ -34186,13 +34875,23 @@
 
     		searchNenoByDate.subscribe(value => {
     			console.log("searchNenoByDate", value);
-    			searchNeno("", value.date, "");
+
+    			if (value.date == "refresh") {
+    				page = 0;
+    				$$invalidate(1, nenoItems = []);
+    				load();
+    			} else if (value.date != "") {
+    				searchNeno("", value.date, "");
+    			}
     		});
 
     		searchNenoByTag.subscribe(value => {
     			console.log("searchNenoByTag", value);
-    			$$invalidate(6, changeTag = value.tag.substring(1));
-    			searchNeno("", "", value.tag);
+
+    			if (value.tag != "") {
+    				$$invalidate(7, changeTag = value.tag.substring(1));
+    				searchNeno("", "", value.tag);
+    			}
     		});
 
     		flowClient.addEventListener("scroll", function () {
@@ -34204,8 +34903,8 @@
     	});
 
     	function load() {
-    		$$invalidate(3, isLoding = true);
-    		$$invalidate(4, isLodingError = false);
+    		$$invalidate(4, isLoding = true);
+    		$$invalidate(5, isLodingError = false);
 
     		getAllFmolo({ page }).then(respone => {
     			let re = respone;
@@ -34215,20 +34914,20 @@
     			}
 
     			re.body.forEach(element => {
-    				$$invalidate(7, nenoItems = [...nenoItems, element]);
+    				$$invalidate(1, nenoItems = [...nenoItems, element]);
     			});
 
-    			$$invalidate(3, isLoding = false);
+    			$$invalidate(4, isLoding = false);
     		}).catch(reason => {
     			console.log("reason", reason);
-    			$$invalidate(4, isLodingError = true);
-    			$$invalidate(3, isLoding = false);
+    			$$invalidate(5, isLodingError = true);
+    			$$invalidate(4, isLoding = false);
     		});
     	}
 
     	function searchNeno(searchText = "", searchDate = "", searchTag = "") {
     		if (searchText.length != 0 || searchDate.length != 0 || searchTag.length != 0) {
-    			$$invalidate(3, isLoding = true);
+    			$$invalidate(4, isLoding = true);
 
     			search({
     				content: searchText,
@@ -34236,14 +34935,18 @@
     				tag: searchTag
     			}).then(async respone => {
     				let re = respone;
-    				$$invalidate(3, isLoding = false);
+    				$$invalidate(4, isLoding = false);
     				$$invalidate(8, searchItems = re.body);
     			}).catch(reason => {
     				console.log("reason", reason);
-    				$$invalidate(3, isLoding = false);
+    				$$invalidate(4, isLoding = false);
     			});
     		} else {
     			$$invalidate(8, searchItems = []);
+
+    			if (nenoItems.length == 0) {
+    				load();
+    			}
     		}
     	}
 
@@ -34254,7 +34957,7 @@
     	});
 
     	function onwindowresize() {
-    		$$invalidate(1, innerHeight = window.innerHeight);
+    		$$invalidate(2, innerHeight = window.innerHeight);
     	}
 
     	const click_handler = () => {
@@ -34273,16 +34976,16 @@
 
     	function input_input_handler() {
     		searchText = this.value;
-    		$$invalidate(5, searchText);
+    		$$invalidate(6, searchText);
     	}
 
     	const click_handler_2 = () => {
-    		$$invalidate(5, searchText = "");
+    		$$invalidate(6, searchText = "");
     		$$invalidate(8, searchItems = []);
     	};
 
     	const update_handler = event => {
-    		$$invalidate(7, nenoItems = [event.detail, ...nenoItems]);
+    		$$invalidate(1, nenoItems = [event.detail, ...nenoItems]);
     	};
 
     	const click_handler_3 = () => {
@@ -34290,13 +34993,13 @@
     	};
 
     	const deleteOne_handler = event => {
-    		$$invalidate(7, nenoItems = nenoItems.filter(item => {
+    		$$invalidate(1, nenoItems = nenoItems.filter(item => {
     			return item._id != event.detail._id;
     		}));
     	};
 
     	const deleteOne_handler_1 = event => {
-    		$$invalidate(7, nenoItems = nenoItems.filter(item => {
+    		$$invalidate(1, nenoItems = nenoItems.filter(item => {
     			return item._id != event.detail._id;
     		}));
     	};
@@ -34319,6 +35022,7 @@
     		search,
     		ProgressLine,
     		showSlide,
+    		log,
     		flowClient,
     		innerHeight,
     		flowClientTop,
@@ -34337,15 +35041,15 @@
 
     	$$self.$inject_state = $$props => {
     		if ("flowClient" in $$props) $$invalidate(0, flowClient = $$props.flowClient);
-    		if ("innerHeight" in $$props) $$invalidate(1, innerHeight = $$props.innerHeight);
-    		if ("flowClientTop" in $$props) $$invalidate(2, flowClientTop = $$props.flowClientTop);
-    		if ("isLoding" in $$props) $$invalidate(3, isLoding = $$props.isLoding);
-    		if ("isLodingError" in $$props) $$invalidate(4, isLodingError = $$props.isLodingError);
+    		if ("innerHeight" in $$props) $$invalidate(2, innerHeight = $$props.innerHeight);
+    		if ("flowClientTop" in $$props) $$invalidate(3, flowClientTop = $$props.flowClientTop);
+    		if ("isLoding" in $$props) $$invalidate(4, isLoding = $$props.isLoding);
+    		if ("isLodingError" in $$props) $$invalidate(5, isLodingError = $$props.isLodingError);
     		if ("isEnd" in $$props) isEnd = $$props.isEnd;
-    		if ("searchText" in $$props) $$invalidate(5, searchText = $$props.searchText);
-    		if ("changeTag" in $$props) $$invalidate(6, changeTag = $$props.changeTag);
+    		if ("searchText" in $$props) $$invalidate(6, searchText = $$props.searchText);
+    		if ("changeTag" in $$props) $$invalidate(7, changeTag = $$props.changeTag);
     		if ("page" in $$props) page = $$props.page;
-    		if ("nenoItems" in $$props) $$invalidate(7, nenoItems = $$props.nenoItems);
+    		if ("nenoItems" in $$props) $$invalidate(1, nenoItems = $$props.nenoItems);
     		if ("searchItems" in $$props) $$invalidate(8, searchItems = $$props.searchItems);
     	};
 
@@ -34358,21 +35062,27 @@
     			 {
     				if (flowClient != undefined) {
     					let flowClientBoundingClientRect = flowClient.getBoundingClientRect();
-    					$$invalidate(2, flowClientTop = flowClientBoundingClientRect.top);
+    					$$invalidate(3, flowClientTop = flowClientBoundingClientRect.top);
     				}
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*nenoItems*/ 2) {
+    			 {
+    				console.log(nenoItems);
     			}
     		}
     	};
 
     	return [
     		flowClient,
+    		nenoItems,
     		innerHeight,
     		flowClientTop,
     		isLoding,
     		isLodingError,
     		searchText,
     		changeTag,
-    		nenoItems,
     		searchItems,
     		$searchNenoByTag,
     		load,
@@ -34410,13 +35120,13 @@
     const { console: console_1$9 } = globals;
     const file$b = "src\\components\\Setting.svelte";
 
-    // (130:4) {:else}
+    // (133:4) {:else}
     function create_else_block$4(ctx) {
     	let div1;
     	let div0;
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*$githubStrore*/ ctx[7].githubName) return create_if_block_1$7;
+    		if (/*$githubStrore*/ ctx[6].githubName) return create_if_block_1$7;
     		return create_else_block_1$1;
     	}
 
@@ -34429,8 +35139,8 @@
     			div0 = element("div");
     			if_block.c();
     			attr_dev(div0, "class", "m-4 flex flex-col");
-    			add_location(div0, file$b, 131, 12, 4467);
-    			add_location(div1, file$b, 130, 8, 4448);
+    			add_location(div0, file$b, 134, 12, 4491);
+    			add_location(div1, file$b, 133, 8, 4472);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -34460,14 +35170,14 @@
     		block,
     		id: create_else_block$4.name,
     		type: "else",
-    		source: "(130:4) {:else}",
+    		source: "(133:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (111:4) {#if useMode != "github"}
+    // (114:4) {#if useMode != "github"}
     function create_if_block$a(ctx) {
     	let div0;
     	let label0;
@@ -34498,24 +35208,24 @@
     			t5 = space();
     			input = element("input");
     			attr_dev(label0, "for", "");
-    			add_location(label0, file$b, 114, 12, 3843);
+    			add_location(label0, file$b, 117, 12, 3867);
     			attr_dev(option, "class", "p-2");
     			option.__value = "七牛云";
     			option.value = option.__value;
-    			add_location(option, file$b, 117, 16, 4009);
+    			add_location(option, file$b, 120, 16, 4033);
     			attr_dev(select, "class", "p-2 mt-4");
-    			if (/*platform*/ ctx[1] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[18].call(select));
-    			add_location(select, file$b, 115, 12, 3883);
+    			if (/*platform*/ ctx[1] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[17].call(select));
+    			add_location(select, file$b, 118, 12, 3907);
     			attr_dev(div0, "class", "m-4 flex flex-col");
-    			add_location(div0, file$b, 113, 8, 3798);
+    			add_location(div0, file$b, 116, 8, 3822);
     			attr_dev(label1, "for", "");
-    			add_location(label1, file$b, 121, 12, 4133);
+    			add_location(label1, file$b, 124, 12, 4157);
     			attr_dev(input, "type", "text");
     			attr_dev(input, "class", "w-full border-2  mt-4 outline-white p-2");
     			attr_dev(input, "placeholder", "填写你的在七牛云绑定的域名 (这个是我的http://img.neno.topmini.top)");
-    			add_location(input, file$b, 122, 12, 4173);
+    			add_location(input, file$b, 125, 12, 4197);
     			attr_dev(div1, "class", "m-4");
-    			add_location(div1, file$b, 120, 8, 4102);
+    			add_location(div1, file$b, 123, 8, 4126);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -34533,8 +35243,8 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(select, "change", /*select_change_handler*/ ctx[18]),
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[19])
+    					listen_dev(select, "change", /*select_change_handler*/ ctx[17]),
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[18])
     				];
 
     				mounted = true;
@@ -34562,14 +35272,14 @@
     		block,
     		id: create_if_block$a.name,
     		type: "if",
-    		source: "(111:4) {#if useMode != \\\"github\\\"}",
+    		source: "(114:4) {#if useMode != \\\"github\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (187:16) {:else}
+    // (190:16) {:else}
     function create_else_block_1$1(ctx) {
     	let a;
     	let a_href_value;
@@ -34580,7 +35290,7 @@
     			a.textContent = "使用github账号登录";
     			attr_dev(a, "class", " border-2  mb-4 text-center  outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white");
     			attr_dev(a, "href", a_href_value = `https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8`);
-    			add_location(a, file$b, 187, 20, 7306);
+    			add_location(a, file$b, 190, 20, 7339);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a, anchor);
@@ -34595,19 +35305,19 @@
     		block,
     		id: create_else_block_1$1.name,
     		type: "else",
-    		source: "(187:16) {:else}",
+    		source: "(190:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (133:16) {#if $githubStrore.githubName}
+    // (136:16) {#if $githubStrore.githubName}
     function create_if_block_1$7(ctx) {
     	let div4;
     	let div0;
     	let button0;
-    	let t0_value = /*$githubStrore*/ ctx[7].githubName + "";
+    	let t0_value = /*$githubStrore*/ ctx[6].githubName + "";
     	let t0;
     	let t1;
     	let t2;
@@ -34616,16 +35326,14 @@
     	let t4;
     	let input0;
     	let t5;
-    	let input1;
-    	let t6;
     	let div3;
     	let label1;
-    	let t8;
+    	let t7;
     	let div2;
     	let button1;
+    	let t9;
+    	let input1;
     	let t10;
-    	let input2;
-    	let t11;
     	let button2;
     	let mounted;
     	let dispose;
@@ -34644,53 +35352,47 @@
     			t4 = space();
     			input0 = element("input");
     			t5 = space();
-    			input1 = element("input");
-    			t6 = space();
     			div3 = element("div");
     			label1 = element("label");
     			label1.textContent = "导入/导出离线数据";
-    			t8 = space();
+    			t7 = space();
     			div2 = element("div");
     			button1 = element("button");
     			button1.textContent = "导入";
+    			t9 = space();
+    			input1 = element("input");
     			t10 = space();
-    			input2 = element("input");
-    			t11 = space();
     			button2 = element("button");
     			button2.textContent = "导出";
     			attr_dev(button0, "class", "border-2   w-full  text-center  outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white");
-    			add_location(button0, file$b, 135, 28, 4678);
+    			add_location(button0, file$b, 138, 28, 4702);
     			attr_dev(div0, "class", "flex items-center ml-4");
-    			add_location(div0, file$b, 134, 24, 4612);
+    			add_location(div0, file$b, 137, 24, 4636);
     			attr_dev(label0, "for", "");
-    			add_location(label0, file$b, 146, 28, 5249);
+    			add_location(label0, file$b, 149, 28, 5273);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "class", "w-full border-2  mt-4 outline-white p-2");
     			attr_dev(input0, "placeholder", "仓库名");
-    			add_location(input0, file$b, 147, 28, 5305);
-    			attr_dev(input1, "type", "text");
-    			attr_dev(input1, "class", "w-full border-2  mt-4 outline-white p-2");
-    			attr_dev(input1, "placeholder", "分支");
-    			add_location(input1, file$b, 153, 28, 5605);
+    			add_location(input0, file$b, 150, 28, 5329);
     			attr_dev(div1, "class", "m-4");
-    			add_location(div1, file$b, 145, 24, 5202);
+    			add_location(div1, file$b, 148, 24, 5226);
     			attr_dev(label1, "for", "");
-    			add_location(label1, file$b, 161, 28, 5977);
+    			add_location(label1, file$b, 164, 28, 6010);
     			attr_dev(button1, "class", "w-full border-2  mt-4 outline-white p-2");
-    			add_location(button1, file$b, 163, 32, 6113);
-    			attr_dev(input2, "type", "file");
-    			set_style(input2, "display", "none");
-    			attr_dev(input2, "accept", ".txt");
-    			attr_dev(input2, "class", "w-full border-2  mt-4 outline-white p-2");
-    			add_location(input2, file$b, 169, 32, 6435);
+    			add_location(button1, file$b, 166, 32, 6146);
+    			attr_dev(input1, "type", "file");
+    			set_style(input1, "display", "none");
+    			attr_dev(input1, "accept", ".txt");
+    			attr_dev(input1, "class", "w-full border-2  mt-4 outline-white p-2");
+    			add_location(input1, file$b, 172, 32, 6468);
     			attr_dev(button2, "class", "w-full border-2  mt-4 outline-white p-2");
-    			add_location(button2, file$b, 177, 32, 6875);
+    			add_location(button2, file$b, 180, 32, 6908);
     			attr_dev(div2, "class", "flex items-center space-x-4");
-    			add_location(div2, file$b, 162, 28, 6038);
+    			add_location(div2, file$b, 165, 28, 6071);
     			attr_dev(div3, "class", "m-4");
-    			add_location(div3, file$b, 160, 24, 5930);
+    			add_location(div3, file$b, 163, 24, 5963);
     			attr_dev(div4, "class", "mb-4");
-    			add_location(div4, file$b, 133, 20, 4568);
+    			add_location(div4, file$b, 136, 20, 4592);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div4, anchor);
@@ -34704,48 +35406,40 @@
     			append_dev(div1, t4);
     			append_dev(div1, input0);
     			set_input_value(input0, /*repoName*/ ctx[4]);
-    			append_dev(div1, t5);
-    			append_dev(div1, input1);
-    			set_input_value(input1, /*branch*/ ctx[5]);
-    			append_dev(div4, t6);
+    			append_dev(div4, t5);
     			append_dev(div4, div3);
     			append_dev(div3, label1);
-    			append_dev(div3, t8);
+    			append_dev(div3, t7);
     			append_dev(div3, div2);
     			append_dev(div2, button1);
+    			append_dev(div2, t9);
+    			append_dev(div2, input1);
+    			/*input1_binding*/ ctx[22](input1);
     			append_dev(div2, t10);
-    			append_dev(div2, input2);
-    			/*input2_binding*/ ctx[24](input2);
-    			append_dev(div2, t11);
     			append_dev(div2, button2);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*click_handler_1*/ ctx[20], false, false, false),
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[21]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[22]),
-    					listen_dev(button1, "click", /*click_handler_2*/ ctx[23], false, false, false),
-    					listen_dev(input2, "change", /*input2_change_handler*/ ctx[25]),
-    					listen_dev(button2, "click", /*click_handler_3*/ ctx[26], false, false, false)
+    					listen_dev(button0, "click", /*click_handler_1*/ ctx[19], false, false, false),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[20]),
+    					listen_dev(button1, "click", /*click_handler_2*/ ctx[21], false, false, false),
+    					listen_dev(input1, "change", /*input1_change_handler_1*/ ctx[23]),
+    					listen_dev(button2, "click", /*click_handler_3*/ ctx[24], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*$githubStrore*/ 128 && t0_value !== (t0_value = /*$githubStrore*/ ctx[7].githubName + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*$githubStrore*/ 64 && t0_value !== (t0_value = /*$githubStrore*/ ctx[6].githubName + "")) set_data_dev(t0, t0_value);
 
     			if (dirty & /*repoName*/ 16 && input0.value !== /*repoName*/ ctx[4]) {
     				set_input_value(input0, /*repoName*/ ctx[4]);
     			}
-
-    			if (dirty & /*branch*/ 32 && input1.value !== /*branch*/ ctx[5]) {
-    				set_input_value(input1, /*branch*/ ctx[5]);
-    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div4);
-    			/*input2_binding*/ ctx[24](null);
+    			/*input1_binding*/ ctx[22](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -34755,7 +35449,7 @@
     		block,
     		id: create_if_block_1$7.name,
     		type: "if",
-    		source: "(133:16) {#if $githubStrore.githubName}",
+    		source: "(136:16) {#if $githubStrore.githubName}",
     		ctx
     	});
 
@@ -34824,37 +35518,37 @@
     			t9 = space();
     			div3 = element("div");
     			button1 = element("button");
-    			button1.textContent = `保存设置${/*done*/ ctx[9]}`;
+    			button1.textContent = `保存设置${/*done*/ ctx[8]}`;
     			attr_dev(i, "class", "ri-arrow-left-line");
-    			add_location(i, file$b, 93, 12, 3215);
+    			add_location(i, file$b, 96, 12, 3239);
     			attr_dev(button0, "class", "focus:outline-none text-gray-600   sm:hidden md:hidden mr-4");
-    			add_location(button0, file$b, 87, 8, 3020);
+    			add_location(button0, file$b, 90, 8, 3044);
     			attr_dev(div0, "class", "font-bold text-lg flex  justify-start  items-center");
-    			add_location(div0, file$b, 86, 4, 2945);
+    			add_location(div0, file$b, 89, 4, 2969);
     			attr_dev(label0, "for", "");
-    			add_location(label0, file$b, 97, 8, 3313);
+    			add_location(label0, file$b, 100, 8, 3337);
     			attr_dev(input0, "type", "radio");
     			input0.__value = input0_value_value = "自部署模式";
     			input0.value = input0.__value;
-    			/*$$binding_groups*/ ctx[16][0].push(input0);
-    			add_location(input0, file$b, 100, 16, 3438);
-    			add_location(label1, file$b, 99, 12, 3413);
+    			/*$$binding_groups*/ ctx[15][0].push(input0);
+    			add_location(input0, file$b, 103, 16, 3462);
+    			add_location(label1, file$b, 102, 12, 3437);
     			attr_dev(input1, "type", "radio");
     			input1.__value = input1_value_value = "github";
     			input1.value = input1.__value;
-    			/*$$binding_groups*/ ctx[16][0].push(input1);
-    			add_location(input1, file$b, 104, 16, 3581);
-    			add_location(label2, file$b, 103, 12, 3556);
+    			/*$$binding_groups*/ ctx[15][0].push(input1);
+    			add_location(input1, file$b, 107, 16, 3605);
+    			add_location(label2, file$b, 106, 12, 3580);
     			attr_dev(div1, "class", "flex items-center space-x-4 p-2 mt-4");
-    			add_location(div1, file$b, 98, 8, 3349);
+    			add_location(div1, file$b, 101, 8, 3373);
     			attr_dev(div2, "class", "m-4");
-    			add_location(div2, file$b, 96, 4, 3286);
+    			add_location(div2, file$b, 99, 4, 3310);
     			attr_dev(button1, "class", "w-full border-2   outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white");
-    			add_location(button1, file$b, 198, 8, 7759);
+    			add_location(button1, file$b, 201, 8, 7792);
     			attr_dev(div3, "class", "m-4");
-    			add_location(div3, file$b, 197, 4, 7732);
+    			add_location(div3, file$b, 200, 4, 7765);
     			attr_dev(div4, "class", "  flex-1 flex flex-col justify-start  pt-4 pl-4 ");
-    			add_location(div4, file$b, 85, 0, 2877);
+    			add_location(div4, file$b, 88, 0, 2901);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -34888,10 +35582,10 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*click_handler*/ ctx[14], false, false, false),
-    					listen_dev(input0, "change", /*input0_change_handler*/ ctx[15]),
-    					listen_dev(input1, "change", /*input1_change_handler*/ ctx[17]),
-    					listen_dev(button1, "click", /*click_handler_4*/ ctx[27], false, false, false)
+    					listen_dev(button0, "click", /*click_handler*/ ctx[13], false, false, false),
+    					listen_dev(input0, "change", /*input0_change_handler*/ ctx[14]),
+    					listen_dev(input1, "change", /*input1_change_handler*/ ctx[16]),
+    					listen_dev(button1, "click", /*click_handler_4*/ ctx[25], false, false, false)
     				];
 
     				mounted = true;
@@ -34922,8 +35616,8 @@
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div4);
-    			/*$$binding_groups*/ ctx[16][0].splice(/*$$binding_groups*/ ctx[16][0].indexOf(input0), 1);
-    			/*$$binding_groups*/ ctx[16][0].splice(/*$$binding_groups*/ ctx[16][0].indexOf(input1), 1);
+    			/*$$binding_groups*/ ctx[15][0].splice(/*$$binding_groups*/ ctx[15][0].indexOf(input0), 1);
+    			/*$$binding_groups*/ ctx[15][0].splice(/*$$binding_groups*/ ctx[15][0].indexOf(input1), 1);
     			if_block.d();
     			mounted = false;
     			run_all(dispose);
@@ -34946,11 +35640,11 @@
     	let $githubStrore;
     	let $pagedd;
     	validate_store(settingStrore, "settingStrore");
-    	component_subscribe($$self, settingStrore, $$value => $$invalidate(28, $settingStrore = $$value));
+    	component_subscribe($$self, settingStrore, $$value => $$invalidate(26, $settingStrore = $$value));
     	validate_store(githubStrore, "githubStrore");
-    	component_subscribe($$self, githubStrore, $$value => $$invalidate(7, $githubStrore = $$value));
+    	component_subscribe($$self, githubStrore, $$value => $$invalidate(6, $githubStrore = $$value));
     	validate_store(pagedd, "pagedd");
-    	component_subscribe($$self, pagedd, $$value => $$invalidate(8, $pagedd = $$value));
+    	component_subscribe($$self, pagedd, $$value => $$invalidate(7, $pagedd = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Setting", slots, []);
     	let platform = $settingStrore.platform;
@@ -35048,23 +35742,18 @@
     		$$invalidate(4, repoName);
     	}
 
-    	function input1_input_handler() {
-    		branch = this.value;
-    		$$invalidate(5, branch);
-    	}
-
     	const click_handler_2 = () => {
     		importNeno();
     	};
 
-    	function input2_binding($$value) {
+    	function input1_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
     			uploadNode = $$value;
-    			$$invalidate(6, uploadNode);
+    			$$invalidate(5, uploadNode);
     		});
     	}
 
-    	function input2_change_handler() {
+    	function input1_change_handler_1() {
     		importFile = this.files;
     		$$invalidate(0, importFile);
     	}
@@ -35108,10 +35797,10 @@
     		if ("domain" in $$props) domain = $$props.domain;
     		if ("useMode" in $$props) $$invalidate(3, useMode = $$props.useMode);
     		if ("repoName" in $$props) $$invalidate(4, repoName = $$props.repoName);
-    		if ("branch" in $$props) $$invalidate(5, branch = $$props.branch);
-    		if ("done" in $$props) $$invalidate(9, done = $$props.done);
+    		if ("branch" in $$props) branch = $$props.branch;
+    		if ("done" in $$props) $$invalidate(8, done = $$props.done);
     		if ("importFile" in $$props) $$invalidate(0, importFile = $$props.importFile);
-    		if ("uploadNode" in $$props) $$invalidate(6, uploadNode = $$props.uploadNode);
+    		if ("uploadNode" in $$props) $$invalidate(5, uploadNode = $$props.uploadNode);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -35147,7 +35836,6 @@
     		imgDomain,
     		useMode,
     		repoName,
-    		branch,
     		uploadNode,
     		$githubStrore,
     		$pagedd,
@@ -35164,10 +35852,9 @@
     		input_input_handler,
     		click_handler_1,
     		input0_input_handler,
-    		input1_input_handler,
     		click_handler_2,
-    		input2_binding,
-    		input2_change_handler,
+    		input1_binding,
+    		input1_change_handler_1,
     		click_handler_3,
     		click_handler_4
     	];
@@ -35578,14 +36265,14 @@
      * Released under the MIT License.
      */
 
-    function isObject(o) {
+    function isObject$1(o) {
       return Object.prototype.toString.call(o) === '[object Object]';
     }
 
     function isPlainObject(o) {
       var ctor,prot;
 
-      if (isObject(o) === false) return false;
+      if (isObject$1(o) === false) return false;
 
       // If has modified constructor
       ctor = o.constructor;
@@ -35593,7 +36280,7 @@
 
       // If has modified prototype
       prot = ctor.prototype;
-      if (isObject(prot) === false) return false;
+      if (isObject$1(prot) === false) return false;
 
       // If constructor does not have an Object-specific method
       if (prot.hasOwnProperty('isPrototypeOf') === false) {
@@ -35603,228 +36290,6 @@
       // Most likely a plain Object
       return true;
     }
-
-    // shim for using process in browser
-    // based off https://github.com/defunctzombie/node-process/blob/master/browser.js
-
-    function defaultSetTimout() {
-        throw new Error('setTimeout has not been defined');
-    }
-    function defaultClearTimeout () {
-        throw new Error('clearTimeout has not been defined');
-    }
-    var cachedSetTimeout = defaultSetTimout;
-    var cachedClearTimeout = defaultClearTimeout;
-    if (typeof global$1.setTimeout === 'function') {
-        cachedSetTimeout = setTimeout;
-    }
-    if (typeof global$1.clearTimeout === 'function') {
-        cachedClearTimeout = clearTimeout;
-    }
-
-    function runTimeout(fun) {
-        if (cachedSetTimeout === setTimeout) {
-            //normal enviroments in sane situations
-            return setTimeout(fun, 0);
-        }
-        // if setTimeout wasn't available but was latter defined
-        if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-            cachedSetTimeout = setTimeout;
-            return setTimeout(fun, 0);
-        }
-        try {
-            // when when somebody has screwed with setTimeout but no I.E. maddness
-            return cachedSetTimeout(fun, 0);
-        } catch(e){
-            try {
-                // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-                return cachedSetTimeout.call(null, fun, 0);
-            } catch(e){
-                // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-                return cachedSetTimeout.call(this, fun, 0);
-            }
-        }
-
-
-    }
-    function runClearTimeout(marker) {
-        if (cachedClearTimeout === clearTimeout) {
-            //normal enviroments in sane situations
-            return clearTimeout(marker);
-        }
-        // if clearTimeout wasn't available but was latter defined
-        if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-            cachedClearTimeout = clearTimeout;
-            return clearTimeout(marker);
-        }
-        try {
-            // when when somebody has screwed with setTimeout but no I.E. maddness
-            return cachedClearTimeout(marker);
-        } catch (e){
-            try {
-                // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-                return cachedClearTimeout.call(null, marker);
-            } catch (e){
-                // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-                // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-                return cachedClearTimeout.call(this, marker);
-            }
-        }
-
-
-
-    }
-    var queue = [];
-    var draining = false;
-    var currentQueue;
-    var queueIndex = -1;
-
-    function cleanUpNextTick() {
-        if (!draining || !currentQueue) {
-            return;
-        }
-        draining = false;
-        if (currentQueue.length) {
-            queue = currentQueue.concat(queue);
-        } else {
-            queueIndex = -1;
-        }
-        if (queue.length) {
-            drainQueue();
-        }
-    }
-
-    function drainQueue() {
-        if (draining) {
-            return;
-        }
-        var timeout = runTimeout(cleanUpNextTick);
-        draining = true;
-
-        var len = queue.length;
-        while(len) {
-            currentQueue = queue;
-            queue = [];
-            while (++queueIndex < len) {
-                if (currentQueue) {
-                    currentQueue[queueIndex].run();
-                }
-            }
-            queueIndex = -1;
-            len = queue.length;
-        }
-        currentQueue = null;
-        draining = false;
-        runClearTimeout(timeout);
-    }
-    function nextTick(fun) {
-        var args = new Array(arguments.length - 1);
-        if (arguments.length > 1) {
-            for (var i = 1; i < arguments.length; i++) {
-                args[i - 1] = arguments[i];
-            }
-        }
-        queue.push(new Item(fun, args));
-        if (queue.length === 1 && !draining) {
-            runTimeout(drainQueue);
-        }
-    }
-    // v8 likes predictible objects
-    function Item(fun, array) {
-        this.fun = fun;
-        this.array = array;
-    }
-    Item.prototype.run = function () {
-        this.fun.apply(null, this.array);
-    };
-    var title = 'browser';
-    var platform = 'browser';
-    var browser = true;
-    var env = {};
-    var argv = [];
-    var version = ''; // empty string to avoid regexp issues
-    var versions = {};
-    var release = {};
-    var config = {};
-
-    function noop$1() {}
-
-    var on = noop$1;
-    var addListener = noop$1;
-    var once = noop$1;
-    var off = noop$1;
-    var removeListener = noop$1;
-    var removeAllListeners = noop$1;
-    var emit = noop$1;
-
-    function binding(name) {
-        throw new Error('process.binding is not supported');
-    }
-
-    function cwd () { return '/' }
-    function chdir (dir) {
-        throw new Error('process.chdir is not supported');
-    }function umask() { return 0; }
-
-    // from https://github.com/kumavis/browser-process-hrtime/blob/master/index.js
-    var performance = global$1.performance || {};
-    var performanceNow =
-      performance.now        ||
-      performance.mozNow     ||
-      performance.msNow      ||
-      performance.oNow       ||
-      performance.webkitNow  ||
-      function(){ return (new Date()).getTime() };
-
-    // generate timestamp or delta
-    // see http://nodejs.org/api/process.html#process_process_hrtime
-    function hrtime(previousTimestamp){
-      var clocktime = performanceNow.call(performance)*1e-3;
-      var seconds = Math.floor(clocktime);
-      var nanoseconds = Math.floor((clocktime%1)*1e9);
-      if (previousTimestamp) {
-        seconds = seconds - previousTimestamp[0];
-        nanoseconds = nanoseconds - previousTimestamp[1];
-        if (nanoseconds<0) {
-          seconds--;
-          nanoseconds += 1e9;
-        }
-      }
-      return [seconds,nanoseconds]
-    }
-
-    var startTime = new Date();
-    function uptime() {
-      var currentTime = new Date();
-      var dif = currentTime - startTime;
-      return dif / 1000;
-    }
-
-    var process = {
-      nextTick: nextTick,
-      title: title,
-      browser: browser,
-      env: env,
-      argv: argv,
-      version: version,
-      versions: versions,
-      on: on,
-      addListener: addListener,
-      once: once,
-      off: off,
-      removeListener: removeListener,
-      removeAllListeners: removeAllListeners,
-      emit: emit,
-      binding: binding,
-      cwd: cwd,
-      chdir: chdir,
-      umask: umask,
-      hrtime: hrtime,
-      platform: platform,
-      release: release,
-      config: config,
-      uptime: uptime
-    };
 
     function getUserAgent() {
         if (typeof navigator === "object" && "userAgent" in navigator) {
@@ -36723,7 +37188,41 @@
 
     };
     const refreshTokenWithGithub = async (data) => {
-        return await (await fetch(`${baseurl$1}/githubRefreshToken`, genergeParams$1(data))).json()
+        var respone = await (await fetch(`${baseurl$1}/githubRefreshToken`, genergeParams$1(data))).json();
+        const oldvalue = get_store_value(githubStrore);
+
+        if (respone.access_token) {
+            githubStrore.set({
+                githubName: respone.githubName,
+                access_token: respone.access_token,
+                refresh_token: respone.refresh_token,
+                repoName: oldvalue.repoName,
+                lastCommitSha: oldvalue.lastCommitSha,
+                refresh_token: respone.refresh_token,
+                refresh_token_expires_in: respone.refresh_token_expires_in
+            });
+            return new Promise(async (resolve, rej) => {
+                return resolve({ body: respone })
+            })
+        } else {
+            githubStrore.set({
+                githubName: "",
+                access_token: "",
+                refresh_token: "",
+                repoName: oldvalue.repoName,
+                lastCommitSha: "",
+                refresh_token: "",
+                refresh_token_expires_in: ""
+                
+            });
+            window.location.replace(
+                "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
+            );
+            return new Promise(async (resolve, rej) => {
+                return resolve({ body: {} })
+            })
+        }
+
 
     };
 
@@ -36790,6 +37289,53 @@
             }
 
 
+        }
+    };
+    const getLastCommitRecord = async (data) => {
+        try {
+            var re = await request$1('GET /repos/{owner}/{repo}/branches', {
+                headers: {
+                    authorization: `token ${gitubToken}`,
+                },
+                owner: githubName,
+                repo: repoName,
+            });
+            console.log(re);
+            return new Promise(async (resolve, rej) => {
+                return resolve({ body: re.data[0] })
+            })
+        } catch (error) {
+            console.log("getContentShaerror", error);
+            if (error.status == 401) {
+                if (error.message == "Bad credentials") {
+                    await refreshTokenWithGithub();
+                    return await getLastCommitRecord()
+                }
+            }
+        }
+    };
+    const compare2Commits = async (data) => {
+        try {
+
+            var re = await request$1('GET /repos/{owner}/{repo}/compare/{basehead}', {
+                headers: {
+                    authorization: `token ${gitubToken}`,
+                },
+                owner: githubName,
+                repo: repoName,
+                basehead: `${data.base}...${data.head}`
+            });
+            return new Promise(async (resolve, rej) => {
+                return resolve({ body: re.data })
+            })
+        } catch (error) {
+            console.log("getContentShaerror", error);
+            if (error.status == 401) {
+                if (error.message == "Bad credentials") {
+                    await refreshTokenWithGithub();
+                    return await compare2Commits(data)
+                }
+            }
         }
     };
     const getContentSha = async (data) => {
@@ -36928,22 +37474,15 @@
     				refreshTokenWithGithub({ refresToken: $githubStrore.refresh_token }).then(respone => {
     					console.log(respone);
 
-    					if (respone.access_token) {
-    						set_store_value(githubStrore, $githubStrore.githubName = respone.githubName, $githubStrore);
-    						set_store_value(githubStrore, $githubStrore.access_token = respone.access_token, $githubStrore);
-    						set_store_value(githubStrore, $githubStrore.refresh_token = respone.refresh_token, $githubStrore);
-    						set_store_value(githubStrore, $githubStrore.refresh_token_expires_in = respone.refresh_token_expires_in, $githubStrore);
-    						window.localStorage.setItem("githubStrore", JSON.stringify($githubStrore));
-
-    						if (respone.nenoinkId == "") {
+    					if (respone.body.access_token) {
+    						if (respone.body.nenoinkId == "") {
     							window.location.replace("https://github.com/apps/nenoink/installations/new");
     							return;
     						}
-    					} else {
-    						//重新授权
-    						window.location.replace("https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8");
-    					}
-    				});
+    					} //重新授权
+    					// window.location.replace(
+    				}); //   "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
+    				// );
     			}
     		}
     	};
@@ -36990,7 +37529,7 @@
     const { console: console_1$b } = globals;
     const file$e = "src\\App.svelte";
 
-    // (1:0) <script>   import HelloWorld from "./components/HelloWorld.svelte";   import Router from "./components/Router.svelte";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,   }
+    // (1:0) <script>   import HelloWorld from "./components/HelloWorld.svelte";   import Router from "./components/Router.svelte";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,     searchNenoByDate,   }
     function create_catch_block$4(ctx) {
     	const block = {
     		c: noop,
@@ -37004,14 +37543,14 @@
     		block,
     		id: create_catch_block$4.name,
     		type: "catch",
-    		source: "(1:0) <script>   import HelloWorld from \\\"./components/HelloWorld.svelte\\\";   import Router from \\\"./components/Router.svelte\\\";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,   }",
+    		source: "(1:0) <script>   import HelloWorld from \\\"./components/HelloWorld.svelte\\\";   import Router from \\\"./components/Router.svelte\\\";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,     searchNenoByDate,   }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (81:31)      <HelloWorld />   {/await}
+    // (134:31)      <HelloWorld />   {/await}
     function create_then_block$4(ctx) {
     	let helloworld;
     	let current;
@@ -37043,14 +37582,14 @@
     		block,
     		id: create_then_block$4.name,
     		type: "then",
-    		source: "(81:31)      <HelloWorld />   {/await}",
+    		source: "(134:31)      <HelloWorld />   {/await}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (1:0) <script>   import HelloWorld from "./components/HelloWorld.svelte";   import Router from "./components/Router.svelte";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,   }
+    // (1:0) <script>   import HelloWorld from "./components/HelloWorld.svelte";   import Router from "./components/Router.svelte";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,     searchNenoByDate,   }
     function create_pending_block$4(ctx) {
     	const block = {
     		c: noop,
@@ -37064,7 +37603,7 @@
     		block,
     		id: create_pending_block$4.name,
     		type: "pending",
-    		source: "(1:0) <script>   import HelloWorld from \\\"./components/HelloWorld.svelte\\\";   import Router from \\\"./components/Router.svelte\\\";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,   }",
+    		source: "(1:0) <script>   import HelloWorld from \\\"./components/HelloWorld.svelte\\\";   import Router from \\\"./components/Router.svelte\\\";   import {     settingStrore,     pagedd,     githubStrore,     pushToGithubTag,     searchNenoByDate,   }",
     		ctx
     	});
 
@@ -37087,7 +37626,7 @@
     		pending: create_pending_block$4,
     		then: create_then_block$4,
     		catch: create_catch_block$4,
-    		value: 3,
+    		value: 5,
     		blocks: [,,,]
     	};
 
@@ -37100,7 +37639,7 @@
     			t = space();
     			info.block.c();
     			attr_dev(main, "class", "overflow-y-hidden f h-screen");
-    			add_location(main, file$e, 77, 0, 2095);
+    			add_location(main, file$e, 130, 0, 3895);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -37169,18 +37708,17 @@
     	let $pagedd;
     	let $settingStrore;
     	let $githubStrore;
+    	let $searchNenoByDate;
     	validate_store(pagedd, "pagedd");
     	component_subscribe($$self, pagedd, $$value => $$invalidate(0, $pagedd = $$value));
     	validate_store(settingStrore, "settingStrore");
     	component_subscribe($$self, settingStrore, $$value => $$invalidate(1, $settingStrore = $$value));
     	validate_store(githubStrore, "githubStrore");
     	component_subscribe($$self, githubStrore, $$value => $$invalidate(2, $githubStrore = $$value));
+    	validate_store(searchNenoByDate, "searchNenoByDate");
+    	component_subscribe($$self, searchNenoByDate, $$value => $$invalidate(3, $searchNenoByDate = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("App", slots, []);
-
-    	if ("serviceWorker" in navigator) {
-    		navigator.serviceWorker.register("/service-worker.js");
-    	}
 
     	onMount(() => {
     		let setting = window.localStorage.getItem("settingStrore");
@@ -37193,16 +37731,68 @@
     		}
 
     		github && set_store_value(githubStrore, $githubStrore = JSON.parse(github), $githubStrore);
+
+    		//打开的时候进行同步
+    		trySyncGithub();
     	});
+
+    	githubStrore.subscribe(value => {
+    		if (value.access_token) {
+    			window.localStorage.setItem("githubStrore", JSON.stringify($githubStrore));
+    		}
+    	});
+
+    	async function trySyncGithub() {
+    		if ($githubStrore.access_token != "" && $githubStrore.repoName != "") {
+    			// 先检查老数据,第一次就获取所有的数据
+    			if ($githubStrore.lastCommitSha == "") {
+    				await cloneGithubRepo("");
+    				set_store_value(searchNenoByDate, $searchNenoByDate.date = "refresh", $searchNenoByDate);
+    			}
+
+    			{
+    				var lastCommitData = await getLastCommitRecord();
+
+    				if ($githubStrore.lastCommitSha != "" && lastCommitData.body.commit.sha != $githubStrore.lastCommitSha) {
+    					var comparResult = await compare2Commits({
+    						base: $githubStrore.lastCommitSha,
+    						head: lastCommitData.body.commit.sha
+    					});
+
+    					var fileChange = comparResult.body.files;
+
+    					for (let index = 0; index < fileChange.length; index++) {
+    						const element = fileChange[index];
+
+    						if (element.filename.indexOf(".json") == 35) {
+    							if (element.status != "removed") {
+    								var nenoBodyRaw = (await getGithubContent({ path: encodeURI(element.filename) })).body;
+    								var nenoData = {};
+
+    								try {
+    									nenoData = JSON.parse(nenoBodyRaw);
+    								} catch(error) {
+    									
+    								}
+
+    								if (!is_empty(nenoData)) insertToIndexedDB(nenoData);
+    							} else {
+    								await deleteOneFromIndexedDB({ _id: element.filename.substring(11, 35) });
+    							}
+    						}
+    					}
+
+    					set_store_value(searchNenoByDate, $searchNenoByDate.date = "refresh", $searchNenoByDate);
+    				}
+
+    				set_store_value(githubStrore, $githubStrore.lastCommitSha = lastCommitData.body.commit.sha, $githubStrore);
+    			}
+    		}
+    	}
 
     	pushToGithubTag.subscribe(async value => {
     		if (value.timestmp != 0 && $githubStrore.access_token != "") {
     			console.log(JSON.stringify(value.data));
-
-    			// 先检查老数据,第一次就获取所有的数据
-    			if ($githubStrore.lastCommitSha == "") {
-    				await cloneGithubRepo("");
-    			}
 
     			await getContentSha({
     				branch: $githubStrore.branch,
@@ -37219,7 +37809,6 @@
 
     				console.log("pushToGithubTagdata", data);
     				set_store_value(githubStrore, $githubStrore.lastCommitSha = data.body.commit.sha, $githubStrore);
-    				window.localStorage.setItem("githubStrore", JSON.stringify($githubStrore));
     			});
     		}
     	});
@@ -37238,15 +37827,24 @@
     		pagedd,
     		githubStrore,
     		pushToGithubTag,
+    		searchNenoByDate,
     		onMount,
     		pushToGithub,
     		getContentSha,
     		cloneGithubRepo,
+    		compare2Commits,
+    		getLastCommitRecord,
+    		getGithubContent,
+    		insertToIndexedDB,
+    		deleteOneFromIndexedDB,
+    		is_empty,
+    		trySyncGithub,
     		test,
     		sleep,
     		$pagedd,
     		$settingStrore,
-    		$githubStrore
+    		$githubStrore,
+    		$searchNenoByDate
     	});
 
     	return [];

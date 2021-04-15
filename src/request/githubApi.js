@@ -3,6 +3,7 @@ import { request } from "../utils/githubtool/index";
 import { Base64 } from 'js-base64';
 import { insertToIndexedDB } from "./fetchApi";
 import { is_empty } from "svelte/internal";
+import { get } from 'svelte/store';
 let baseurl = ""
 let gitubToken = ""
 let repoName = ""
@@ -34,7 +35,41 @@ export const loginWithGithub = async (data) => {
 
 }
 export const refreshTokenWithGithub = async (data) => {
-    return await (await fetch(`${baseurl}/githubRefreshToken`, genergeParams(data))).json()
+    var respone = await (await fetch(`${baseurl}/githubRefreshToken`, genergeParams(data))).json()
+    const oldvalue = get(githubStrore);
+
+    if (respone.access_token) {
+        githubStrore.set({
+            githubName: respone.githubName,
+            access_token: respone.access_token,
+            refresh_token: respone.refresh_token,
+            repoName: oldvalue.repoName,
+            lastCommitSha: oldvalue.lastCommitSha,
+            refresh_token: respone.refresh_token,
+            refresh_token_expires_in: respone.refresh_token_expires_in
+        })
+        return new Promise(async (resolve, rej) => {
+            return resolve({ body: respone })
+        })
+    } else {
+        githubStrore.set({
+            githubName: "",
+            access_token: "",
+            refresh_token: "",
+            repoName: oldvalue.repoName,
+            lastCommitSha: "",
+            refresh_token: "",
+            refresh_token_expires_in: ""
+            
+        })
+        window.location.replace(
+            "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
+        );
+        return new Promise(async (resolve, rej) => {
+            return resolve({ body: {} })
+        })
+    }
+
 
 }
 
@@ -101,6 +136,53 @@ export const getGithubContent = async (data) => {
         }
 
 
+    }
+}
+export const getLastCommitRecord = async (data) => {
+    try {
+        var re = await request('GET /repos/{owner}/{repo}/branches', {
+            headers: {
+                authorization: `token ${gitubToken}`,
+            },
+            owner: githubName,
+            repo: repoName,
+        })
+        console.log(re);
+        return new Promise(async (resolve, rej) => {
+            return resolve({ body: re.data[0] })
+        })
+    } catch (error) {
+        console.log("getContentShaerror", error);
+        if (error.status == 401) {
+            if (error.message == "Bad credentials") {
+                await refreshTokenWithGithub()
+                return await getLastCommitRecord(data)
+            }
+        }
+    }
+}
+export const compare2Commits = async (data) => {
+    try {
+
+        var re = await request('GET /repos/{owner}/{repo}/compare/{basehead}', {
+            headers: {
+                authorization: `token ${gitubToken}`,
+            },
+            owner: githubName,
+            repo: repoName,
+            basehead: `${data.base}...${data.head}`
+        })
+        return new Promise(async (resolve, rej) => {
+            return resolve({ body: re.data })
+        })
+    } catch (error) {
+        console.log("getContentShaerror", error);
+        if (error.status == 401) {
+            if (error.message == "Bad credentials") {
+                await refreshTokenWithGithub()
+                return await compare2Commits(data)
+            }
+        }
     }
 }
 export const getContentSha = async (data) => {

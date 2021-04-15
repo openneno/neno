@@ -9,6 +9,7 @@
     import { getAllFmolo, search } from "../request/fetchApi";
     import ProgressLine from "./ProgressLine.svelte";
     import { showSlide } from "./SettingSlide.svelte";
+    import { log } from "util";
 
     let flowClient;
     let innerHeight = 0;
@@ -28,17 +29,28 @@
 
     let nenoItems = [];
     let searchItems = [];
-
+    $: {
+        console.log(nenoItems);
+    }
     onMount(() => {
         load();
         searchNenoByDate.subscribe((value) => {
             console.log("searchNenoByDate", value);
-            searchNeno("", value.date, "");
+            if (value.date == "refresh") {
+                page = 0;
+                nenoItems=[]
+                load();
+            } else if (value.date != "") {
+                searchNeno("", value.date, "");
+            }
         });
         searchNenoByTag.subscribe((value) => {
             console.log("searchNenoByTag", value);
-            changeTag = value.tag.substring(1);
-            searchNeno("", "", value.tag);
+
+            if (value.tag != "") {
+                changeTag = value.tag.substring(1);
+                searchNeno("", "", value.tag);
+            }
         });
         flowClient.addEventListener("scroll", function () {
             if (
@@ -96,6 +108,9 @@
                 });
         } else {
             searchItems = [];
+            if (nenoItems.length == 0) {
+                load();
+            }
         }
     }
 </script>

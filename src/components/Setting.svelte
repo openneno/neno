@@ -1,7 +1,10 @@
 <script>
     import { onMount } from "svelte";
 
-    import { exportIndexedDBToFile, imporFileTotIndexedDB } from "../request/fetchApi";
+    import {
+        exportIndexedDBToFile,
+        imporFileTotIndexedDB,
+    } from "../request/fetchApi";
     import { settingStrore, githubStrore } from "../store/store.js";
     import { pagedd } from "../store/store.js";
 
@@ -151,12 +154,12 @@
                                 class="w-full border-2  mt-4 outline-white p-2"
                                 placeholder="仓库名"
                             />
-                            <input
+                            <!-- <input
                                 type="text"
                                 bind:value={branch}
                                 class="w-full border-2  mt-4 outline-white p-2"
                                 placeholder="分支"
-                            />
+                            /> -->
                         </div>
                         <div class="m-4">
                             <label for="">导入/导出离线数据</label>
