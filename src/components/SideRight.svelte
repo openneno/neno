@@ -119,7 +119,7 @@
 <div class="  flex-1 flex flex-col justify-start  pt-4  w-0">
     <img
         src="https://raw.githubusercontent.com/Mran/Logseq/master/Logseq.png"
-        class="w-64 hidden"
+        class="w-64 "
         alt=""
     />
     <div class="  flex flex-row items-center justify-between ">
