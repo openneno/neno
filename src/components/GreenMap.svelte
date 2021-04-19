@@ -43,7 +43,7 @@
     }
 </script>
 
-<div class="w-full flex justify-between pl-1 ">
+<div class="w-full flex justify-between pl-1  overflow-visible">
     {#each gmap as week}
         <div class=" space-y-1 ">
             {#each week as day}
@@ -55,7 +55,7 @@
                                 day.date == toDay ? "" : day.date
                             );
                         }}
-                        class="rounded-sm w-4 h-4 z-0 "
+                        class="rounded-sm w-4 h-4 z-50 overflow-visible  "
                         class:border-green-500={day.date == toDay}
                         class:border-soild={day.date == toDay}
                         class:bg-gray-300={day.count == 0}
@@ -73,7 +73,7 @@
                     {#if day.hover}
                         <div
                             class="absolute  bg-gray-800 text-white text-sm rounded-sm pl-2 pr-2 pt-1 pb-1 z-50 w-48 flex justify-center items-center"
-                            style="top:-2rem"
+                            style="top:-2rem;z-index: 9999; overflow: visible;"
                         >
                             {day.count} nenos on {day.date}
                         </div>

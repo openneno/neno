@@ -5,7 +5,7 @@
     settingStrore,
     pagedd,
     githubStrore,
-    pushToGithubTag,
+    commitToGithubTag,
     searchNenoByDate,
   } from "./store/store.js";
   import { onMount } from "svelte";
@@ -16,6 +16,7 @@
     compare2Commits,
     getLastCommitRecord,
     getGithubContent,
+    deleteContent,
   } from "./request/githubApi";
   import {
     insertToIndexedDB,
@@ -78,8 +79,10 @@
                   nenoData = JSON.parse(nenoBodyRaw);
                 } catch (error) {}
                 if (!is_empty(nenoData)) insertToIndexedDB(nenoData);
-              }else{
-               await deleteOneFromIndexedDB({_id:element.filename.substring(11,35)})
+              } else {
+                await deleteOneFromIndexedDB({
+                  _id: element.filename.substring(11, 35),
+                });
               }
             }
           }
@@ -89,27 +92,56 @@
       }
     }
   }
-  pushToGithubTag.subscribe(async (value) => {
+  commitToGithubTag.subscribe(async (value) => {
     if (value.timestmp != 0 && $githubStrore.access_token != "") {
       console.log(JSON.stringify(value.data));
 
       await getContentSha({
         branch: $githubStrore.branch,
-        fileName: `${value.data.created_at.substring(0, 10)}/${
-          value.data._id
-        }.json`,
+        fileName: encodeURI(
+          `${value.data.created_at.substring(0, 10)}/${value.data._id}.json`
+        ),
       }).then(async (shadata) => {
-        var data = await pushToGithub({
-          branch: $githubStrore.branch,
-          fileName: `${value.data.created_at.substring(0, 10)}/${
-            value.data._id
-          }.json`,
-          content: JSON.stringify(value.data, null, "\t"),
-          commitMessage: value.data.pureContent,
-          encode: true,
-          sha: shadata.body.sha,
-        });
-        console.log("pushToGithubTagdata", data);
+        switch (value.action) {
+          case "push": {
+            var data = await pushToGithub({
+              branch: $githubStrore.branch,
+              fileName: `${value.data.created_at.substring(0, 10)}/${
+                value.data._id
+              }.json`,
+              content: JSON.stringify(value.data, null, "\t"),
+              commitMessage: value.data.pureContent,
+              encode: true,
+              sha: shadata.body.sha,
+            });
+            console.log("commitToGithubTagdata", data);
+            break;
+          }
+          case "countDate": {
+            var data = await pushToGithub({
+              branch: $githubStrore.branch,
+              fileName: `${value.data.created_at.substring(0, 10)}/${
+                value.data._id
+              }.json`,
+
+              content: JSON.stringify(value.data, null, "\t"),
+              commitMessage: "countDate update",
+              encode: true,
+              sha: shadata.body.sha,
+            });
+            console.log("countDategithub", data);
+            break;
+          }
+          case "delete": {
+            var data = await deleteContent({
+              fileName: `${value.data.created_at.substring(0, 10)}/${
+                value.data._id
+              }.json`,
+              sha: shadata.body.sha,
+            });
+            console.log("commitToGithubTagdata", data);
+          }
+        }
 
         $githubStrore.lastCommitSha = data.body.commit.sha;
       });

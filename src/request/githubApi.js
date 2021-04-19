@@ -45,8 +45,8 @@ export const refreshTokenWithGithub = async (data) => {
             refresh_token: respone.refresh_token,
             repoName: oldvalue.repoName,
             lastCommitSha: oldvalue.lastCommitSha,
-            refresh_token: respone.refresh_token,
-            refresh_token_expires_in: respone.refresh_token_expires_in
+            expires_in: respone.expires_in * 1000 + Date.now(),
+            refresh_token_expires_in: respone.refresh_token_expires_in * 1000 + Date.now()
         })
         return new Promise(async (resolve, rej) => {
             return resolve({ body: respone })
@@ -58,9 +58,9 @@ export const refreshTokenWithGithub = async (data) => {
             refresh_token: "",
             repoName: oldvalue.repoName,
             lastCommitSha: "",
-            refresh_token: "",
-            refresh_token_expires_in: ""
-            
+            expires_in: respone.expires_in * 1000 + Date.now(),
+            refresh_token_expires_in: respone.refresh_token_expires_in * 1000 + Date.now()
+
         })
         window.location.replace(
             "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
@@ -216,6 +216,40 @@ export const getContentSha = async (data) => {
     }
 
 }
+export const deleteContent = async (data) => {
+    try {
+        var re = await request('DELETE /repos/{owner}/{repo}/contents/{path}', {
+            headers: {
+                authorization: `token ${gitubToken}`,
+            },
+            owner: githubName,
+            repo: repoName,
+            path: data.fileName,
+            message: "delete",
+            sha: data.sha
+        })
+        console.log(re);
+        return new Promise(async (resolve, rej) => {
+            return resolve({ body: re.data })
+        })
+    } catch (error) {
+        console.log("getContentShaerror", error);
+        if (error.status == 401) {
+            if (error.message == "Bad credentials") {
+                await refreshTokenWithGithub()
+                return await getContentSha(data)
+            }
+        }
+        if (error.status == 404) {
+            return new Promise(async (resolve, rej) => {
+                return resolve({ body: { sha: "" } })
+            })
+        }
+
+    }
+
+}
+
 export const checkGithubAppInstalled = async (data) => {
     return await (await fetch(`https://api.github.com/user/installations`, {
         method: "get",

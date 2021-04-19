@@ -139,7 +139,7 @@
     }
 </script>
 
-<div class="w-full flex flex-col overflow-auto h-screen">
+<div class="w-full flex flex-col overflow-auto  overflow-visible h-screen">
     <div
         class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold"
     >

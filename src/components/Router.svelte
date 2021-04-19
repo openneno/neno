@@ -20,6 +20,7 @@
         $githubStrore.githubName = "";
         $githubStrore.access_token = "";
         $githubStrore.refresh_token = "";
+        $githubStrore.expires_in = 0;
         $githubStrore.refresh_token_expires_in = 0;
         window.localStorage.setItem(
           "githubStrore",
@@ -34,8 +35,9 @@
               $githubStrore.githubName = respone.githubName;
               $githubStrore.access_token = respone.access_token;
               $githubStrore.refresh_token = respone.refresh_token;
+              $githubStrore.expires_in = respone.expires_in*1000 + Date.now();
               $githubStrore.refresh_token_expires_in =
-                respone.refresh_token_expires_in;
+                respone.refresh_token_expires_in*1000 +  Date.now();
               window.localStorage.setItem(
                 "githubStrore",
                 JSON.stringify($githubStrore)
@@ -54,9 +56,12 @@
             console.log(reason);
           });
       }
-    } else {
+    } else if (
+      $githubStrore.expires_in < Date.now() &&
+      $githubStrore.refresh_token
+    ) {
       //尝试刷新token
-      if ($githubStrore.refresh_token) {
+      {
         refreshTokenWithGithub({
           refresToken: $githubStrore.refresh_token,
         }).then((respone) => {

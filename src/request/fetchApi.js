@@ -1,4 +1,4 @@
-import { settingStrore, pushToGithubTag } from "../store/store.js";
+import { settingStrore, commitToGithubTag } from "../store/store.js";
 import { getObjectId } from "../utils/objetid.js";
 import { getObjectURL } from "../utils/process.js";
 import { openDB, } from 'idb';
@@ -233,9 +233,12 @@ export const addFmolo = async (data) => {
                 await (await db).put('nenoCount', countDate);
 
             }
+            countDate.created_at = "countDate"
+            countDate._id = "countDate"
+            commitToGithubTag.set({ timestmp: Date.now(), data: countDate, action: "countDate" })
         }
 
-        pushToGithubTag.set({ timestmp: Date.now(), data: data })
+        commitToGithubTag.set({ timestmp: Date.now(), data: data, action: "push" })
         return new Promise(async (resolve, rej) => {
 
             return resolve({ body: data })
@@ -279,8 +282,12 @@ export const detail = async (data) => {
 }
 export const deleteOne = async (data) => {
     if (useMode == "github") {
+        var result = await (await db).getFromIndex('nenoitem', "_id", data._id);
+
         (await db).delete('nenoitem', data._id);
-        pushToGithubTag.set(Date.now())
+
+        commitToGithubTag.set({ timestmp: Date.now(), data: result, action: "delete" })
+
         return new Promise(async (resolve, rej) => {
             return resolve({ body: {}, code: 200 })
         })
@@ -339,7 +346,7 @@ export const pin = async (data) => {
 
         pinTags.tags = [...pinTags.tags]
         await (await db).put('nenoPinTags', pinTags);
-        pushToGithubTag.set(Date.now())
+        commitToGithubTag.set(Date.now())
         return new Promise(async (resolve, rej) => {
             return resolve({
                 code: 200,
@@ -470,7 +477,7 @@ export const rename = async (data) => {
 
             cursor = await cursor.continue()
         }
-        pushToGithubTag.set(Date.now())
+        commitToGithubTag.set(Date.now())
         return new Promise(async (resolve, rej) => {
             return resolve({
                 code: 200,
