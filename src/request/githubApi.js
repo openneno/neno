@@ -1,24 +1,31 @@
-import { settingStrore, githubStrore } from "../store/store.js";
-import { request } from "../utils/githubtool/index";
-import { Base64 } from 'js-base64';
-import { insertToIndexedDB } from "./fetchApi";
-import { is_empty } from "svelte/internal";
-import { get } from 'svelte/store';
+import {settingStore, githubStore, reload} from "../store/store.js";
+import {request} from "../utils/githubtool/index";
+import {Base64} from 'js-base64';
+import {
+    insertCountDateToIndexedDB,
+    insertPicToIndexedDB,
+    insertPinTagsToIndexedDB,
+    insertToIndexedDB
+} from "./fetchApi";
+import {is_empty} from "svelte/internal";
+import {get} from 'svelte/store';
+
 let baseurl = ""
 let gitubToken = ""
 let repoName = ""
 let githubName = ""
 
-settingStrore.subscribe(value => {
-    baseurl = "http://127.0.0.1:3000"
-    // baseurl = value.domain;
+settingStore.subscribe(value => {
+    // baseurl = "http://127.0.0.1:3000"
+    baseurl = value.domain;
 
 });
-githubStrore.subscribe(value => {
+githubStore.subscribe(value => {
     gitubToken = value.access_token
     repoName = value.repoName
     githubName = value.githubName
 });
+
 function genergeParams(data) {
     return {
         body: JSON.stringify(data),
@@ -30,16 +37,17 @@ function genergeParams(data) {
     }
 
 }
+
 export const loginWithGithub = async (data) => {
     return await (await fetch(`${baseurl}/githubLogin`, genergeParams(data))).json()
 
 }
 export const refreshTokenWithGithub = async (data) => {
     var respone = await (await fetch(`${baseurl}/githubRefreshToken`, genergeParams(data))).json()
-    const oldvalue = get(githubStrore);
+    const oldvalue = get(githubStore);
 
     if (respone.access_token) {
-        githubStrore.set({
+        githubStore.set({
             githubName: respone.githubName,
             access_token: respone.access_token,
             refresh_token: respone.refresh_token,
@@ -49,10 +57,10 @@ export const refreshTokenWithGithub = async (data) => {
             refresh_token_expires_in: respone.refresh_token_expires_in * 1000 + Date.now()
         })
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: respone })
+            return resolve({body: respone})
         })
     } else {
-        githubStrore.set({
+        githubStore.set({
             githubName: "",
             access_token: "",
             refresh_token: "",
@@ -66,7 +74,7 @@ export const refreshTokenWithGithub = async (data) => {
             "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
         );
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: {} })
+            return resolve({body: {}})
         })
     }
 
@@ -88,7 +96,7 @@ export const pushToGithub = async (data) => {
         })
         console.log(re);
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: re.data })
+            return resolve({body: re.data})
         })
     } catch (error) {
         if (error.status == 401) {
@@ -106,7 +114,7 @@ export const getGithubContent = async (data) => {
         var re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
             headers: {
                 authorization: `token ${gitubToken}`,
-                accept: "application/vnd.github.v3.raw+json"
+                accept: `application/vnd.github.v3${data.raw ? ".raw" : ""}+json`
             },
             owner: githubName,
             repo: repoName,
@@ -114,11 +122,10 @@ export const getGithubContent = async (data) => {
 
         })
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: re.data })
+            return resolve({body: re.data})
 
         })
-    }
-    catch (error) {
+    } catch (error) {
         console.log("getContentShaerror", error);
         if (error.status == 401) {
             if (error.message == "Bad credentials") {
@@ -130,7 +137,7 @@ export const getGithubContent = async (data) => {
         //HttpError: This repository is empty.
         if (error.message.indexOf("empty") != -1) {
             return new Promise(async (resolve, rej) => {
-                return resolve({ body: {} })
+                return resolve({body: {}})
 
             })
         }
@@ -149,7 +156,7 @@ export const getLastCommitRecord = async (data) => {
         })
         console.log(re);
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: re.data[0] })
+            return resolve({body: re.data[0]})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
@@ -173,7 +180,7 @@ export const compare2Commits = async (data) => {
             basehead: `${data.base}...${data.head}`
         })
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: re.data })
+            return resolve({body: re.data})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
@@ -197,7 +204,7 @@ export const getContentSha = async (data) => {
         })
         console.log(re);
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: re.data })
+            return resolve({body: re.data})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
@@ -209,7 +216,7 @@ export const getContentSha = async (data) => {
         }
         if (error.status == 404) {
             return new Promise(async (resolve, rej) => {
-                return resolve({ body: { sha: "" } })
+                return resolve({body: {sha: ""}})
             })
         }
 
@@ -230,7 +237,7 @@ export const deleteContent = async (data) => {
         })
         console.log(re);
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: re.data })
+            return resolve({body: re.data})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
@@ -242,7 +249,7 @@ export const deleteContent = async (data) => {
         }
         if (error.status == 404) {
             return new Promise(async (resolve, rej) => {
-                return resolve({ body: { sha: "" } })
+                return resolve({body: {sha: ""}})
             })
         }
 
@@ -262,8 +269,9 @@ export const checkGithubAppInstalled = async (data) => {
 
 }
 export const cloneGithubRepo = async (contentPath) => {
+    let nenoBodyRaw;
     console.log("contentPath", contentPath);
-    var contentData = (await getGithubContent({ path: encodeURI(contentPath) }))
+    var contentData = (await getGithubContent({path: encodeURI(contentPath), raw: true}))
         .body;
     if (is_empty(contentData)) {
         return;
@@ -273,16 +281,47 @@ export const cloneGithubRepo = async (contentPath) => {
         if (element.type == "dir") {
             await cloneGithubRepo(element.path);
         } else if (element.type == "file") {
+            let nenoData = {};
+
             if (element.name.lastIndexOf(".json") == 24) {
-                var nenoBodyRaw = (
-                    await getGithubContent({ path: encodeURI(element.path) })
+                nenoBodyRaw = (
+                    await getGithubContent({path: encodeURI(element.path), raw: true})
                 ).body;
-                var nenoData = {};
                 try {
                     nenoData = JSON.parse(nenoBodyRaw);
-                } catch (error) { }
+                } catch (error) {
+                }
                 if (!is_empty(nenoData)) insertToIndexedDB(nenoData);
+            } else if (element.name == "countDate.json") {
+                nenoBodyRaw = (
+                    await getGithubContent({path: encodeURI(element.path), raw: true})
+                ).body;
+                try {
+                    nenoData = JSON.parse(nenoBodyRaw);
+                } catch (error) {
+                }
+                if (!is_empty(nenoData)) await insertCountDateToIndexedDB(nenoData);
+            } else if (element.name == "pinTags.json") {
+                nenoBodyRaw = (
+                    await getGithubContent({path: encodeURI(element.path), raw: true})
+                ).body;
+                try {
+                    nenoData = JSON.parse(nenoBodyRaw);
+                } catch (error) {
+                }
+                if (!is_empty(nenoData)) await insertPinTagsToIndexedDB(nenoData);
+            } else if (element.path.indexOf("picData/") === 0) {
+                nenoBodyRaw = (
+                    await getGithubContent({path: encodeURI(element.path), raw: false})
+                ).body;
+                nenoData = {
+                    _id: nenoBodyRaw.name.substring(0, nenoBodyRaw.name.indexOf(".")),
+                    base64: "data:image/png;base64," + nenoBodyRaw.content
+                }
+                if (!is_empty(nenoData)) await insertPicToIndexedDB(nenoData);
             }
+            reload.set({tag: Date.now(), action: "neno"})
+
         }
     }
 }

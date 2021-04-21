@@ -1,37 +1,40 @@
-import { settingStrore, commitToGithubTag } from "../store/store.js";
-import { getObjectId } from "../utils/objetid.js";
-import { getObjectURL } from "../utils/process.js";
-import { openDB, } from 'idb';
+import {settingStore, commitToGithubTag, reload} from "../store/store.js";
+import {getObjectId} from "../utils/objetid.js";
+import {getObjectURL} from "../utils/process.js";
+import {openDB,} from 'idb';
 import dayjs from "dayjs";
 
 // import { openDB } from 'idb/with-async-ittr.js';
 let baseurl = ""
 let useMode = "演示模式"
-const db = openDB("neno", 3, {
+const db = openDB("neno", 4, {
     upgrade(db, oldVersion, newVersion, transaction) {
         console.log('数据库新建成功');
 
         var objectStore;
         if (!db.objectStoreNames.contains('nenoitem')) {
-            objectStore = db.createObjectStore('nenoitem', { keyPath: '_id' });
-            objectStore.createIndex('_id', '_id', { unique: true });// 创建索引
-            objectStore.createIndex('parentId', 'parentId', { unique: false });// 创建索引
+            objectStore = db.createObjectStore('nenoitem', {keyPath: '_id'});
+            objectStore.createIndex('_id', '_id', {unique: true});// 创建索引
+            objectStore.createIndex('parentId', 'parentId', {unique: false});// 创建索引
 
-            objectStore = db.createObjectStore('nenoPic', { keyPath: '_id' });
-            objectStore.createIndex('_id', '_id', { unique: true });
+            objectStore = db.createObjectStore('nenoPic', {keyPath: '_id'});
+            objectStore.createIndex('_id', '_id', {unique: true});
 
-            objectStore = db.createObjectStore('nenoCount', { keyPath: '_id' });
-            objectStore.createIndex('_id', '_id', { unique: false });
+            objectStore = db.createObjectStore('nenoCount', {keyPath: '_id'});
+            objectStore.createIndex('_id', '_id', {unique: false});
+
+            objectStore = db.createObjectStore('task', {keyPath: '_id'});
+            objectStore.createIndex('_id', '_id', {unique: true});
 
 
-            objectStore = db.createObjectStore('nenoPinTags', { keyPath: '_id' });
+            objectStore = db.createObjectStore('nenoPinTags', {keyPath: '_id'});
         }
     },
 })
 
-settingStrore.subscribe(value => {
-    baseurl = "http://127.0.0.1:3000"
-    // baseurl = value.domain;
+settingStore.subscribe(value => {
+    // baseurl = "http://127.0.0.1:3000"
+    baseurl = value.domain;
     useMode = value.useMode
 });
 // const baseurl = "http://127.0.0.1:3000"
@@ -48,6 +51,7 @@ function genergeParams(data) {
     }
 
 }
+
 const readUploadedFileAsText = (inputFile) => {
     const temporaryFileReader = new FileReader();
 
@@ -72,7 +76,7 @@ export const exportIndexedDBToFile = async () => {
     for (const element of allNenoPic) {
         var blob = element.file;
         let picbase64 = await readUploadedFileAsText(blob)
-        allNenopicBase64 = [...allNenopicBase64, { _id: element._id, file: picbase64 }]
+        allNenopicBase64 = [...allNenopicBase64, {_id: element._id, file: picbase64}]
     }
 
     return new Promise((resolve, rej) => {
@@ -129,6 +133,27 @@ export const imporFileTotIndexedDB = async (allData) => {
     })
 
 }
+export const getFileFromIndexedDB = async (key) => {
+    let result = await (await db).get("nenoPic", key)
+    return new Promise((resolve, rej) => {
+        var url = getObjectURL(result.file)
+        return resolve({key: url})
+
+    })
+}
+export const uploadPicIndexedDB = async (imageFile) => {
+    const _id = getObjectId().toString();
+    var picData = {_id: _id, file: imageFile, created_at: "picData"};
+    await (await db).put("nenoPic", picData)
+    picData.base64File = await readUploadedFileAsText(imageFile)
+    picData.suffixName = imageFile.name.substring(imageFile.name.lastIndexOf(".") + 1)
+    await pushTaskToIndexedDB({timestmp: Date.now(), data: picData, action: "uploadPic"})
+
+    return new Promise((resolve, rej) => {
+        return resolve({key: _id})
+    })
+}
+
 export const insertToIndexedDB = async (data) => {
 
     await (await db).put('nenoitem', data);
@@ -139,24 +164,70 @@ export const insertToIndexedDB = async (data) => {
     })
 
 }
-export const getFileFromIndexedDB = async (key) => {
-    let result = await (await db).get("nenoPic", key)
+export const insertCountDateToIndexedDB = async (data) => {
+
+    await (await db).put('nenoCount', data);
     return new Promise((resolve, rej) => {
-        var url = getObjectURL(result.file)
-        return resolve({ key: url })
+        return resolve("ok")
+
+    })
+
+}
+export const insertPinTagsToIndexedDB = async (data) => {
+
+    await (await db).put('nenoPinTags', data);
+    return new Promise((resolve, rej) => {
+        return resolve("ok")
+
+    })
+
+}
+export const insertPicToIndexedDB = async (imageBase64Data) => {
+    var picData = {
+        _id: imageBase64Data._id,
+        file: await fetch(imageBase64Data.base64).then(r => r.blob()),
+        created_at: "picData"
+    };
+    await (await db).put("nenoPic", picData)
+    return new Promise((resolve, rej) => {
+        return resolve({key: imageBase64Data._id})
+    })
+}
+export const deleteOneFromIndexedDB = async (data) => {
+    (await db).delete('nenoitem', data._id);
+    return new Promise(async (resolve, rej) => {
+        return resolve({body: {}, code: 200})
+    })
+}
+export const pushTaskToIndexedDB = async (data) => {
+    const taskData = await (await db).put('task', {_id: getObjectId().toString(), data: data});
+
+    return new Promise(async (resolve, rej) => {
+        return resolve({body: taskData, code: 200})
+    })
+}
+export const popTaskToIndexedDB = async (data) => {
+    let taskData = []
+    let cursor = await (await db).transaction("task").store.openCursor();
+
+    while ((cursor)) {
+
+        taskData = [...taskData, cursor.value]
+
+        cursor = await cursor.continue();
+    }
+
+    return new Promise(async (resolve, rej) => {
+        return resolve({body: taskData})
 
     })
 }
-export const uploadPicIndexedDB = async (imageFile) => {
-    var _id = getObjectId().toString()
-
-    await (await db).put("nenoPic", { _id: _id, file: imageFile })
-
-    return new Promise((resolve, rej) => {
-        return resolve({ key: _id })
+export const deleteTaskToIndexedDB = async (_id) => {
+    await (await db).delete('task', _id);
+    return new Promise(async (resolve, rej) => {
+        return resolve({body: {}, code: 200})
     })
 }
-
 export const getAllFmolo = async (data) => {
     if (useMode == "github") {
 
@@ -177,7 +248,7 @@ export const getAllFmolo = async (data) => {
                 nenos = [...nenos, value]
                 if (++count > 20) {
                     return new Promise((resolve, rej) => {
-                        return resolve({ body: nenos })
+                        return resolve({body: nenos})
 
                     })
 
@@ -187,7 +258,7 @@ export const getAllFmolo = async (data) => {
             }
         }
         return new Promise((resolve, rej) => {
-            return resolve({ body: nenos })
+            return resolve({body: nenos})
 
         })
 
@@ -199,7 +270,7 @@ export const getAllFmolo = async (data) => {
 export const addFmolo = async (data) => {
     if (useMode == "github") {
         if
-            (data._id != "") {
+        (data._id != "") {
             var old = await (await db).getFromIndex('nenoitem', "_id", data._id);
             if (old) {
                 data.created_at = old.created_at
@@ -214,7 +285,6 @@ export const addFmolo = async (data) => {
             data.created_at = dayjs().format()
             await (await db).put('nenoitem', data);
             let dDate = data.created_at.substring(0, 10)
-            // let dDate="2021-03-27"
             let countDate = {}
 
             let cursor = await (await db).transaction("nenoCount").store.openCursor();
@@ -235,13 +305,14 @@ export const addFmolo = async (data) => {
             }
             countDate.created_at = "countDate"
             countDate._id = "countDate"
-            commitToGithubTag.set({ timestmp: Date.now(), data: countDate, action: "countDate" })
+            reload.set({tag: Date.now(), action: "nenoCount"})
+            await pushTaskToIndexedDB({timestmp: Date.now(), data: countDate, action: "countDate"})
         }
+        await pushTaskToIndexedDB({timestmp: Date.now(), data: data, action: "push"})
 
-        commitToGithubTag.set({ timestmp: Date.now(), data: data, action: "push" })
         return new Promise(async (resolve, rej) => {
 
-            return resolve({ body: data })
+            return resolve({body: data})
 
         })
 
@@ -274,7 +345,7 @@ export const detail = async (data) => {
         result.children = children
         return new Promise(async (resolve, rej) => {
             ('return: ', result);
-            return resolve({ body: result })
+            return resolve({body: result})
         })
     } else {
         return await (await fetch(`${baseurl}/detail`, genergeParams(data))).json()
@@ -286,22 +357,19 @@ export const deleteOne = async (data) => {
 
         (await db).delete('nenoitem', data._id);
 
-        commitToGithubTag.set({ timestmp: Date.now(), data: result, action: "delete" })
+        await pushTaskToIndexedDB({timestmp: Date.now(), data: result, action: "delete"})
+
+        reload.set({tag: Date.now(), action: "nenoCount"})
 
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: {}, code: 200 })
+            return resolve({body: {}, code: 200})
         })
     } else {
         return await (await fetch(`${baseurl}/delete`, genergeParams(data))).json()
 
     }
 }
-export const deleteOneFromIndexedDB = async (data) => {
-    (await db).delete('nenoitem', data._id);
-    return new Promise(async (resolve, rej) => {
-        return resolve({ body: {}, code: 200 })
-    })
-}
+
 export const tags = async (data) => {
 
     if (useMode == "github") {
@@ -345,8 +413,12 @@ export const pin = async (data) => {
         }
 
         pinTags.tags = [...pinTags.tags]
+
         await (await db).put('nenoPinTags', pinTags);
-        commitToGithubTag.set(Date.now())
+        pinTags.created_at = "pinTags"
+        pinTags._id = "pinTags"
+        await pushTaskToIndexedDB({timestmp: Date.now(), data: pinTags, action: "pinTags"})
+
         return new Promise(async (resolve, rej) => {
             return resolve({
                 code: 200,
@@ -367,7 +439,7 @@ export const pins = async (data) => {
         }
         let repintags = []
         pinTags.forEach(element => {
-            repintags = [...repintags, { _id: getObjectId().toString(), tag: element }]
+            repintags = [...repintags, {_id: getObjectId().toString(), tag: element}]
         });
         return new Promise(async (resolve, rej) => {
             return resolve({
@@ -391,14 +463,14 @@ export const search = async (data) => {
         while ((cursor)) {
             let value = cursor.value;
 
-            if (value.created_at == data.created_at || value.tags.includes(data.tag) || value.content.indexOf(data.content) != -1) {
+            if (value.created_at == data.created_at || value.tags.includes(data.tag) || (data.content != "" && value.content.indexOf(data.content) != -1)) {
                 nenos = [...nenos, value]
             }
 
             cursor = await cursor.continue();
         }
         return new Promise((resolve, rej) => {
-            return resolve({ body: nenos })
+            return resolve({body: nenos})
 
         })
 
@@ -421,7 +493,7 @@ export const count = async (data) => {
         }
         let count = await (await db).countFromIndex("nenoitem", "_id")
         return new Promise(async (resolve, rej) => {
-            return resolve({ body: { countDate: countDate, count: count } })
+            return resolve({body: {countDate: countDate, count: count}})
 
         })
     } else {
@@ -470,14 +542,14 @@ export const rename = async (data) => {
                     pContent += element.content.substring(pIndex);
                     element.content = pContent
                     cursor.update(neno)
+                    await pushTaskToIndexedDB({timestmp: Date.now(), data: neno, action: "push"})
+
                     break
                 }
             }
-
-
             cursor = await cursor.continue()
         }
-        commitToGithubTag.set(Date.now())
+        reload.set({tag: Date.now(), action: "nenoCount"})
         return new Promise(async (resolve, rej) => {
             return resolve({
                 code: 200,

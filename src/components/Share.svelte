@@ -31,8 +31,8 @@
     import { getFileFromIndexedDB } from "../request/fetchApi";
     import dayjs from "dayjs";
     import html2canvas from "html2canvas";
-    import { countStrore, searchNenoByTag } from "../store/store.js";
-    import { onMount } from "svelte";
+    import {countStore, searchNenoByTag} from "../store/store.js";
+    import {onMount} from "svelte";
     let show = false;
     onMount(() => {
         showShare = showDetail;
@@ -184,7 +184,7 @@
                     class=" space-y-2 flex justify-between text-gray-500 text-sm"
                 >
                     <div>
-                        {`${$countStrore.nenoCount} NENOS • ${$countStrore.dayCount}DAYS `}
+                        {`${$countStore.nenoCount} NENOS • ${$countStore.dayCount}DAYS `}
                     </div>
 
                     <div class="flex items-center space-x-2">

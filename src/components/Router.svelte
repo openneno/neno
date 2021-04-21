@@ -4,10 +4,10 @@
    */
 
   import {
-    loginWithGithub,
-    refreshTokenWithGithub,
+      loginWithGithub,
+      refreshTokenWithGithub,
   } from "../request/githubApi";
-  import { githubStrore } from "../store/store.js";
+  import {githubStore} from "../store/store.js";
 
   window.onload = function () {
     console.log(window.location);
@@ -17,36 +17,36 @@
         console.log(`Parameter of ${key} is ${value} `);
       });
       if (searchParams.has("code")) {
-        $githubStrore.githubName = "";
-        $githubStrore.access_token = "";
-        $githubStrore.refresh_token = "";
-        $githubStrore.expires_in = 0;
-        $githubStrore.refresh_token_expires_in = 0;
-        window.localStorage.setItem(
-          "githubStrore",
-          JSON.stringify($githubStrore)
-        );
-        loginWithGithub({
-          code: searchParams.get("code"),
-        })
-          .then((respone) => {
-            console.log(respone);
-            if (respone.access_token) {
-              $githubStrore.githubName = respone.githubName;
-              $githubStrore.access_token = respone.access_token;
-              $githubStrore.refresh_token = respone.refresh_token;
-              $githubStrore.expires_in = respone.expires_in*1000 + Date.now();
-              $githubStrore.refresh_token_expires_in =
-                respone.refresh_token_expires_in*1000 +  Date.now();
-              window.localStorage.setItem(
-                "githubStrore",
-                JSON.stringify($githubStrore)
-              );
-              if (!respone.nenoinkId) {
-                window.location.replace(
-                  "https://github.com/apps/nenoink/installations/new"
-                );
-                return;
+          $githubStore.githubName = "";
+          $githubStore.access_token = "";
+          $githubStore.refresh_token = "";
+          $githubStore.expires_in = 0;
+          $githubStore.refresh_token_expires_in = 0;
+          window.localStorage.setItem(
+              "githubStore",
+              JSON.stringify($githubStore)
+          );
+          loginWithGithub({
+              code: searchParams.get("code"),
+          })
+              .then((respone) => {
+                  console.log(respone);
+                  if (respone.access_token) {
+                      $githubStore.githubName = respone.githubName;
+                      $githubStore.access_token = respone.access_token;
+                      $githubStore.refresh_token = respone.refresh_token;
+                      $githubStore.expires_in = respone.expires_in * 1000 + Date.now();
+                      $githubStore.refresh_token_expires_in =
+                          respone.refresh_token_expires_in * 1000 + Date.now();
+                      window.localStorage.setItem(
+                          "githubStore",
+                          JSON.stringify($githubStore)
+                      );
+                      if (!respone.nenoinkId) {
+                          window.location.replace(
+                              "https://github.com/apps/nenoink/installations/new"
+                          );
+                          return;
               }
             }
 
@@ -57,17 +57,18 @@
           });
       }
     } else if (
-      $githubStrore.expires_in < Date.now() &&
-      $githubStrore.refresh_token
+        $githubStore.expires_in < Date.now() &&
+        $githubStore.refresh_token
+
     ) {
-      //尝试刷新token
-      {
-        refreshTokenWithGithub({
-          refresToken: $githubStrore.refresh_token,
-        }).then((respone) => {
-          console.log(respone);
-          if (respone.body.access_token) {
-            if (respone.body.nenoinkId == "") {
+        //尝试刷新token
+        {
+            refreshTokenWithGithub({
+                refresToken: $githubStore.refresh_token,
+            }).then((respone) => {
+                console.log(respone);
+                if (respone.body.access_token) {
+                    if (respone.body.nenoinkId == "") {
               window.location.replace(
                 "https://github.com/apps/nenoink/installations/new"
               );

@@ -87,6 +87,7 @@
                 `<span class="bg-yellow-300">${searchContent}</span>`
             );
         }
+        pContent = pContent.replaceAll(/(https?:\/\/?[^\s<)）\]]*)/g, '<a href="$1" target="_blank">$1</a>')
         return pContent;
     }
     async function getImageurl(imgDomain, key, platform) {

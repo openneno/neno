@@ -16,7 +16,7 @@
     import { getObjectURL } from "../utils/process";
     import { showPictureView } from "./ViewPicture.svelte";
 
-    import { settingStrore, tagStrore } from "../store/store.js";
+    import {settingStore, tagStore} from "../store/store.js";
 
     import ProgressLine from "./ProgressLine.svelte";
     export let content = "";
@@ -129,8 +129,8 @@
             let tagMay = text.substring(sIndex, cIndex);
 
             tagTips = [];
-            for (let index = 0; index < $tagStrore.allTags.length; index++) {
-                const element = $tagStrore.allTags[index];
+            for (let index = 0; index < $tagStore.allTags.length; index++) {
+                const element = $tagStore.allTags[index];
                 if (element.indexOf(tagMay) == 0) {
                     tagTips = [...tagTips, element];
                 }
@@ -183,7 +183,7 @@
             if (element.uploadingstatus == "未上传") {
                 element.uploadingstatus = "上传中";
                 // uploadPic(element, index);
-                if ($settingStrore.useMode=="离线模式") {
+                if ($settingStore.useMode == "github") {
                     uploadPicLocal(element, index);
                 } else {
                     qiniuToken()
@@ -347,7 +347,7 @@
                 {
                     key: element.uploadInfo.key,
                     platform: element.uploadInfo.platform,
-                    imgDomain: $settingStrore.imgDomain,
+                    imgDomain: $settingStore.imgDomain,
                     timeStamp: element.timeStamp,
                 },
             ];

@@ -1,19 +1,19 @@
 <script>
-    import { onMount } from "svelte";
+    import {onMount} from "svelte";
 
     import {
         exportIndexedDBToFile,
         imporFileTotIndexedDB,
     } from "../request/fetchApi";
-    import { settingStrore, githubStrore } from "../store/store.js";
-    import { pagedd } from "../store/store.js";
+    import {settingStore, githubStore} from "../store/store.js";
+    import {pagedd} from "../store/store.js";
 
-    let platform = $settingStrore.platform;
-    let imgDomain = $settingStrore.imgDomain;
-    let domain = $settingStrore.domain;
-    let useMode = $settingStrore.useMode;
-    let repoName = $githubStrore.repoName;
-    let branch = $githubStrore.branch;
+    let platform = $settingStore.platform;
+    let imgDomain = $settingStore.imgDomain;
+    let domain = $settingStore.domain;
+    let useMode = $settingStore.useMode;
+    let repoName = $githubStore.repoName;
+    let branch = $githubStore.branch;
 
     let done = "";
     let importFile = "";
@@ -39,21 +39,21 @@
         }
     }
     function saveSetting() {
-        $settingStrore.imgDomain = imgDomain;
-        $settingStrore.platform = platform;
-        $settingStrore.domain = domain;
-        $settingStrore.useMode = useMode;
-        $githubStrore.repoName = repoName;
-        $settingStrore.branch = branch;
+        $settingStore.imgDomain = imgDomain;
+        $settingStore.platform = platform;
+        $settingStore.domain = domain;
+        $settingStore.useMode = useMode;
+        $githubStore.repoName = repoName;
+        $settingStore.branch = branch;
 
-        console.log($settingStrore);
+        console.log($settingStore);
         window.localStorage.setItem(
-            "settingStrore",
-            JSON.stringify($settingStrore)
+            "settingStore",
+            JSON.stringify($settingStore)
         );
         window.localStorage.setItem(
-            "githubStrore",
-            JSON.stringify($githubStrore)
+            "githubStore",
+            JSON.stringify($githubStore)
         );
         window.location.reload();
     }
@@ -73,14 +73,14 @@
         uploadNode.click();
     }
     function clearGithubSetting() {
-        $githubStrore.githubName = "";
-        $githubStrore.repoName = "";
-        $githubStrore.access_token = "";
-        $githubStrore.refresh_token = "";
-        $githubStrore.refresh_token_expires_in = 0;
+        $githubStore.githubName = "";
+        $githubStore.repoName = "";
+        $githubStore.access_token = "";
+        $githubStore.refresh_token = "";
+        $githubStore.refresh_token_expires_in = 0;
         window.localStorage.setItem(
-            "githubStrore",
-            JSON.stringify($githubStrore)
+            "githubStore",
+            JSON.stringify($githubStore)
         );
         window.location.reload();
     }
@@ -133,7 +133,7 @@
     {:else}
         <div>
             <div class="m-4 flex flex-col">
-                {#if $githubStrore.githubName}
+                {#if $githubStore.githubName}
                     <div class="mb-4">
                         <div class="flex items-center ml-4">
                             <button
@@ -142,7 +142,7 @@
                                     clearGithubSetting();
                                 }}
                             >
-                                {$githubStrore.githubName}
+                                {$githubStore.githubName}
                                 登出</button
                             >
                         </div>

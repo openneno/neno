@@ -13,16 +13,7 @@
     let isChangeTaging = false;
 
     const dispatch = createEventDispatcher();
-    $: {
-        console.log(
-            tag,
-            showTag,
-            parentTag,
-            children,
-            showTag.indexOf("#"),
-            showTag.indexOf("#") == 0 ? showTag.substring(1) : showTag
-        );
-    }
+
 </script>
 
 <div>

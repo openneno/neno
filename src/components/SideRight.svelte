@@ -1,15 +1,15 @@
 <script>
-    import { onMount } from "svelte";
-    import { fly } from "svelte/transition";
-    import { searchNenoByTag, searchNenoByDate } from "../store/store.js";
+    import {onMount} from "svelte";
+    import {fly} from "svelte/transition";
+    import {searchNenoByTag, searchNenoByDate, reload} from "../store/store.js";
 
     import QuillEditor from "./QuillEditor.svelte";
     import FmoloItem from "./FmoloItem.svelte";
 
-    import { getAllFmolo, search } from "../request/fetchApi";
+    import {getAllFmolo, search} from "../request/fetchApi";
     import ProgressLine from "./ProgressLine.svelte";
-    import { showSlide } from "./SettingSlide.svelte";
-    import { log } from "util";
+    import {showSlide} from "./SettingSlide.svelte";
+    import {log} from "util";
 
     let flowClient;
     let innerHeight = 0;
@@ -29,16 +29,14 @@
 
     let nenoItems = [];
     let searchItems = [];
-    $: {
-        console.log(nenoItems);
-    }
+
     onMount(() => {
         load();
         searchNenoByDate.subscribe((value) => {
             console.log("searchNenoByDate", value);
             if (value.date == "refresh") {
                 page = 0;
-                nenoItems=[]
+                nenoItems = []
                 load();
             } else if (value.date != "") {
                 searchNeno("", value.date, "");
@@ -46,16 +44,26 @@
         });
         searchNenoByTag.subscribe((value) => {
             console.log("searchNenoByTag", value);
+            changeTag = value.tag.substring(1);
 
             if (value.tag != "") {
-                changeTag = value.tag.substring(1);
                 searchNeno("", "", value.tag);
+            } else {
+                searchItems = []
             }
         });
+        reload.subscribe((value) => {
+            if (value.tag && value.action == "neno") {
+                page = 0;
+                isEnd = false
+                nenoItems = []
+                load();
+            }
+        })
         flowClient.addEventListener("scroll", function () {
             if (
                 flowClient.scrollTop ==
-                    flowClient.scrollHeight - flowClient.clientHeight &&
+                flowClient.scrollHeight - flowClient.clientHeight &&
                 !isLoding &&
                 !isEnd
             ) {
@@ -64,10 +72,11 @@
             }
         });
     });
+
     function load() {
         isLoding = true;
         isLodingError = false;
-        getAllFmolo({ page: page })
+        getAllFmolo({page: page})
             .then((respone) => {
                 let re = respone;
                 if (re.body.length == 0) {
@@ -84,6 +93,7 @@
                 isLoding = false;
             });
     }
+
     function searchNeno(searchText = "", searchDate = "", searchTag = "") {
         if (
             searchText.length != 0 ||
@@ -115,64 +125,58 @@
     }
 </script>
 
-<svelte:window bind:innerHeight />
+<svelte:window bind:innerHeight/>
 <div class="  flex-1 flex flex-col justify-start  pt-4  w-0">
-    <img
-        src="https://raw.githubusercontent.com/Mran/Logseq/master/Logseq.png"
-        class="w-64 "
-        alt=""
-    />
     <div class="  flex flex-row items-center justify-between ">
         <div class="flex flex-row items-center pl-4 ">
             {#if changeTag == ""}
-                NENO
+                <div class="font-bold">NENO</div>
             {:else}
                 <div
-                    class="flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1"
+                        class="flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1"
                 >
-                    <div class="mr-1 pt-1"><i class="ri-hashtag" /></div>
+                    <div class="mr-1 pt-1"><i class="ri-hashtag"/></div>
                     <div class="font-bold w-auto mr-2" type="text">
                         {changeTag}
                     </div>
                     <button class="focus:outline-none ">
                         <i
-                            class="ri-close-circle-fill text-gray-400"
-                            on:click={() => {
+                                class="ri-close-circle-fill text-gray-400"
+                                on:click={() => {
                                 $searchNenoByTag.tag = "";
-                            }}
-                        />
+                            }}></i>
                     </button>
                 </div>
             {/if}
             {#if changeTag == ""}
                 <button
-                    class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
-                    on:click={() => {
+                        class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
+                        on:click={() => {
                         showSlide();
                     }}
                 >
-                    <i class="ri-function-fill" />
+                    <i class="ri-function-fill"/>
                 </button>
             {/if}
         </div>
 
         <div
-            class="bg-gray-200 rounded-lg h-8 p-2 flex items-center flex-shrink-0"
+                class="bg-gray-200 rounded-lg h-8 p-2 flex items-center flex-shrink-0"
         >
-            <i class="ri-search-2-line text-gray-400" />
+            <i class="ri-search-2-line text-gray-400"/>
             <input
-                class=" ml-2 bg-gray-200 focus:outline-none text-sm"
-                type="text"
-                on:keydown={(event) => {
+                    class=" ml-2 bg-gray-200 focus:outline-none text-sm"
+                    type="text"
+                    on:keydown={(event) => {
                     if (event.code == "Enter") {
                         searchNeno(searchText, "");
                     }
                 }}
-                bind:value={searchText}
+                    bind:value={searchText}
             />
             <i
-                class="ri-close-circle-fill text-gray-400"
-                on:click={() => {
+                    class="ri-close-circle-fill text-gray-400"
+                    on:click={() => {
                     searchText = "";
                     searchItems = [];
                 }}
@@ -181,36 +185,37 @@
     </div>
     <div class="p-2 ">
         <QuillEditor
-            on:update={(event) => {
+                on:update={(event) => {
                 nenoItems = [event.detail, ...nenoItems];
             }}
         />
     </div>
     {#if isLoding}
         <div transition:fly={{ y: -20, duration: 1000 }} class="w-full ">
-            <ProgressLine />
+            <ProgressLine/>
         </div>
     {/if}
     {#if isLodingError}
         <div class="w-full pl-4 pr-4">
             <button
-                class=" w-full rounded focus:outline-none m-aut bg-red-400  text-white  p-2  "
-                on:click={() => {
+                    class=" w-full rounded focus:outline-none m-aut bg-red-400  text-white  p-2  "
+                    on:click={() => {
                     load();
-                }}>重新获取</button
+                }}>重新获取
+            </button
             >
         </div>
     {/if}
     <div
-        bind:this={flowClient}
-        class="flex flex-col overflow-y-scroll p-2 "
-        style="height:{innerHeight - flowClientTop}px"
+            bind:this={flowClient}
+            class="flex flex-col overflow-y-scroll p-2 "
+            style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length == 0}
             {#each nenoItems as item (item._id)}
                 <FmoloItem
-                    {...item}
-                    on:deleteOne={(event) => {
+                        {...item}
+                        on:deleteOne={(event) => {
                         nenoItems = nenoItems.filter((item) => {
                             return item._id != event.detail._id;
                         });
@@ -220,9 +225,9 @@
         {:else}
             {#each searchItems as item (item._id)}
                 <FmoloItem
-                    {...item}
-                    searchContent={searchText}
-                    on:deleteOne={(event) => {
+                        {...item}
+                        searchContent={searchText}
+                        on:deleteOne={(event) => {
                         nenoItems = nenoItems.filter((item) => {
                             return item._id != event.detail._id;
                         });
