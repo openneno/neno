@@ -49,18 +49,21 @@
         let index = 0
         setInterval(async () => {
             console.log(tasking)
+            if ($githubStore.access_token != "" && $githubStore.repoName != "") {
 
-            if (!tasking) {
-                tasking = true
-                let taskData = (await popTaskToIndexedDB()).body
-                console.log(taskData)
-                for (const item of taskData) {
-                    await doTask(item.data)
-                    await deleteTaskToIndexedDB(item._id)
+                if (!tasking) {
+                    tasking = true
+                    let taskData = (await popTaskToIndexedDB()).body
+                    console.log(taskData)
+                    for (const item of taskData) {
+                        await doTask(item.data)
+                        await deleteTaskToIndexedDB(item._id)
+                    }
+                    tasking = false
+
                 }
-                tasking = false
-
             }
+
 
         }, 5000)
     });
