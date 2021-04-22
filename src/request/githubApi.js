@@ -10,16 +10,12 @@ import {
 import {is_empty} from "svelte/internal";
 import {get} from 'svelte/store';
 
-let baseurl = ""
+let baseurl = "http://api.neno.topmini.top"
 let gitubToken = ""
 let repoName = ""
 let githubName = ""
 
-settingStore.subscribe(value => {
-    // baseurl = "http://127.0.0.1:3000"
-    baseurl = value.domain;
 
-});
 githubStore.subscribe(value => {
     gitubToken = value.access_token
     repoName = value.repoName
