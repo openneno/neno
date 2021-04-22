@@ -10,7 +10,7 @@ import {
 import {is_empty} from "svelte/internal";
 import {get} from 'svelte/store';
 
-let baseurl = "http://api.neno.topmini.top"
+let baseurl = "https://api.neno.topmini.top"
 let gitubToken = ""
 let repoName = ""
 let githubName = ""
