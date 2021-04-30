@@ -49,24 +49,24 @@
             {#each week as day}
                 <div class="  relative flex justify-center items-center ">
                     <div
-                        on:click={() => {
+                            on:click={() => {
                             dispatch(
                                 "greenmapClick",
                                 day.date == toDay ? "" : day.date
                             );
                         }}
-                        class="rounded-sm w-4 h-4 z-50 overflow-visible  "
-                        class:border-green-500={day.date == toDay}
-                        class:border-soild={day.date == toDay}
-                        class:bg-gray-300={day.count == 0}
-                        class:bg-green-300={day.count > 0 && day.count <= 3}
-                        class:bg-green-400={day.count > 3 && day.count <= 8}
-                        class:bg-green-600={day.count > 8}
-                        class:border-2={day.date == toDay}
-                        on:mouseenter={() => {
+                            class="rounded-sm w-4 h-4  overflow-visible  "
+                            class:border-green-500={day.date == toDay}
+                            class:border-soild={day.date == toDay}
+                            class:bg-gray-300={day.count == 0}
+                            class:bg-green-300={day.count > 0 && day.count <= 3}
+                            class:bg-green-400={day.count > 3 && day.count <= 8}
+                            class:bg-green-600={day.count > 8}
+                            class:border-2={day.date == toDay}
+                            on:mouseenter={() => {
                             day.hover = true;
                         }}
-                        on:mouseleave={() => {
+                            on:mouseleave={() => {
                             day.hover = false;
                         }}
                     />

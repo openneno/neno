@@ -95,12 +95,32 @@
 
             toolTip();
         });
+        quillEditor.root.addEventListener('paste', evt => {
+            if (evt.clipboardData && evt.clipboardData.files && evt.clipboardData.files.length) {
+                evt.preventDefault();
+                [].forEach.call(evt.clipboardData.files, file => {
+                    if (!file.type.match(/^image\/(gif|jpe?g|a?png|bmp)/i)) {
+                        return;
+                    }
+                    imageFiles = joinFile([file])
+                    console.log(file)
+                });
+            }
+        }, false);
         quillEditor.on("selection-change", function (range, oldRange, source) {
             if (range) {
                 toolTip();
             }
         });
         quillEditor.setSelection(quillEditor.getText().length);
+        quillEditor.clipboard.addMatcher('IMG', (node, delta) => {
+            const Delta = Quill.import('delta')
+            return new Delta().insert('')
+        })
+        quillEditor.clipboard.addMatcher('PICTURE', (node, delta) => {
+            const Delta = Quill.import('delta')
+            return new Delta().insert('')
+        })
         let tempfiles = [];
         images.forEach((element) => {
             tempfiles = [
@@ -463,7 +483,7 @@
                 background: #13ce66;
                 text-align: center;
                 transform: rotate(45deg);
-                box-shadow: 0 0 1pc 1px rgb(0 0 0 / 20%);"
+                box-shadow: 0 0 1px 1px rgba(0, 0 ,0 , 0.2);"
                     >
                         <div
                             for=""

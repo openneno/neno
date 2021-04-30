@@ -7,7 +7,7 @@
         githubStore,
         commitToGithubTag,
         searchNenoByDate,
-        reload
+        reload, taskCountTag
     } from "./store/store.js";
     import {onMount} from "svelte";
     import {
@@ -30,9 +30,9 @@
     } from "./request/fetchApi";
     import {is_empty} from "svelte/internal";
 
-    // if ("serviceWorker" in navigator) {
-    //   navigator.serviceWorker.register("/service-worker.js");
-    // }
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/service-worker.js");
+    }
     let tasking = false
     onMount(() => {
         let setting = window.localStorage.getItem("settingStore");
@@ -55,10 +55,18 @@
                     tasking = true
                     let taskData = (await popTaskToIndexedDB()).body
                     console.log(taskData)
+                    taskCountTag.set({all: taskData.length, done: 0})
                     for (const item of taskData) {
                         await doTask(item.data)
                         await deleteTaskToIndexedDB(item._id)
+
+                        taskCountTag.update((value) => {
+
+                            return {all: value.all, done: value.done + 1}
+                        });
                     }
+                    taskCountTag.set({all: 0, done: 0})
+
                     tasking = false
 
                 }
@@ -220,18 +228,28 @@
                     break
                 }
                 case "delete": {
-                    data = await deleteContent({
-                        fileName: `${value.data.created_at.substring(0, 10)}/${
-                            value.data._id
-                        }.json`,
-                        sha: shadata.body.sha,
-                    });
-                    console.log("deletedata", data);
+                    if (shadata.body.sha) {
+                        data = await deleteContent({
+                            fileName: `${value.data.created_at.substring(0, 10)}/${
+                                value.data._id
+                            }.json`,
+                            sha: shadata.body.sha,
+                        });
+                        console.log("deletedata", data);
+                    } else {
+                        data = {
+                            body: {commit: {sha: ""}}
+                        }
+                    }
+
                 }
             }
-            console.log("lastCommitSha", data, data.body.commit.sha);
+            if (data.body.commit.sha) {
+                console.log("lastCommitSha", data, data.body.commit.sha);
 
-            $githubStore.lastCommitSha = data.body.commit.sha;
+                $githubStore.lastCommitSha = data.body.commit.sha;
+            }
+
         });
     }
 

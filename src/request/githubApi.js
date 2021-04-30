@@ -33,49 +33,30 @@ function genergeParams(data) {
     }
 
 }
-
 export const loginWithGithub = async (data) => {
-    return await (await fetch(`${baseurl}/githubLogin`, genergeParams(data))).json()
+    try {
+        var re = await request('GET /user', {
+            headers: {
+                authorization: `token ${data.access_token}`,
+            },
 
-}
-export const refreshTokenWithGithub = async (data) => {
-    var respone = await (await fetch(`${baseurl}/githubRefreshToken`, genergeParams(data))).json()
-    const oldvalue = get(githubStore);
-
-    if (respone.access_token) {
-        githubStore.set({
-            githubName: respone.githubName,
-            access_token: respone.access_token,
-            refresh_token: respone.refresh_token,
-            repoName: oldvalue.repoName,
-            lastCommitSha: oldvalue.lastCommitSha,
-            expires_in: respone.expires_in * 1000 + Date.now(),
-            refresh_token_expires_in: respone.refresh_token_expires_in * 1000 + Date.now()
         })
+        console.log(re);
         return new Promise(async (resolve, rej) => {
-            return resolve({body: respone})
+            return resolve({body: re.data})
         })
-    } else {
-        githubStore.set({
-            githubName: "",
-            access_token: "",
-            refresh_token: "",
-            repoName: oldvalue.repoName,
-            lastCommitSha: "",
-            expires_in: respone.expires_in * 1000 + Date.now(),
-            refresh_token_expires_in: respone.refresh_token_expires_in * 1000 + Date.now()
-
-        })
-        window.location.replace(
-            "https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8"
-        );
-        return new Promise(async (resolve, rej) => {
-            return resolve({body: {}})
-        })
+    } catch (error) {
+        if (error.status == 401) {
+            if (error.message == "Bad credentials") {
+                return new Promise(async (resolve, rej) => {
+                    return resolve({body: {}, code: 401})
+                })
+            }
+        }
+        console.log("error", error);
     }
-
-
 }
+
 
 export const pushToGithub = async (data) => {
     try {
@@ -245,7 +226,7 @@ export const deleteContent = async (data) => {
         }
         if (error.status == 404) {
             return new Promise(async (resolve, rej) => {
-                return resolve({body: {sha: ""}})
+                return resolve({body: {commit: {sha: ""}}})
             })
         }
 

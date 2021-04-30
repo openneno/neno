@@ -5,13 +5,16 @@
         exportIndexedDBToFile,
         imporFileTotIndexedDB,
     } from "../request/fetchApi";
-    import {settingStore, githubStore} from "../store/store.js";
-    import {pagedd} from "../store/store.js";
+    import {loginWithGithub} from "../request/githubApi";
+
+    import {pagedd, settingStore, githubStore} from "../store/store.js";
 
     let platform = $settingStore.platform;
     let imgDomain = $settingStore.imgDomain;
     let domain = $settingStore.domain;
     let useMode = $settingStore.useMode;
+    let access_token = $githubStore.access_token;
+
     let repoName = $githubStore.repoName;
     let branch = $githubStore.branch;
 
@@ -38,13 +41,13 @@
             };
         }
     }
+
     function saveSetting() {
         $settingStore.imgDomain = imgDomain;
         $settingStore.platform = platform;
         $settingStore.domain = domain;
         $settingStore.useMode = useMode;
         $githubStore.repoName = repoName;
-        $settingStore.branch = branch;
 
         console.log($settingStore);
         window.localStorage.setItem(
@@ -57,11 +60,12 @@
         );
         window.location.reload();
     }
+
     async function exportData() {
         let alldata = await exportIndexedDBToFile();
         let stringAllData = JSON.stringify(alldata);
         console.log(stringAllData);
-        var blob = new Blob([stringAllData], { type: "application/json" });
+        var blob = new Blob([stringAllData], {type: "application/json"});
         var objectURL = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = objectURL;
@@ -69,9 +73,11 @@
         link.click();
         window.URL.revokeObjectURL(link.href);
     }
+
     async function importNeno(params) {
         uploadNode.click();
     }
+
     function clearGithubSetting() {
         $githubStore.githubName = "";
         $githubStore.repoName = "";
@@ -89,23 +95,24 @@
 <div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 ">
     <div class="font-bold text-lg flex  justify-start  items-center">
         <button
-            class="focus:outline-none text-gray-600   sm:hidden md:hidden mr-4"
-            on:click={() => {
+                class="focus:outline-none text-gray-600   sm:hidden md:hidden mr-4"
+                on:click={() => {
                 $pagedd = "neno";
             }}
         >
-            <i class="ri-arrow-left-line" />
-        </button>设置
+            <i class="ri-arrow-left-line"/>
+        </button>
+        设置
     </div>
     <div class="m-4">
         <label for="">使用方式</label>
         <div class="flex items-center space-x-4 p-2 mt-4">
             <label>
-                <input type="radio" bind:group={useMode} value={"自部署模式"} />
+                <input type="radio" bind:group={useMode} value={"自部署模式"}/>
                 自部署模式
             </label>
             <label>
-                <input type="radio" bind:group={useMode} value={"github"} />
+                <input type="radio" bind:group={useMode} value={"github"}/>
                 本地模式+github同步
             </label>
         </div>
@@ -124,86 +131,101 @@
         <div class="m-4">
             <label for="">图库域名</label>
             <input
-                type="text"
-                bind:value={imgDomain}
-                class="w-full border-2  mt-4 outline-white p-2"
-                placeholder="填写你的在七牛云绑定的域名 (这个是我的http://img.neno.topmini.top)"
+                    type="text"
+                    bind:value={imgDomain}
+                    class="w-full border-2  mt-4 outline-white p-2"
+                    placeholder="填写你的在七牛云绑定的域名 (这个是我的http://img.neno.topmini.top)"
             />
         </div>
     {:else}
         <div>
             <div class="m-4 flex flex-col">
-                {#if $githubStore.githubName}
-                    <div class="mb-4">
-                        <div class="flex items-center ml-4">
-                            <button
-                                class="border-2   w-full  text-center  outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
-                                on:click={() => {
-                                    clearGithubSetting();
-                                }}
-                            >
-                                {$githubStore.githubName}
-                                登出</button
-                            >
+                <div class="mb-4">
+                    <div class="m-4">
+                        <label htmlFor="">用户Github Token<a class="text-sm ml-4"
+                                                           href="https://github.com/settings/tokens" target="_blank">(如何获取)</a></label>
+                        <div>
+                            {$githubStore.githubName == "" ? "输入Github Token获取github用户名" : $githubStore.githubName}
+
                         </div>
-                        <div class="m-4">
-                            <label for="">仓库设置</label>
+                        <div class="flex justify-between">
                             <input
+                                    type="text"
+                                    bind:value={access_token}
+                                    class=" w-8/12 border-2  mt-4 outline-white p-2"
+                                    placeholder="用户Token"
+                            />
+                            <button class=" border-2  mt-4 outline-white p-2" on:click={
+async ()=>{
+                            if (access_token.length!=40){
+
+                            }else {
+                                var response=await loginWithGithub({access_token:access_token})
+                                if(response.code!=401){
+                                    githubStore.set({githubName: response.body.login,access_token: access_token,
+                                    lastCommitSha:""})
+
+                                }else {
+                                  githubStore.set({githubName: "",access_token: "",
+                                    lastCommitSha:""})
+
+                                }
+                            }
+                        }
+                        }>
+
+                                点击获取github用户名
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="m-4">
+                        <label htmlFor="">仓库设置</label>
+                        <input
                                 type="text"
                                 bind:value={repoName}
                                 class="w-full border-2  mt-4 outline-white p-2"
                                 placeholder="仓库名"
-                            />
-                            <!-- <input
-                                type="text"
-                                bind:value={branch}
-                                class="w-full border-2  mt-4 outline-white p-2"
-                                placeholder="分支"
-                            /> -->
-                        </div>
-                        <div class="m-4">
-                            <label for="">导入/导出离线数据</label>
-                            <div class="flex items-center space-x-4">
-                                <button
+                        />
+
+                    </div>
+                    <div class="m-4">
+                        <label htmlFor="">导入/导出离线数据</label>
+                        <div class="flex items-center space-x-4">
+                            <button
                                     class="w-full border-2  mt-4 outline-white p-2"
                                     on:click={() => {
                                         importNeno();
-                                    }}>导入</button
-                                >
-                                <input
+                                    }}>导入
+                            </button
+                            >
+                            <input
                                     type="file"
                                     bind:this={uploadNode}
                                     bind:files={importFile}
                                     style="display:none"
                                     accept=".txt"
                                     class="w-full border-2  mt-4 outline-white p-2"
-                                />
-                                <button
+                            />
+                            <button
                                     class="w-full border-2  mt-4 outline-white p-2"
                                     on:click={() => {
                                         exportData();
-                                    }}>导出</button
-                                >
-                            </div>
+                                    }}>导出
+                            </button
+                            >
                         </div>
                     </div>
-                {:else}
-                    <a
-                        class=" border-2  mb-4 text-center  outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
-                        href={`https://github.com/login/oauth/authorize?response_type=code&client_id=Iv1.a9367867a9a251d8`}
-                    >
-                        使用github账号登录
-                    </a>
-                {/if}
+                </div>
             </div>
         </div>
     {/if}
     <div class="m-4">
         <button
-            on:click={() => {
+                on:click={() => {
                 saveSetting();
             }}
-            class="w-full border-2   outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
+                class="w-full border-2   outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
         >
             保存设置{done}
         </button>
