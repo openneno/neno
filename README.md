@@ -44,13 +44,12 @@ fork本仓库
 - [X] 使用github进行存储
 - [ ] 每日回顾
 - [ ] 随机漫步
+- [ ] 基于github action
 
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5%E7%A7%BB%E5%8A%A8%E7%AB%AF.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E7%88%B6%E7%BA%A7.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/setting.png)
-
-
 
 =============
 
