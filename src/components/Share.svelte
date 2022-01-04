@@ -29,7 +29,7 @@
     import { fly, fade } from "svelte/transition";
     import { getObjectURL } from "../utils/process";
     import { getFileFromIndexedDB } from "../request/fetchApi";
-    import dayjs from "dayjs";
+    import dayjs from 'dayjs'
     import html2canvas from "html2canvas";
     import {countStore, searchNenoByTag} from "../store/store.js";
     import {onMount} from "svelte";

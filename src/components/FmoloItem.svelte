@@ -6,7 +6,7 @@
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
 
-    import * as dayjs from 'dayjs';
+    import dayjs from 'dayjs'
     import { getObjectURL } from "../utils/process";
     import { showFmolo } from "./FmoloDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
