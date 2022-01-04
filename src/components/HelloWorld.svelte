@@ -9,28 +9,31 @@
   import Share from "./Share.svelte";
 
   import { pagedd } from "../store/store.js";
+  import { darkmode } from "../store/store.js";
 </script>
 
-<div
-  class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100"
->
-  <div class="max-w-6xl min-w-0 w-full  flex ">
-    <div
-      class="hidden  sm:flex md:flex flex-col items-start"
-      style="width:240px"
-    >
-      <SideLeft />
+<div class:dark={$darkmode.isDark}>
+  <div
+    class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100 dark:bg-black "
+  >
+    <div class="max-w-6xl min-w-0 w-full  flex  ">
+      <div
+        class="hidden  sm:flex md:flex flex-col items-start dark:bg-black"
+        style="width:240px"
+      >
+        <SideLeft />
+      </div>
+      {#if $pagedd == "neno"}
+        <SideRight />
+      {:else if $pagedd == "setting"}
+        <Setting />
+      {:else}
+        <Daily />
+      {/if}
     </div>
-    {#if $pagedd == "neno"}
-      <SideRight />
-    {:else if $pagedd == "setting"}
-      <Setting />
-    {:else}
-      <Daily />
-    {/if}
+    <FmoloDetail />
+    <SettingSlide />
+    <ViewPicture />
+    <Share />
   </div>
-  <FmoloDetail />
-  <SettingSlide />
-  <ViewPicture />
-  <Share />
 </div>

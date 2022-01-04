@@ -6,7 +6,7 @@
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
 
-    import dayjs from "dayjs";
+    import * as dayjs from 'dayjs';
     import { getObjectURL } from "../utils/process";
     import { showFmolo } from "./FmoloDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
@@ -87,27 +87,33 @@
                 `<span class="bg-yellow-300">${searchContent}</span>`
             );
         }
-        pContent = pContent.replaceAll(/(https?:\/\/?[^\s<)）\]]*)/g, '<a href="$1" target="_blank">$1</a>')
+        pContent = pContent.replaceAll(
+            /(https?:\/\/?[^\s<)）\]]*)/g,
+            '<a href="$1" target="_blank">$1</a>'
+        );
         return pContent;
     }
     async function getImageurl(imgDomain, key, platform) {
         if (platform == "indexedDB") {
             var url = await getFileFromIndexedDB(key);
             return url.key;
-        } else {
-            return imgDomain + "/" + key;
         }
+        // else {
+        //     return imgDomain + "/" + key;
+        // }
     }
 </script>
 
-<div class="w-full p-4 rounded-lg bg-white mb-4 shadow-sm  hover:shadow-lg">
+<div
+    class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-sm  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
+>
     <div class="flex justify-between">
-        <div class="text-sm text-gray-500">
+        <div class="text-sm text-gray-500 dark:text-slate-300">
             {dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")}
         </div>
         <div class="relative">
             <button on:click={() => toggleMenu(1)} class="focus:outline-none ">
-                <i class="ri-more-line" />
+                <i class="ri-more-line dark:text-slate-300" />
             </button>
             {#if openMenu == true}
                 <div
@@ -121,11 +127,11 @@
                     in:fade={{ duration: 100 }}
                     out:fade={{ duration: 100 }}
                     bind:this={menuList}
-                    class=" absolute w-16  bg-white shadow-xl rounded-lg flex flex-col justify-center  border-gray-200  border-solid space-y-1 pt-2 pb-2 focus:outline-none"
-                    style="left:-16px;border-width:1px"
+                    class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-none"
+                    style="left:-16px;"
                 >
                     <button
-                        class="focus:outline-none hover:bg-gray-300 "
+                        class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300 "
                         on:click={() => {
                             showShareView(
                                 _id,
@@ -141,19 +147,19 @@
                         }}>分享</button
                     >
                     <button
-                        class="focus:outline-none hover:bg-gray-300 "
+                        class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300   "
                         on:click={() => {
                             toggleEditMode();
                         }}>编辑</button
                     >
                     <button
-                        class="focus:outline-none hover:bg-gray-300"
+                        class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
                         on:click={() => {
                             showFmolo(_id, false);
                         }}>批注</button
                     >
                     <button
-                        class="focus:outline-none hover:bg-gray-300"
+                        class="  dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
                         on:click={() => {
                             deleteNeno(_id);
                         }}>删除</button
@@ -181,7 +187,7 @@
         />
     {:else}
         <div
-            class="list-decimal text-sm text-red-300  ql-editor whitespace-no-wrap "
+            class="list-decimal text-sm text-red-300  whitespace-no-wrap "
             style="height:revert"
         >
             <p class="whitespace-no-wrap ">
@@ -252,5 +258,4 @@
 </div>
 
 <!-- <svelte:window on:click={toggleMore} /> -->
-<style lang="postcss">
-</style>
+

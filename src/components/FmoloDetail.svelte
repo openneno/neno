@@ -1,5 +1,5 @@
 <script context="module">
-    let showDetailss = null;
+    var showDetailss ;
     export function showFmolo(fmoloId, isHidden) {
         console.log("showFmolo", fmoloId, isHidden);
         showDetailss(fmoloId, isHidden);
@@ -20,7 +20,9 @@
     let fmoloDetail = { children: [], _id: "" };
 
     onMount(() => {
+
         showDetailss = showDetail;
+
     });
 
     let _id = "";
@@ -71,7 +73,7 @@
             <div
                 in:fly={{ x: 200, duration: 200 }}
                 out:fly={{ x: 200, duration: 200 }}
-                class="lt:w-8/12 w-10/12 2xl:w-4/12 float-right  shadow-sm bg-gray-100 h-full p-4 flex flex-col overflow-y-scroll"
+                class="lt:w-8/12 w-10/12 2xl:w-4/12 float-right  shadow-sm bg-gray-100 dark:bg-gray-900 h-full p-4 flex flex-col overflow-y-scroll"
             >
                 {#if isLoding}
                     <div transition:fly={{ y: -20, duration: 1000 }}>

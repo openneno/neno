@@ -1,65 +1,34 @@
 {
-  "name": "svelte-starter-postcss",
-  "version": "1.0.0",
-  "description": "A starter for bulding Svelte web apps, with PostCSS support.",
-  "main": " ",
+  "name": "sttv",
+  "version": "0.0.0",
   "scripts": {
-    "build": "rollup -c",
-    "build:auto": "rollup -c -w",
-    "serve": "sirv dist",
-    "serve:dev": "sirv dist --dev",
-    "dev": "run-p build:auto serve:dev",
-    "now-build": "rollup -c",
-    "test": "cypress open",
-    "tauri": "tauri"
+    "dev": "cross-env NODE_ENV=development vite",
+    "build": "vite build",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "serve": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/noprodev/svelte-starter-postcss.git"
-  },
-  "keywords": [
-    "Svelte",
-    "starter",
-    "PostCSS"
-  ],
-  "author": "noprodev",
-  "license": "UNLICENSED",
-  "bugs": {
-    "url": "https://github.com/noprodev/svelte-starter-postcss/issues"
-  },
-  "homepage": "https://github.com/noprodev/svelte-starter-postcss#readme",
   "devDependencies": {
-    "@fullhuman/postcss-purgecss": "^1.3.0",
-    "chokidar": "^3.5.1",
-    "cssnano": "^4.1.10",
-    "cypress": "^3.8.3",
-    "npm-run-all": "^4.1.5",
-    "postcss": "^7.0.35",
-    "postcss-color-mod-function": "^3.0.3",
-    "postcss-import": "^12.0.1",
-    "postcss-preset-env": "^6.7.0",
-    "postcss-url": "^8.0.0",
-    "prettier": "^2.0.1",
-    "rollup": "^1.32.1",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-copy-assets": "^2.0.3",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-livereload": "^1.3.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-postcss": "^2.9.0",
-    "rollup-plugin-svelte": "^6.1.1",
-    "rollup-plugin-terser": "^4.0.4",
-    "sirv-cli": "^0.4.6",
-    "svelte": "^3.32.3",
-    "svelte-preprocess": "^2.16.0",
-    "svelte-preprocess-postcss": "^1.1.1",
-    "tailwindcss": "^1.9.6",
-    "ts-jest": "^26.1.0",
-    "typescript": "^4.0.2"
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
+    "@testing-library/svelte": "^3.0.3",
+    "@types/jest": "^26.0.21",
+    "autoprefixer": "^10.2.5",
+    "babel-jest": "^26.6.3",
+    "cross-env": "^7.0.3",
+    "cssnano": "^5.0.6",
+    "jest": "^26.6.3",
+    "postcss": "^8.2.7",
+    "postcss-load-config": "^3.0.1",
+    "svelte-jester": "^1.3.1",
+    "svelte": "^3.42.1",
+    "svelte-preprocess": "^4.10.1",
+
+    "ts-jest": "^26.5.4",
+    "typescript": "^4.2.3",
+    "vite": "^2.1.0"
   },
   "dependencies": {
+    "tailwindcss": "^3.0.7",
     "@octokit/auth-app": "^3.0.0",
     "@octokit/endpoint": "^6.0.1",
     "@octokit/request-error": "^2.0.0",
@@ -78,7 +47,6 @@
     "prosemirror-view": "^1.17.5",
     "qiniu-js": "^3.1.2",
     "quill": "^1.3.7",
-    "tauri": "^0.14.1",
     "universal-user-agent": "^6.0.0",
     "wangeditor": "^4.6.6"
   }

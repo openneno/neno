@@ -1,6 +1,5 @@
 <script>
     import { createEventDispatcher, onMount } from "svelte";
-    import App from "../App.svelte";
     export let tag = "";
     export let selectionTag = "";
     export let parentTag = "";
@@ -18,7 +17,7 @@
 
 <div>
     <button
-        class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm"
+        class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm text-slate-800  dark:text-slate-300"
         class:bg-green-500={selectionTag == tag}
         class:text-white={selectionTag == tag}
         on:click={() => {

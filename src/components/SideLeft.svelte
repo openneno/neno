@@ -1,5 +1,5 @@
 <script>
-    import {tags, pin, pins, count, rename} from "../request/fetchApi";
+    import { tags, pin, pins, count, rename } from "../request/fetchApi";
     import {
         pagedd,
         countStore,
@@ -7,11 +7,12 @@
         searchNenoByDate,
         searchNenoByTag,
         reload,
+        darkmode,
     } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
     import TagExpand from "./TagExpand.svelte";
 
-    import {onMount} from "svelte";
+    import { onMount } from "svelte";
     import dayjs from "dayjs";
 
     let allTags = [];
@@ -25,7 +26,7 @@
                 countcount();
                 getPins();
             }
-        })
+        });
     });
 
     function getTags() {
@@ -90,7 +91,7 @@
 
     function pinNeno(tag, isPin) {
         if (isPin) {
-            pinTags = [...pinTags, {_id: "", tag: tag}];
+            pinTags = [...pinTags, { _id: "", tag: tag }];
             allTags = allTags.filter((item) => {
                 return item != tag;
             });
@@ -101,7 +102,7 @@
             allTags = [...allTags, tag];
         }
 
-        pin({tag: tag})
+        pin({ tag: tag })
             .then((respone) => {
                 let re = respone;
             })
@@ -133,7 +134,7 @@
     }
 
     function renameName(detail) {
-        rename({oldTag: detail.oldTag, newTag: detail.newTag})
+        rename({ oldTag: detail.oldTag, newTag: detail.newTag })
             .then((respone) => {
                 getPins();
             })
@@ -143,34 +144,53 @@
     }
 </script>
 
-<div class="w-full flex flex-col overflow-auto  overflow-visible h-screen">
+<div class="w-full flex flex-col overflow-auto   h-screen   ">
     <div
-            class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold"
+        class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold dark:text-slate-300"
     >
         <div class="flex  items-center justify-between space-x-2">
-            <div>NENO</div>
+            <div class="dark:text-slate-300">NENO</div>
 
             <a href="https://github.com/Mran/neno" target="_blank">
-                <i class="ri-github-fill ri-xl"/></a
+                <i class="ri-github-fill ri-xl " /></a
             >
         </div>
-        <button
-                class="focus:outline-none"
+
+        <div>
+            {#if $darkmode.isDark}
+                <i
+                    class="ri-sun-line text-white"
+                    on:click={() => {
+                        $darkmode.isDark = false;
+                    }}
+                />
+            {:else}
+                <i
+                    class="ri-moon-line"
+                    on:click={() => {
+                        $darkmode.isDark = true;
+                    }}
+                />
+            {/if}
+
+            <button
+                class="focus:outline-none "
                 on:click={() => {
-                $pagedd = "setting";
-            }}
-        >
-            <i class="ri-settings-fill"/>
-        </button>
+                    $pagedd = "setting";
+                }}
+            >
+                <i class="ri-settings-fill " />
+            </button>
+        </div>
     </div>
     <GreenMap
-            countDate={$countStore.countDate}
-            on:greenmapClick={(event) => {
+        countDate={$countStore.countDate}
+        on:greenmapClick={(event) => {
             $searchNenoByDate.date = event.detail;
         }}
     />
 
-    <div class="flex justify-around  w-full mt-4 text-gray-500">
+    <div class="flex justify-around  w-full mt-4 text-gray-500dark:text-slate-300">
         <div class="font-bold text-lg">
             <div class="text-xl">{$countStore.nenoCount}</div>
             NENO
@@ -184,66 +204,63 @@
             DAY
         </div>
     </div>
-    <div class="flex flex-col items-start text-sm text-gray-600 w-full mt-2">
+    <div class="flex flex-col items-start text-sm text-gray-600   dark:text-slate-200 w-full mt-2">
         <button
-                on:click={() => {
+            on:click={() => {
                 $pagedd = "neno";
                 $searchNenoByTag.tag = "";
             }}
-                class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
-                ($pagedd == 'neno' ? 'bg-green-500 text-white' : '')}        "
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
+                ($pagedd == 'neno' ? 'bg-green-500 text-white' : '')}      "
         >
-            <i class="ri-quill-pen-fill mr-2"/>NENO
-        </button
-        >
+            <i class="ri-quill-pen-fill mr-2" />NENO
+        </button>
 
         <button
-                on:click={() => {
+            on:click={() => {
                 $pagedd = "daily";
             }}
-                class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
                 ($pagedd == 'daily' ? 'bg-green-500 text-white' : '')}        "
         >
-            <i class="ri-calendar-event-fill mr-2"/>每日回顾
-        </button
-        >
+            <i class="ri-calendar-event-fill mr-2" />每日回顾
+        </button>
         <button
-                on:click={() => {
+            on:click={() => {
                 $pagedd = "luck";
             }}
-                class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
                 ($pagedd == 'luck' ? 'bg-green-500 text-white' : '')}        "
         >
-            <i class="ri-bubble-chart-fill mr-2"/>随机漫步
-        </button
-        >
+            <i class="ri-bubble-chart-fill mr-2" />随机漫步
+        </button>
     </div>
 
     {#if pinTags.length != 0}
         <div class=" p-4 w-full text-sm text-yellow-500">置顶</div>
 
-        {#each pinTags as {_id, tag}}
+        {#each pinTags as { _id, tag }}
             <button
-                    class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm"
-                    class:bg-green-500={$searchNenoByTag.tag == tag}
-                    class:text-white={$searchNenoByTag.tag == tag}
-                    on:click={() => {
+                class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm"
+                class:bg-green-500={$searchNenoByTag.tag == tag}
+                class:text-white={$searchNenoByTag.tag == tag}
+                on:click={() => {
                     $searchNenoByTag.tag = tag;
                 }}
             >
                 <div class="flex">
-                    <div class=""><i class="ri-hashtag"/></div>
+                    <div class=""><i class="ri-hashtag" /></div>
                     <div class="ml-1">
                         {tag.indexOf("#") == 0 ? tag.substring(1) : tag}
                     </div>
                 </div>
                 <button
-                        class="focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2"
-                        on:click={() => {
+                    class="focus:outline-none group-hover:opacity-100 opacity-0  pl-2 pr-2"
+                    on:click={() => {
                         pinNeno(tag, false);
                     }}
                 >
-                    <i class="ri-pushpin-fill"/>
+                    <i class="ri-pushpin-fill" />
                 </button>
             </button>
         {/each}
@@ -254,15 +271,15 @@
 
         {#each allTags as tag}
             <TagExpand
-                    {...tag}
-                    selectionTag={$searchNenoByTag.tag}
-                    on:selectTag={(event) => {
+                {...tag}
+                selectionTag={$searchNenoByTag.tag}
+                on:selectTag={(event) => {
                     $searchNenoByTag.tag = event.detail;
                 }}
-                    on:pinTag={(event) => {
+                on:pinTag={(event) => {
                     pinNeno(event.detail, true);
                 }}
-                    on:renameTag={(event) => {
+                on:renameTag={(event) => {
                     renameName(event.detail);
                 }}
             />

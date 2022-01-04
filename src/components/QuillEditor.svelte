@@ -6,17 +6,15 @@
 
     import Quill from "quill";
 
-    import * as qiniu from "qiniu-js";
     import {
         addFmolo,
-        qiniuToken,
         uploadPicIndexedDB,
         getFileFromIndexedDB,
     } from "../request/fetchApi";
     import { getObjectURL } from "../utils/process";
     import { showPictureView } from "./ViewPicture.svelte";
 
-    import {settingStore, tagStore} from "../store/store.js";
+    import { settingStore, tagStore } from "../store/store.js";
 
     import ProgressLine from "./ProgressLine.svelte";
     export let content = "";
@@ -92,35 +90,46 @@
         };
         quillEditor.on("text-change", function (delta, oldDelta, source) {
             isContentEmpty = quillEditor.getText().length == 1;
+            console.log("text-change", delta, oldDelta, source);
 
             toolTip();
         });
-        quillEditor.root.addEventListener('paste', evt => {
-            if (evt.clipboardData && evt.clipboardData.files && evt.clipboardData.files.length) {
-                evt.preventDefault();
-                [].forEach.call(evt.clipboardData.files, file => {
-                    if (!file.type.match(/^image\/(gif|jpe?g|a?png|bmp)/i)) {
-                        return;
-                    }
-                    imageFiles = joinFile([file])
-                    console.log(file)
-                });
-            }
-        }, false);
+        quillEditor.root.addEventListener(
+            "paste",
+            (evt) => {
+                if (
+                    evt.clipboardData &&
+                    evt.clipboardData.files &&
+                    evt.clipboardData.files.length
+                ) {
+                    evt.preventDefault();
+                    [].forEach.call(evt.clipboardData.files, (file) => {
+                        if (
+                            !file.type.match(/^image\/(gif|jpe?g|a?png|bmp)/i)
+                        ) {
+                            return;
+                        }
+                        imageFiles = joinFile([file]);
+                        console.log(file);
+                    });
+                }
+            },
+            false
+        );
         quillEditor.on("selection-change", function (range, oldRange, source) {
             if (range) {
                 toolTip();
             }
         });
         quillEditor.setSelection(quillEditor.getText().length);
-        quillEditor.clipboard.addMatcher('IMG', (node, delta) => {
-            const Delta = Quill.import('delta')
-            return new Delta().insert('')
-        })
-        quillEditor.clipboard.addMatcher('PICTURE', (node, delta) => {
-            const Delta = Quill.import('delta')
-            return new Delta().insert('')
-        })
+        quillEditor.clipboard.addMatcher("IMG", (node, delta) => {
+            const Delta = Quill.import("delta");
+            return new Delta().insert("");
+        });
+        quillEditor.clipboard.addMatcher("PICTURE", (node, delta) => {
+            const Delta = Quill.import("delta");
+            return new Delta().insert("");
+        });
         let tempfiles = [];
         images.forEach((element) => {
             tempfiles = [
@@ -139,11 +148,17 @@
     function toolTip() {
         let selection = quillEditor.getSelection();
         if (selection == null) {
+            showTip = false;
             return;
         }
-        selection;
+
         let cIndex = selection.index;
         var text = quillEditor.getText();
+        console.log(text.length);
+        if (text.length == 1) {
+            showTip = false;
+            return;
+        }
         let sIndex = text.lastIndexOf("#", cIndex);
         if (sIndex != -1) {
             let tagMay = text.substring(sIndex, cIndex);
@@ -205,19 +220,6 @@
                 // uploadPic(element, index);
                 if ($settingStore.useMode == "github") {
                     uploadPicLocal(element, index);
-                } else {
-                    qiniuToken()
-                        .then(async (respone) => {
-                            let re = await respone.json();
-                            if (re.errorMessage == undefined) {
-                                {
-                                    uploadPicQiniu(element, index, re.body);
-                                }
-                            }
-                        })
-                        .catch((reason) => {
-                            console.log(reason);
-                        });
                 }
             }
         }
@@ -279,33 +281,7 @@
         imageFiles[index].uploadInfo.key = response.key;
         imageFiles[index].uploadInfo.platform = "indexedDB";
     }
-    function uploadPicQiniu(imageFile, index, token) {
-        console.log(imageFile, imageFile.name, token);
-        const observable = qiniu.upload(
-            imageFile.file,
-            imageFile.file.name,
-            token
-        );
 
-        const subscription = observable.subscribe(
-            (response) => {
-                let total = response.total;
-                imageFiles[index].percent_completed = parseInt(
-                    total.percent + ""
-                );
-                console.log(response, total);
-            },
-            (error) => {
-                console.log(error, "错误");
-            },
-            (response) => {
-                console.log(response, "已上传");
-                imageFiles[index].uploadingstatus = "已上传";
-                imageFiles[index].uploadInfo.key = response.key;
-                imageFiles[index].uploadInfo.platform = "qiniu";
-            }
-        ); // 这样传参形式也可以
-    }
     function uploadPic(imageFile, index) {
         var formData = new FormData();
         var fileField = imageFile.file;
@@ -349,13 +325,11 @@
         let cc = quillEditor.getContents();
         let tags = [];
 
-        for (let index = 0; index < cc.ops.length; index++) {
-            let item = cc.ops[index];
-            let mt = item.insert.match(/#\S*/g);
-            if (mt != null) {
-                tags = [...tags, ...mt];
-            }
+        let mt = editor.childNodes[0].innerText.match(/#\S*/g);
+        if (mt != null) {
+            tags = [...tags, ...mt];
         }
+
         let imagesInfo = [];
         for (let index = 0; index < imageFiles.length; index++) {
             const element = imageFiles[index];
@@ -375,7 +349,7 @@
 
         addFmolo({
             content: sContent,
-            pureContent:editor.childNodes[0].innerText,
+            pureContent: editor.childNodes[0].innerText,
             _id: _id,
             parentId: parentId,
             source: "web",
@@ -411,10 +385,10 @@
 </script>
 
 <div
-    class="border-gray-200 border-solid border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white relative"
+    class="border-gray-200 border-solid dark:border-gray-500 border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white dark:bg-gray-600 dark:text-slate-100 relative"
 >
     <div bind:this={editor} id="editor" class="list-decimal list-inside" />
-    {#if tagTips.length > 0}
+    {#if tagTips.length > 0 && showTip}
         <div
             bind:this={tipClient}
             class="rounded bg-gray-800 text-sm text-white w-auto absolute font-bold p-1"
@@ -501,14 +475,15 @@
     >
         <div id="toolbar" class="space-x-1" bind:this={toolbar}>
             <button
-                class="rounded-sm hover:bg-gray-200 p-1 focus:outline-none"
+                class="rounded-sm  hover:bg-gray-200 p-1 focus:outline-none"
                 on:click={insertHashTag}><i class="ri-hashtag" /></button
             >
-            <button class="ql-bold hover:bg-gray-200 p-1 focus:outline-none"
+            <button
+                class=" rounded-sm ql-bold hover:bg-gray-200 p-1 focus:outline-none"
                 ><i class="ri-bold" /></button
             >
             <button
-                class="ql-list hover:bg-gray-200 p-1 focus:outline-none"
+                class=" rounded-sm ql-list hover:bg-gray-200 p-1 focus:outline-none"
                 value="bullet"
                 ><i
                     class="ri-list-check hover:bg-gray-200 p-1 focus:outline-none"
@@ -516,7 +491,7 @@
             >
 
             <button
-                class="ql-list hover:bg-gray-200 p-1 focus:outline-none"
+                class="rounded-sm ql-list hover:bg-gray-200 p-1 focus:outline-none"
                 value="ordered"
                 ><i
                     class="ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-none"
@@ -524,7 +499,7 @@
             >
 
             <button
-                class="ql-underline hover:bg-gray-200 p-1 focus:outline-none"
+                class=" rounded-sm ql-underline hover:bg-gray-200 p-1 focus:outline-none"
                 ><i class="ri-underline" /></button
             >
             <button
@@ -544,12 +519,12 @@
         <div class="flex space-x-2 justify-end">
             {#if canCancle}
                 <button
-                    class="rounded-sm bg-white border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm"
+                    class="rounded-sm bg-white dark:bg-neutral-700 dark:text-gray-200 border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm"
                     on:click={cancelInput}>取消</button
                 >
             {/if}
             <button
-                class="rounded-sm bg-green-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-none disabled:opacity-50 fle justify-center items-center w-16"
+                class="rounded-sm bg-green-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-none disabled:opacity-70 fle justify-center items-center w-16"
                 disabled={isContentEmpty || isSending}
                 on:click={() => {
                     sendBiu();
@@ -566,4 +541,5 @@
 </div>
 
 <style>
+    
 </style>

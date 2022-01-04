@@ -9,7 +9,6 @@
     import {getAllFmolo, search} from "../request/fetchApi";
     import ProgressLine from "./ProgressLine.svelte";
     import {showSlide} from "./SettingSlide.svelte";
-    import {log} from "util";
 
     let flowClient;
     let innerHeight = 0;

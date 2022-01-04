@@ -1,4 +1,4 @@
-import {writable} from "svelte/store";
+import { writable } from "svelte/store";
 
 //Insert store variables here
 export const tokoen = writable(" eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6Ijk0OTAwNTQ4NkBxcS5jb20iLCJleHAiOjE2MTMyMTU2MTMsImlhdCI6MTYxMzEyOTIxMywiaXNzIjoiYXdlTGlzdCJ9.g3JKHINnQvqsw9H1-phS_ma-08DGzLx5dQRv8McRnJU");
@@ -20,14 +20,16 @@ export const githubStore = writable({
     lastCommitSha: ""
 });
 
-export const countStore = writable({tagCount: 0, nenoCount: 0, dayCount: 0, dateCount: {}});
-export const tagStore = writable({pinTags: [], allTags: []});
-export const searchNenoByDate = writable({date: ""});
-export const searchNenoByTag = writable({tag: ""});
-export const reload = writable({tag: 0, action: ""});
+export const countStore = writable({ tagCount: 0, nenoCount: 0, dayCount: 0, dateCount: {} });
+export const tagStore = writable({ pinTags: [], allTags: [] });
+export const searchNenoByDate = writable({ date: "" });
+export const searchNenoByTag = writable({ tag: "" });
+export const reload = writable({ tag: 0, action: "" });
 
-export const commitToGithubTag = writable({timestmp: 0, data: {}});
-export const taskCountTag = writable({all: 0, done: 0});
+export const commitToGithubTag = writable({ timestmp: 0, data: {} });
+export const taskCountTag = writable({ all: 0, done: 0 });
+export const darkmode = writable({ isDark: true });
+
 
 
 
