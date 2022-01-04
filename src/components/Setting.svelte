@@ -93,9 +93,11 @@
 </script>
 
 <div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 ">
-    <div class="font-bold text-lg flex  justify-start  items-center">
+    <div
+        class="font-bold text-lg flex  justify-start  items-center text-gray-600 dark:text-gray-100 "
+    >
         <button
-            class="focus:outline-none text-gray-600   sm:hidden md:hidden mr-4"
+            class="focus:outline-none    sm:hidden md:hidden mr-4"
             on:click={() => {
                 $pagedd = "neno";
             }}
@@ -104,22 +106,9 @@
         </button>
         设置
     </div>
-    <!-- <div class="m-4">
-        <label for="">使用方式</label>
-        <div class="flex items-center space-x-4 p-2 mt-4">
-            <label>
-                <input type="radio" bind:group={useMode} value={"自部署模式"}/>
-                自部署模式
-            </label>
-            <label>
-                <input type="radio" bind:group={useMode} value={"github"}/>
-                本地模式+github同步
-            </label>
-        </div>
-    </div> -->
 
     <div>
-        <div class="m-4 flex flex-col">
+        <div class="m-4 flex flex-col dark:text-gray-100 ">
             <div class="mb-4">
                 <div class="m-4">
                     <label htmlFor=""
@@ -138,7 +127,7 @@
                         <input
                             type="text"
                             bind:value={access_token}
-                            class=" w-8/12 border-2  mt-4 outline-white p-2"
+                            class=" w-8/12 border-2  mt-4 outline-white p-2 text-black"
                             placeholder="用户Token"
                         />
                         <button
@@ -174,7 +163,7 @@
                     <input
                         type="text"
                         bind:value={repoName}
-                        class="w-full border-2  mt-4 outline-white p-2"
+                        class="w-full border-2  mt-4 outline-white p-2 text-black"
                         placeholder="仓库名"
                     />
                 </div>
@@ -213,7 +202,7 @@
             on:click={() => {
                 saveSetting();
             }}
-            class="w-full border-2   outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
+            class="w-full border-2  dark:text-white outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
         >
             保存设置{done}
         </button>
