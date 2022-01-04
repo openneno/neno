@@ -129,13 +129,13 @@
     <div class="  flex flex-row items-center justify-between ">
         <div class="flex flex-row items-center pl-4 ">
             {#if changeTag == ""}
-                <div class="font-bold">NENO</div>
+                <div class="font-bold dark:text-slate-300">NENO</div>
             {:else}
                 <div
                         class="flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1"
                 >
-                    <div class="mr-1 pt-1"><i class="ri-hashtag"/></div>
-                    <div class="font-bold w-auto mr-2" type="text">
+                    <div class="mr-1 pt-1"><i class="ri-hashtag dark:text-slate-300 "/></div>
+                    <div class="font-bold w-auto mr-2 dark:text-slate-300" type="text">
                         {changeTag}
                     </div>
                     <button class="focus:outline-none ">
@@ -154,7 +154,7 @@
                         showSlide();
                     }}
                 >
-                    <i class="ri-function-fill"/>
+                    <i class="ri-function-fill dark:text-slate-300"/>
                 </button>
             {/if}
 
