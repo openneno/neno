@@ -7,7 +7,7 @@
         searchNenoByDate,
         searchNenoByTag,
         reload,
-        darkmode,
+        settingStore,
     } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
     import TagExpand from "./TagExpand.svelte";
@@ -142,6 +142,13 @@
                 console.log(reason);
             });
     }
+    function changeDarkMode() {
+        $settingStore.isDark = !$settingStore.isDark;
+        window.localStorage.setItem(
+            "settingStore",
+            JSON.stringify($settingStore)
+        );
+    }
 </script>
 
 <div class="w-full flex flex-col overflow-auto   h-screen   ">
@@ -157,18 +164,18 @@
         </div>
 
         <div>
-            {#if $darkmode.isDark}
+            {#if $settingStore.isDark}
                 <i
                     class="ri-sun-line text-white"
                     on:click={() => {
-                        $darkmode.isDark = false;
+                        changeDarkMode();
                     }}
                 />
             {:else}
                 <i
                     class="ri-moon-line"
                     on:click={() => {
-                        $darkmode.isDark = true;
+                        changeDarkMode();
                     }}
                 />
             {/if}
@@ -190,7 +197,9 @@
         }}
     />
 
-    <div class="flex justify-around  w-full mt-4 text-gray-500dark:text-slate-300">
+    <div
+        class="flex justify-around  w-full mt-4 text-gray-500dark:text-slate-300"
+    >
         <div class="font-bold text-lg">
             <div class="text-xl">{$countStore.nenoCount}</div>
             NENO
@@ -204,7 +213,9 @@
             DAY
         </div>
     </div>
-    <div class="flex flex-col items-start text-sm text-gray-600   dark:text-slate-200 w-full mt-2">
+    <div
+        class="flex flex-col items-start text-sm text-gray-600   dark:text-slate-200 w-full mt-2"
+    >
         <button
             on:click={() => {
                 $pagedd = "neno";

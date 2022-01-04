@@ -9,10 +9,10 @@
   import Share from "./Share.svelte";
 
   import { pagedd } from "../store/store.js";
-  import { darkmode } from "../store/store.js";
+  import { settingStore } from "../store/store.js";
 </script>
 
-<div class:dark={$darkmode.isDark}>
+<div class:dark={$settingStore.isDark}>
   <div
     class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100 dark:bg-black "
   >

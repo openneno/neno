@@ -7,7 +7,8 @@ export const settingStore = writable({
     platform: "七牛",
     imgDomain: "http://img.neno.topmini.top",
     domain: "https://api.neno.topmini.top",
-    useMode: "github"
+    useMode: "github",
+    isDark: false
 });
 export const githubStore = writable({
     access_token: "",
