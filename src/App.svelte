@@ -148,7 +148,7 @@
       }
     }
   }
-
+//执行日常的增删改查的任务 
   async function doTask(value) {
     await getContentSha({
       branch: $githubStore.branch,

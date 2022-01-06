@@ -159,7 +159,7 @@
             {/if}
 
             <div
-                    class="flex"
+                    class="flex dark:text-slate-300"
                     class:hidden={$taskCountTag.all==0}
 
             >

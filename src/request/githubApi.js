@@ -63,6 +63,7 @@ export const pushToGithub = async (data) => {
         var re = await request('PUT /repos/{owner}/{repo}/contents/{path}', {
             headers: {
                 authorization: `token ${gitubToken}`,
+                accept:"application/vnd.github.v3+json"
             },
             owner: githubName,
             repo: repoName,
@@ -78,7 +79,6 @@ export const pushToGithub = async (data) => {
     } catch (error) {
         if (error.status == 401) {
             if (error.message == "Bad credentials") {
-                await refreshTokenWithGithub()
                 return await pushToGithub(data)
             }
         }
@@ -106,7 +106,6 @@ export const getGithubContent = async (data) => {
         console.log("getContentShaerror", error);
         if (error.status == 401) {
             if (error.message == "Bad credentials") {
-                await refreshTokenWithGithub()
                 return await getGithubContent(data)
             }
 
@@ -139,7 +138,6 @@ export const getLastCommitRecord = async (data) => {
         console.log("getContentShaerror", error);
         if (error.status == 401) {
             if (error.message == "Bad credentials") {
-                await refreshTokenWithGithub()
                 return await getLastCommitRecord(data)
             }
         }
@@ -163,7 +161,6 @@ export const compare2Commits = async (data) => {
         console.log("getContentShaerror", error);
         if (error.status == 401) {
             if (error.message == "Bad credentials") {
-                await refreshTokenWithGithub()
                 return await compare2Commits(data)
             }
         }
@@ -187,7 +184,6 @@ export const getContentSha = async (data) => {
         console.log("getContentShaerror", error);
         if (error.status == 401) {
             if (error.message == "Bad credentials") {
-                await refreshTokenWithGithub()
                 return await getContentSha(data)
             }
         }
@@ -220,7 +216,6 @@ export const deleteContent = async (data) => {
         console.log("getContentShaerror", error);
         if (error.status == 401) {
             if (error.message == "Bad credentials") {
-                await refreshTokenWithGithub()
                 return await getContentSha(data)
             }
         }
