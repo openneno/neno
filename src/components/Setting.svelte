@@ -200,10 +200,10 @@
                                 class="  bg-fuchsia-100"
                         />
                     </div>
-                    <div class="ml-2  text-sm">
+                    <div class="ml-2  text-sm text-yellow-500">
                         <p>
                             同步功能由github
-                            action完成,可进行手动的全量同步和每次提交到github保存的增量同步
+                            action完成,可进行手动的全量同步(在笔记存储仓库的action中手动执行 sync all neno to notion action)和每次提交到github保存的自动进行的增量同步
                         </p>
                         <p>
                             由于notion

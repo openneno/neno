@@ -12,6 +12,7 @@ NENO
 - **无需后端,完全使用github进行存储你的所有数据,文字和图片**
 - **支持完全离线使用**
 - **支持完整版数据导入导出**
+- **支持同步内容到Notion(使用gihub action)**
 
 [马上体验](https://neno.pages.dev/)
 
@@ -42,9 +43,10 @@ dist 目录下面为构建好的前端页面
 - [x] 分享出图片
 - [X] 完全基于浏览器的离线版本
 - [X] 使用github进行存储
+- [X] 基于github action 的notion 同步
 - [ ] 每日回顾
 - [ ] 随机漫步
-- [ ] 基于github action
+
 
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5.png)
 ![](https://github.com/Mran/neno/blob/master/readmepic/%E9%A6%96%E9%A1%B5%E7%A7%BB%E5%8A%A8%E7%AB%AF.png)
