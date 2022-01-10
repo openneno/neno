@@ -8,6 +8,7 @@
     pagedd,
     githubStore,
     commitToGithubTag,
+    notionStore,
     reload,
     taskCountTag,
   } from "./store/store.js";
@@ -39,6 +40,7 @@
   onMount(() => {
     let setting = window.localStorage.getItem("settingStore");
     let github = window.localStorage.getItem("githubStore");
+    let notion = window.localStorage.getItem("notionStore");
 
     if (setting == null) {
       $pagedd = "setting";
@@ -46,10 +48,10 @@
       $settingStore = JSON.parse(setting);
     }
     github && ($githubStore = JSON.parse(github));
+    notion && ($notionStore = JSON.parse(notion));
 
     //打开的时候进行同步
     trySyncGithub();
-    let index = 0;
     let syncinterval = setInterval(async () => {
       // console.log(tasking);
       if ($githubStore.access_token != "" && $githubStore.repoName != "") {

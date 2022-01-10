@@ -20,7 +20,15 @@ export const githubStore = writable({
     githubName: "",
     lastCommitSha: ""
 });
+//notion相关的配置
+//internalIntegrationToken apikey
+//databaseId 授权的数据库id
+export const notionStore = writable({
+    isSyncToNotion: false,
+    internalIntegrationToken: "",
+    databaseId: "",
 
+});
 export const countStore = writable({ tagCount: 0, nenoCount: 0, dayCount: 0, dateCount: {} });
 export const tagStore = writable({ pinTags: [], allTags: [] });
 export const searchNenoByDate = writable({ date: "" });

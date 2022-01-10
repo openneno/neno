@@ -1,4 +1,4 @@
-import {settingStore, githubStore, reload} from "../store/store.js";
+import { githubStore, reload} from "../store/store.js";
 import {request} from "../utils/githubtool/index";
 import {Base64} from 'js-base64';
 import {
@@ -8,9 +8,7 @@ import {
     insertToIndexedDB
 } from "./fetchApi";
 import {is_empty} from "svelte/internal";
-import {get} from 'svelte/store';
 
-let baseurl = "https://api.neno.topmini.top"
 let gitubToken = ""
 let repoName = ""
 let githubName = ""
@@ -229,17 +227,6 @@ export const deleteContent = async (data) => {
 
 }
 
-export const checkGithubAppInstalled = async (data) => {
-    return await (await fetch(`https://api.github.com/user/installations`, {
-        method: "get",
-        headers: {
-            'content-type': 'application/json',
-            "Authorization": `token ${gitubToken}`
-        },
-        mode: "cors",
-    })).json()
-
-}
 export const cloneGithubRepo = async (contentPath) => {
     let nenoBodyRaw;
     console.log("contentPath", contentPath);
