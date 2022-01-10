@@ -63,6 +63,21 @@ async function createNotionDatabaseProperty(params) {
 
     return await (await fetch(`https://api.notion.com/v1/databases/${notionDatabaseId}`, requestOptions)).json()
 }
+//获取数据库结构
+async function getDatabaseStracture(params) {
+
+    var requestOptions = {
+        method: 'GET',
+        headers: {
+            "Notion-Version": "2021-05-13",
+            "Authorization": `Bearer ${notionToken}`,
+            "Content-Type": "application/json"
+        },
+        redirect: 'follow'
+    };
+
+    return await (await fetch(`https://api.notion.com/v1/databases/${notionDatabaseId}`, requestOptions)).json()
+}
 //同步单个neno笔记到notion数据库
 async function syncNenoItemToNotion(nenoItem) {
 
@@ -164,9 +179,15 @@ async function syncFromLocal(params) {
 
 
 async function run() {
-    //先创建数据库结构
-    let createNotionDatabasePropertyResult = await createNotionDatabaseProperty()
-    console.log(createNotionDatabasePropertyResult);
+
+    //判断数据库结构是否创立
+    let databaseStractureResult = await getDatabaseStracture()
+    if (databaseStractureResult.properties.tags == undefined) {
+        //先创建数据库结构
+        let createNotionDatabasePropertyResult = await createNotionDatabaseProperty()
+        console.log(createNotionDatabasePropertyResult);
+
+    }
     await syncFromLocal()
     return
 }

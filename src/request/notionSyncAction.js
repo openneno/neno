@@ -85,8 +85,6 @@ export const  syncNenoToNotion="# This is a syncNenoToNotion workflow \n" +
     "          > syncNenoToNotion.js\n" +
     "      - run: pwd\n" +
     "      - run: ls\n" +
-    "      - name: echoCommitMessage\n" +
-    "        run: echo ${{github.event.head_commit.message}}\n" +
     "      - name: Setup Node\n" +
     "        if: ${{ contains(github.event.head_commit.message, '[ADD]') }}\n" +
     "        uses: actions/setup-node@v1\n" +
