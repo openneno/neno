@@ -7,24 +7,22 @@
     } from "../request/fetchApi";
     import { loginWithGithub } from "../request/githubApi";
 
-    import { pagedd, settingStore, githubStore } from "../store/store.js";
+    import {
+        pagedd,
+        settingStore,
+        githubStore,
+        
+    } from "../store/store.js";
 
-    let platform = $settingStore.platform;
-    let imgDomain = $settingStore.imgDomain;
-    let domain = $settingStore.domain;
-    let useMode = $settingStore.useMode;
     let access_token = $githubStore.access_token;
 
     let repoName = $githubStore.repoName;
-    let branch = $githubStore.branch;
 
     let done = "";
     let importFile = "";
     let uploadNode = "";
 
-    onMount(() => {
-        console.log(useMode);
-    });
+    onMount(() => {});
     $: {
         console.log(importFile);
         // await importIndexedDB();
@@ -43,10 +41,6 @@
     }
 
     function saveSetting() {
-        $settingStore.imgDomain = imgDomain;
-        $settingStore.platform = platform;
-        $settingStore.domain = domain;
-        $settingStore.useMode = useMode;
         $githubStore.repoName = repoName;
 
         console.log($settingStore);
@@ -77,19 +71,6 @@
     async function importNeno(params) {
         uploadNode.click();
     }
-
-    function clearGithubSetting() {
-        $githubStore.githubName = "";
-        $githubStore.repoName = "";
-        $githubStore.access_token = "";
-        $githubStore.refresh_token = "";
-        $githubStore.refresh_token_expires_in = 0;
-        window.localStorage.setItem(
-            "githubStore",
-            JSON.stringify($githubStore)
-        );
-        window.location.reload();
-    }
 </script>
 
 <div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 ">
@@ -111,7 +92,7 @@
         <div class="m-4 flex flex-col dark:text-gray-100 ">
             <div class="mb-4">
                 <div class="m-4">
-                    <label htmlFor=""
+                    <label for=""
                         >用户Github Token<a
                             class="text-sm ml-4"
                             href="https://github.com/settings/tokens"
@@ -167,6 +148,9 @@
                         placeholder="仓库名"
                     />
                 </div>
+                <div class="bg-gray-200  w-full h-[2px]" />
+
+                
                 <div class="m-4">
                     <label htmlFor="">导入/导出离线数据</label>
                     <div class="flex items-center space-x-4">

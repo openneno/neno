@@ -29,7 +29,6 @@ export const reload = writable({ tag: 0, action: "" });
 
 export const commitToGithubTag = writable({ timestmp: 0, data: {} });
 export const taskCountTag = writable({ all: 0, done: 0 });
-export const darkmode = writable({ isDark: true });
 
 
 

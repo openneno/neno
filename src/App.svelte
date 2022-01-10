@@ -8,7 +8,6 @@
     pagedd,
     githubStore,
     commitToGithubTag,
-    searchNenoByDate,
     reload,
     taskCountTag,
   } from "./store/store.js";
@@ -47,16 +46,16 @@
       $settingStore = JSON.parse(setting);
     }
     github && ($githubStore = JSON.parse(github));
+
     //打开的时候进行同步
     trySyncGithub();
     let index = 0;
-    setInterval(async () => {
+    let syncinterval = setInterval(async () => {
       // console.log(tasking);
       if ($githubStore.access_token != "" && $githubStore.repoName != "") {
         if (!tasking) {
           tasking = true;
           let taskData = (await popTaskToIndexedDB()).body;
-          // console.log(taskData);
           taskCountTag.set({ all: taskData.length, done: 0 });
           for (const item of taskData) {
             await doTask(item.data);
@@ -67,11 +66,11 @@
             });
           }
           taskCountTag.set({ all: 0, done: 0 });
-
           tasking = false;
         }
       }
     }, 5000);
+    return () => clearInterval(syncinterval);
   });
   githubStore.subscribe((value) => {
     if (value.access_token) {
@@ -82,7 +81,6 @@
   async function trySyncGithub() {
     if ($githubStore.access_token != "" && $githubStore.repoName != "") {
       // 先检查老数据,第一次就获取所有的数据
-
       if ($githubStore.lastCommitSha == "") {
         await cloneGithubRepo("");
         reload.set({ tag: Date.now(), action: "nenoCount" });
@@ -148,7 +146,7 @@
       }
     }
   }
-//执行日常的增删改查的任务 
+  //执行日常的增删改查的任务
   async function doTask(value) {
     await getContentSha({
       branch: $githubStore.branch,
@@ -165,7 +163,9 @@
               value.data._id
             }.json`,
             content: JSON.stringify(value.data, null, "\t"),
-            commitMessage: value.data.pureContent,
+            commitMessage: `${shadata.body.sha == "" ? "[ADD]" : "[MODIFY]"} ${
+              value.data.pureContent
+            }`,
             encode: true,
             sha: shadata.body.sha,
           });
