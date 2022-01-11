@@ -106,7 +106,7 @@
                 raw: element.filename.indexOf("picData/") !== -1 ? false : true,
               })
             ).body;
-            var nenoData = {};
+            let nenoData = {};
             if (element.filename.indexOf(".json") == 35) {
               if (element.status != "removed") {
                 try {

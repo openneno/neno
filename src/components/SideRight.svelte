@@ -4,9 +4,9 @@
     import {searchNenoByTag, searchNenoByDate, reload, taskCountTag} from "../store/store.js";
 
     import QuillEditor from "./QuillEditor.svelte";
-    import FmoloItem from "./FmoloItem.svelte";
+    import NenoItem from "./NenoItem.svelte";
 
-    import {getAllFmolo, search} from "../request/fetchApi";
+    import {getAllNeno, search} from "../request/fetchApi";
     import ProgressLine from "./ProgressLine.svelte";
     import {showSlide} from "./SettingSlide.svelte";
 
@@ -20,7 +20,7 @@
     let changeTag = "";
     let page = 0;
     $: {
-        if (flowClient != undefined) {
+        if (flowClient !== undefined) {
             let flowClientBoundingClientRect = flowClient.getBoundingClientRect();
             flowClientTop = flowClientBoundingClientRect.top;
         }
@@ -33,11 +33,11 @@
         load();
         searchNenoByDate.subscribe((value) => {
             console.log("searchNenoByDate", value);
-            if (value.date == "refresh") {
+            if (value.date === "refresh") {
                 page = 0;
                 nenoItems = []
                 load();
-            } else if (value.date != "") {
+            } else if (value.date !== "") {
                 searchNeno("", value.date, "");
             }
         });
@@ -45,14 +45,14 @@
             console.log("searchNenoByTag", value);
             changeTag = value.tag.substring(1);
 
-            if (value.tag != "") {
+            if (value.tag !== "") {
                 searchNeno("", "", value.tag);
             } else {
                 searchItems = []
             }
         });
         reload.subscribe((value) => {
-            if (value.tag && value.action == "neno") {
+            if (value.tag && value.action === "neno") {
                 page = 0;
                 isEnd = false
                 nenoItems = []
@@ -61,7 +61,7 @@
         })
         flowClient.addEventListener("scroll", function () {
             if (
-                flowClient.scrollTop ==
+                flowClient.scrollTop ===
                 flowClient.scrollHeight - flowClient.clientHeight &&
                 !isLoding &&
                 !isEnd
@@ -75,10 +75,10 @@
     function load() {
         isLoding = true;
         isLodingError = false;
-        getAllFmolo({page: page})
+        getAllNeno({page: page})
             .then((respone) => {
                 let re = respone;
-                if (re.body.length == 0) {
+                if (re.body.length === 0) {
                     isEnd = true;
                 }
                 re.body.forEach((element) => {
@@ -95,9 +95,9 @@
 
     function searchNeno(searchText = "", searchDate = "", searchTag = "") {
         if (
-            searchText.length != 0 ||
-            searchDate.length != 0 ||
-            searchTag.length != 0
+            searchText.length !== 0 ||
+            searchDate.length !== 0 ||
+            searchTag.length !== 0
         ) {
             isLoding = true;
             search({
@@ -106,9 +106,8 @@
                 tag: searchTag,
             })
                 .then(async (respone) => {
-                    let re = respone;
                     isLoding = false;
-                    searchItems = re.body;
+                    searchItems = respone.body;
                 })
 
                 .catch((reason) => {
@@ -117,7 +116,7 @@
                 });
         } else {
             searchItems = [];
-            if (nenoItems.length == 0) {
+            if (nenoItems.length === 0) {
                 load();
             }
         }
@@ -128,13 +127,13 @@
 <div class="  flex-1 flex flex-col justify-start  pt-4  w-0">
     <div class="  flex flex-row items-center justify-between ">
         <div class="flex flex-row items-center pl-4 ">
-            {#if changeTag == ""}
+            {#if changeTag === ""}
                 <div class="font-bold dark:text-slate-300">NENO</div>
             {:else}
                 <div
                         class="flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1"
                 >
-                    <div class="mr-1 pt-1"><i class="ri-hashtag dark:text-slate-300 "/></div>
+                    <div class="mr-1 pt-1"><i class="ri-hashtag dark:text-slate-300 "></i></div>
                     <div class="font-bold w-auto mr-2 dark:text-slate-300" type="text">
                         {changeTag}
                     </div>
@@ -147,20 +146,20 @@
                     </button>
                 </div>
             {/if}
-            {#if changeTag == ""}
+            {#if changeTag === ""}
                 <button
                         class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
                         on:click={() => {
                         showSlide();
                     }}
                 >
-                    <i class="ri-function-fill dark:text-slate-300"/>
+                    <i class="ri-function-fill dark:text-slate-300"></i>
                 </button>
             {/if}
 
             <div
                     class="flex dark:text-slate-300"
-                    class:hidden={$taskCountTag.all==0}
+                    class:hidden={$taskCountTag.all===0}
 
             >
                 <svg class="animate-spin mx-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20"
@@ -177,12 +176,12 @@
         <div
                 class="bg-gray-200 rounded-lg h-8 p-2 flex items-center flex-shrink-0"
         >
-            <i class="ri-search-2-line text-gray-400"/>
+            <i class="ri-search-2-line text-gray-400"></i>
             <input
                     class=" ml-2 bg-gray-200 focus:outline-none text-sm"
                     type="text"
                     on:keydown={(event) => {
-                    if (event.code == "Enter") {
+                    if (event.code === "Enter") {
                         searchNeno(searchText, "");
                     }
                 }}
@@ -193,8 +192,7 @@
                     on:click={() => {
                     searchText = "";
                     searchItems = [];
-                }}
-            />
+                }}></i>
         </div>
     </div>
 
@@ -226,25 +224,25 @@
             class="flex flex-col overflow-y-scroll p-2 "
             style="height:{innerHeight - flowClientTop}px"
     >
-        {#if searchItems.length == 0}
+        {#if searchItems.length === 0}
             {#each nenoItems as item (item._id)}
-                <FmoloItem
+                <NenoItem
                         {...item}
                         on:deleteOne={(event) => {
                         nenoItems = nenoItems.filter((item) => {
-                            return item._id != event.detail._id;
+                            return item._id !== event.detail._id;
                         });
                     }}
                 />
             {/each}
         {:else}
             {#each searchItems as item (item._id)}
-                <FmoloItem
+                <NenoItem
                         {...item}
                         searchContent={searchText}
                         on:deleteOne={(event) => {
                         nenoItems = nenoItems.filter((item) => {
-                            return item._id != event.detail._id;
+                            return item._id !== event.detail._id;
                         });
                     }}
                 />
@@ -253,5 +251,3 @@
     </div>
 </div>
 
-<style type="text/postcss">
-</style>

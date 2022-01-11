@@ -1,7 +1,7 @@
 import {settingStore, commitToGithubTag, reload} from "../store/store.js";
 import {getObjectId} from "../utils/objetid.js";
 import {getObjectURL} from "../utils/process.js";
-import {openDB,} from 'idb';
+import { openDB } from 'idb/with-async-ittr';
 import dayjs from "dayjs";
 
 // import { openDB } from 'idb/with-async-ittr.js';
@@ -39,7 +39,6 @@ settingStore.subscribe(value => {
 });
 // const baseurl = "http://127.0.0.1:3000"
 // const baseurl = "https://b9c21f2efdc44e2792d2ac7cbb8feff4.apig.cn-north-4.huaweicloudapis.com"
-// const baseurl = "https://fmolo.bijiduo.com"
 function genergeParams(data) {
     return {
         body: JSON.stringify(data),
@@ -228,49 +227,77 @@ export const deleteTaskToIndexedDB = async (_id) => {
         return resolve({body: {}, code: 200})
     })
 }
-export const getAllFmolo = async (data) => {
-    if (useMode == "github") {
+export const getAllNeno = async (data) => {
+    if (useMode === "github") {
 
 
         // console.log(aa);
-        var nenos = []
-        var count = 0;
-        var pageing = 0;
+        let nenos = []
+        let count = 0;
+        let pageing = 0;
+        // const tx = (await db).transaction("nenoitem");
+        //
+        // for await (const cursor of tx.store) {
+        //     console.log(cursor.value);
+        //     // Skip the next item
+        //     // cursor.advance(2);
+        // }
         let cursor = await (await db).transaction("nenoitem").store.openCursor(null, "prev");
 
         while ((cursor)) {
 
-            if (data.page != 0 && pageing == 0) {
+            if (data.page !== 0 && pageing === 0) {
                 cursor = await (cursor).advance(data.page * 20 + 1)
                 pageing = 1
             } else {
-                let value = cursor.value;
-                nenos = [...nenos, value]
+                let result = cursor.value;
+
+                nenos = [...nenos, result]
                 if (++count > 20) {
+                    for (let neno of nenos) {
+                        await getParentDetail(neno)
+                    }
                     return new Promise((resolve, rej) => {
                         return resolve({body: nenos})
 
                     })
-
                 }
-
+                console.log()
                 cursor = await cursor.continue();
             }
         }
         return new Promise((resolve, rej) => {
             return resolve({body: nenos})
-
         })
-
 
     } else
         return await (await fetch(`${baseurl}/find`, genergeParams(data))).json()
 }
+async function getParentDetail(result) {
+    //查找父item
+    if (result.parentId !== "") {
+        const presult = await (await db).getFromIndex('nenoitem', "_id", result.parentId);
+        result.parent = presult
+    }
+    let children = [];
 
-export const addFmolo = async (data) => {
-    if (useMode == "github") {
+    const cresult = await (await db).getAllFromIndex('nenoitem', "parentId", result._id);
+
+    for (let index = 0; index < cresult.length; index++) {
+        const element = cresult[index];
+
+
+        const gcresult = await (await db).getAllFromIndex('nenoitem', "parentId", element._id);
+        element.children = gcresult
+
+        children = [...children, element]
+    }
+    result.children = children
+}
+export const addNeno = async (data) => {
+    if (useMode === "github") {
         if
-        (data._id != "") {
+        (data._id !== "") {
             var old = await (await db).getFromIndex('nenoitem', "_id", data._id);
             if (old) {
                 data.created_at = old.created_at
@@ -322,29 +349,11 @@ export const addFmolo = async (data) => {
 
 }
 export const detail = async (data) => {
-    if (useMode == "github") {
+    if (useMode === "github") {
         var result = await (await db).getFromIndex('nenoitem', "_id", data._id);
-        //查找父item
-        if (result.parentId != "") {
-            var presult = await (await db).getFromIndex('nenoitem', "_id", result.parentId);
-            result.parent = presult
-        }
-        var children = []
+        await getParentDetail(result)
 
-        var cresult = await (await db).getAllFromIndex('nenoitem', "parentId", result._id);
-
-        for (let index = 0; index < cresult.length; index++) {
-            var element = cresult[index];
-
-
-            var gcresult = await (await db).getAllFromIndex('nenoitem', "parentId", element._id);
-            element.children = gcresult
-
-            children = [...children, element]
-        }
-        result.children = children
         return new Promise(async (resolve, rej) => {
-            ('return: ', result);
             return resolve({body: result})
         })
     } else {
@@ -352,7 +361,7 @@ export const detail = async (data) => {
     }
 }
 export const deleteOne = async (data) => {
-    if (useMode == "github") {
+    if (useMode === "github") {
         var result = await (await db).getFromIndex('nenoitem', "_id", data._id);
 
         (await db).delete('nenoitem', data._id);
@@ -457,16 +466,15 @@ export const search = async (data) => {
     if (useMode == "github") {
 
 
-        var nenos = []
+        let nenos = [];
         let cursor = await (await db).transaction("nenoitem").store.openCursor(null, "prev");
 
         while ((cursor)) {
             let value = cursor.value;
 
-            if (value.created_at == data.created_at || value.tags.includes(data.tag) || (data.content != "" && value.content.indexOf(data.content) != -1)) {
+            if (value.created_at.substring(0, 10) == data.created_at || value.tags.includes(data.tag) || (data.content != "" && value.content.indexOf(data.content) != -1)) {
                 nenos = [...nenos, value]
             }
-
             cursor = await cursor.continue();
         }
         return new Promise((resolve, rej) => {

@@ -1,15 +1,15 @@
 <script context="module">
     var showDetailss ;
-    export function showFmolo(fmoloId, isHidden) {
-        console.log("showFmolo", fmoloId, isHidden);
-        showDetailss(fmoloId, isHidden);
+    export function showNeno(nenoId, isHidden) {
+        console.log("showNeno", nenoId, isHidden);
+        showDetailss(nenoId, isHidden);
     }
 </script>
 
 <script>
     import { fly, fade } from "svelte/transition";
     import QuillEditor from "./QuillEditor.svelte";
-    import FmoloItem from "./FmoloItem.svelte";
+    import NenoItem from "./NenoItem.svelte";
     import ProgressLine from "./ProgressLine.svelte";
     import { detail } from "../request/fetchApi";
 
@@ -17,7 +17,7 @@
     let isLoding = true;
     let show = false;
     let showRight = false;
-    let fmoloDetail = { children: [], _id: "" };
+    let nenoDetail = { children: [], _id: "" };
 
     onMount(() => {
 
@@ -26,9 +26,9 @@
     });
 
     let _id = "";
-    function showDetail(newFmoloId) {
-        _id = newFmoloId;
-        if (show != true) {
+    function showDetail(newNenoId) {
+        _id = newNenoId;
+        if (show !== true) {
             showRight = true;
         }
         show = true;
@@ -38,10 +38,9 @@
         isLoding = true;
         detail({ _id: _id })
             .then((respone) => {
-                let re = respone;
-                fmoloDetail = re.body;
+                nenoDetail = respone.body;
 
-                console.log(fmoloDetail);
+                console.log(nenoDetail);
                 isLoding = false;
             })
             .catch((reason) => {
@@ -49,11 +48,11 @@
                 isLoding = false;
             });
     }
-    function hidden(params) {
+    function hidden() {
         isLoding = false;
         show = false;
         showRight = false;
-        fmoloDetail = { children: [], _id: "" };
+        nenoDetail = { children: [], _id: "" };
     }
 </script>
 
@@ -67,8 +66,7 @@
             class="lt:w-4/12 w-2/12 2xl:w-8/12 float-left   h-full "
             on:click={() => {
                 hidden();
-            }}
-        />
+            }}></div>
         {#if showRight}
             <div
                 in:fly={{ x: 200, duration: 200 }}
@@ -88,29 +86,29 @@
                             hidden();
                         }}
                     >
-                        <i class="ri-close-fill" />
+                        <i class="ri-close-fill"></i>
                     </button>
                 </div>
 
-                <FmoloItem
-                    _id={fmoloDetail._id}
-                    created_at={fmoloDetail.created_at}
-                    content={fmoloDetail.content}
-                    parentId={fmoloDetail.parentId}
-                    parent={fmoloDetail.parent}
-                    images={fmoloDetail.images}
-                    tags={fmoloDetail.tags}
+                <NenoItem
+                    _id={nenoDetail._id}
+                    created_at={nenoDetail.created_at}
+                    content={nenoDetail.content}
+                    parentId={nenoDetail.parentId}
+                    parent={nenoDetail.parent}
+                    images={nenoDetail.images}
+                    tags={nenoDetail.tags}
                 />
 
                 <div class=" pl-6 ">
-                    {#each fmoloDetail.children as item (item._id)}
+                    {#each nenoDetail.children as item (item._id)}
                         <!-- content here -->
-                        <FmoloItem
+                        <NenoItem
                             {...item}
                             on:deleteOne={(event) => {
-                                fmoloDetail.children = fmoloDetail.children.filter(
+                                nenoDetail.children = nenoDetail.children.filter(
                                     (item) => {
-                                        return item._id != event.detail._id;
+                                        return item._id !== event.detail._id;
                                     }
                                 );
                             }}
@@ -118,10 +116,10 @@
                     {/each}
                 </div>
                 <QuillEditor
-                    parentId={fmoloDetail._id}
+                    parentId={nenoDetail._id}
                     on:update={(event) => {
-                        fmoloDetail.children = [
-                            ...fmoloDetail.children,
+                        nenoDetail.children = [
+                            ...nenoDetail.children,
                             event.detail,
                         ];
                     }}

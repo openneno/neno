@@ -3,7 +3,7 @@
   import SideRight from "./SideRight.svelte";
   import Setting from "./Setting.svelte";
   import SettingSlide from "./SettingSlide.svelte";
-  import FmoloDetail from "./FmoloDetail.svelte";
+  import NenoDetail from "./NenoDetail.svelte";
   import ViewPicture from "./ViewPicture.svelte";
   import Daily from "./Daily.svelte";
   import Share from "./Share.svelte";
@@ -23,15 +23,15 @@
       >
         <SideLeft />
       </div>
-      {#if $pagedd == "neno"}
+      {#if $pagedd === "neno"}
         <SideRight />
-      {:else if $pagedd == "setting"}
+      {:else if $pagedd === "setting"}
         <Setting />
       {:else}
         <Daily />
       {/if}
     </div>
-    <FmoloDetail />
+    <NenoDetail />
     <SettingSlide />
     <ViewPicture />
     <Share />

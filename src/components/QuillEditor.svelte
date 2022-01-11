@@ -7,7 +7,7 @@
     import Quill from "quill";
 
     import {
-        addFmolo,
+        addNeno,
         uploadPicIndexedDB,
         getFileFromIndexedDB,
     } from "../request/fetchApi";
@@ -347,7 +347,7 @@
             ];
         }
 
-        addFmolo({
+        addNeno({
             content: sContent,
             pureContent: editor.childNodes[0].innerText,
             _id: _id,
@@ -541,5 +541,5 @@
 </div>
 
 <style>
-    
+
 </style>

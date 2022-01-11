@@ -3,17 +3,16 @@
 </script>
 
 <script>
-    import { createEventDispatcher } from "svelte";
-    import { fade } from "svelte/transition";
+    import {createEventDispatcher} from "svelte";
+    import {fade} from "svelte/transition";
 
     import dayjs from 'dayjs'
-    import { getObjectURL } from "../utils/process";
-    import { showFmolo } from "./FmoloDetail.svelte";
+    import {showNeno} from "./NenoDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
-    import { showPictureView } from "./ViewPicture.svelte";
-    import { deleteOne, getFileFromIndexedDB } from "../request/fetchApi";
-    import { searchNenoByTag } from "../store/store.js";
-    import { showShareView } from "./Share.svelte";
+    import {showPictureView} from "./ViewPicture.svelte";
+    import {deleteOne, getFileFromIndexedDB} from "../request/fetchApi";
+    import {searchNenoByTag} from "../store/store.js";
+    import {showShareView} from "./Share.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -32,6 +31,7 @@
         aa.insertAdjacentHTML("afterbegin", content);
         return aa.textContent;
     }
+
     let menuList;
     let openMenu = false;
     let editMode = false;
@@ -39,29 +39,33 @@
     function action(params) {
         params.focus();
     }
+
     function toggleMenu(node) {
         openMenu = !openMenu;
     }
+
     function toggleEditMode(params) {
         editMode = !editMode;
     }
+
     function deleteNeno(_id) {
-        deleteOne({ _id: _id })
+        deleteOne({_id: _id})
             .then((respone) => {
-                let re = respone;
-                let code = re.code;
-                if (code == 200) {
-                    dispatch("deleteOne", { _id: _id });
+                let code = respone.code;
+                if (code === 200) {
+                    dispatch("deleteOne", {_id: _id});
                 }
             })
             .catch((reason) => {
                 console.log(reason);
             });
     }
+
     document.tagClick = (tag) => {
         $searchNenoByTag.tag = tag.innerText.trim();
         console.log("tagClick", tag.innerText);
     };
+
     function praseTag(rawContent, tags) {
         let pContent = "";
         let pIndex = 0;
@@ -81,10 +85,10 @@
             }
         }
         pContent += copyRawContent.substring(pIndex);
-        if (searchContent.length != 0) {
+        if (searchContent.length !== 0) {
             pContent = pContent.replaceAll(
                 searchContent,
-                `<span class="bg-yellow-300">${searchContent}</span>`
+                `<span class="bg-yellow-300 rounded-sm">${searchContent}</span>`
             );
         }
         pContent = pContent.replaceAll(
@@ -93,19 +97,18 @@
         );
         return pContent;
     }
+
     async function getImageurl(imgDomain, key, platform) {
-        if (platform == "indexedDB") {
+        if (platform === "indexedDB") {
             var url = await getFileFromIndexedDB(key);
             return url.key;
         }
-        // else {
-        //     return imgDomain + "/" + key;
-        // }
+        return ""
     }
 </script>
 
 <div
-    class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-sm  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
+        class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-sm  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
 >
     <div class="flex justify-between">
         <div class="text-sm text-gray-500 dark:text-slate-300">
@@ -113,26 +116,26 @@
         </div>
         <div class="relative">
             <button on:click={() => toggleMenu(1)} class="focus:outline-none ">
-                <i class="ri-more-line dark:text-slate-300" />
+                <i class="ri-more-line dark:text-slate-300"/>
             </button>
             {#if openMenu == true}
                 <div
-                    use:action
-                    tabindex="0"
-                    on:blur|stopPropagation={() => {
+                        use:action
+                        tabindex="0"
+                        on:blur|stopPropagation={() => {
                         setTimeout(() => {
                             toggleMenu();
                         }, 150);
                     }}
-                    in:fade={{ duration: 100 }}
-                    out:fade={{ duration: 100 }}
-                    bind:this={menuList}
-                    class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-none"
-                    style="left:-16px;"
+                        in:fade={{ duration: 100 }}
+                        out:fade={{ duration: 100 }}
+                        bind:this={menuList}
+                        class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-none"
+                        style="left:-16px;"
                 >
                     <button
-                        class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300 "
-                        on:click={() => {
+                            class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300 "
+                            on:click={() => {
                             showShareView(
                                 _id,
                                 created_at,
@@ -144,25 +147,29 @@
                                 searchContent,
                                 tags
                             );
-                        }}>分享</button
+                        }}>分享
+                    </button
                     >
                     <button
-                        class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300   "
-                        on:click={() => {
+                            class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300   "
+                            on:click={() => {
                             toggleEditMode();
-                        }}>编辑</button
+                        }}>编辑
+                    </button
                     >
                     <button
-                        class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
-                        on:click={() => {
-                            showFmolo(_id, false);
-                        }}>批注</button
+                            class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
+                            on:click={() => {
+                            showNeno(_id, false);
+                        }}>批注
+                    </button
                     >
                     <button
-                        class="  dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
-                        on:click={() => {
+                            class="  dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
+                            on:click={() => {
                             deleteNeno(_id);
-                        }}>删除</button
+                        }}>删除
+                    </button
                     >
                 </div>
             {/if}
@@ -170,15 +177,15 @@
     </div>
     {#if editMode}
         <QuillEditor
-            {content}
-            {images}
-            {_id}
-            {parentId}
-            canCancle={true}
-            on:cancle={() => {
+                {content}
+                {images}
+                {_id}
+                {parentId}
+                canCancle={true}
+                on:cancle={() => {
                 editMode = false;
             }}
-            on:update={(event) => {
+                on:update={(event) => {
                 console.log(event.detail);
                 images = event.detail.images;
                 content = event.detail.content;
@@ -187,8 +194,8 @@
         />
     {:else}
         <div
-            class="list-decimal text-sm text-red-300  whitespace-no-wrap "
-            style="height:revert"
+                class="list-decimal text-sm text-red-300  whitespace-no-wrap "
+                style="height:revert"
         >
             <p class="whitespace-no-wrap ">
                 {@html praseTag(content, tags)}
@@ -197,32 +204,32 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each images as { imgDomain, key, platform }, index (index)}
+        {#each images as {imgDomain, key, platform}, index (index)}
             {#await getImageurl(imgDomain, key, platform) then value}
                 <img
-                    on:click={() => {
+                        on:click={() => {
                         showPictureView(images, index);
                     }}
-                    class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
-                    src={value}
-                    alt=""
+                        class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
+                        src={value}
+                        alt=""
                 />
             {/await}
         {/each}
     </div>
-    {#if parent != undefined && parent != null}
+    {#if parent !== undefined && parent != null}
         <button
-            class="flex items-center space-x-1  hover:shadow-sm focus:outline-none"
-            on:click={() => {
-                showFmolo(parent._id, false);
+                class="flex items-center space-x-1  hover:shadow-sm focus:outline-none"
+                on:click={() => {
+                showNeno(parent._id, false);
             }}
         >
             <i
-                class="ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500"
+                    class="ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500"
             />
             <div
-                class="text-gray-500 text-sm"
-                style="-webkit-line-clamp: 1;
+                    class="text-gray-500 text-sm"
+                    style="-webkit-line-clamp: 1;
         text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-box-orient: vertical;
@@ -235,17 +242,17 @@
 
     {#each children as item}
         <button
-            class="flex items-center  space-x-1   hover:shadow-sm focus:outline-none"
-            on:click={() => {
-                showFmolo(item._id, false);
+                class="flex items-center  space-x-1   hover:shadow-sm focus:outline-none"
+                on:click={() => {
+                showNeno(item._id, false);
             }}
         >
             <i
-                class="ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500"
+                    class="ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500"
             />
             <div
-                class="text-gray-500 text-sm"
-                style="-webkit-line-clamp: 1;
+                    class="text-gray-500 text-sm"
+                    style="-webkit-line-clamp: 1;
             text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-box-orient: vertical;

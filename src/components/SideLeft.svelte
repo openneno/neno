@@ -1,18 +1,18 @@
 <script>
-    import { tags, pin, pins, count, rename } from "../request/fetchApi";
+    import {count, pin, pins, rename, tags} from "../request/fetchApi";
     import {
-        pagedd,
         countStore,
-        tagStore,
+        pagedd,
+        reload,
         searchNenoByDate,
         searchNenoByTag,
-        reload,
         settingStore,
+        tagStore,
     } from "../store/store.js";
     import GreenMap from "./GreenMap.svelte";
     import TagExpand from "./TagExpand.svelte";
 
-    import { onMount } from "svelte";
+    import {onMount} from "svelte";
     import dayjs from "dayjs";
 
     let allTags = [];
@@ -22,7 +22,7 @@
         countcount();
         getPins();
         reload.subscribe((value) => {
-            if (value.tag && value.action == "nenoCount") {
+            if (value.tag && value.action === "nenoCount") {
                 countcount();
                 getPins();
             }
@@ -32,8 +32,7 @@
     function getTags() {
         tags()
             .then((respone) => {
-                let re = respone;
-                let tempTags = re.body;
+                let tempTags = respone.body;
                 $countStore.tagCount = tempTags.length;
                 $tagStore.allTags = tempTags;
                 allTags = filterTagtree(tempTags);
@@ -50,13 +49,13 @@
             splitAllTags = [...splitAllTags, element];
         });
 
-        var tagP = [];
-        for (var tagIndex in splitAllTags) {
-            var tagSplit = splitAllTags[tagIndex].split("/");
-            var subtag = "";
-            for (var i in tagSplit) {
-                var simpletag = tagSplit[i];
-                var s = subtag ? subtag + "/" + simpletag : simpletag;
+        let tagP = [];
+        for (let tagIndex in splitAllTags) {
+            const tagSplit = splitAllTags[tagIndex].split("/");
+            let subtag = "";
+            for (let i in tagSplit) {
+                const simpletag = tagSplit[i];
+                const s = subtag ? subtag + "/" + simpletag : simpletag;
                 tagP[s] = {
                     showTag: simpletag,
                     tag: s,
@@ -67,21 +66,20 @@
             }
         }
 
-        var subtag;
-        var c = [];
-        for (var index in tagP)
+        let subtag;
+        let tree = [];
+        for (let index in tagP)
             (subtag = tagP[index]).parentTag
                 ? tagP[subtag.parentTag].children.push(subtag)
-                : c.push(subtag);
+                : tree.push(subtag);
 
-        return c;
+        return tree;
     }
 
     function getPins() {
         pins()
             .then((respone) => {
-                let re = respone;
-                pinTags = re.body;
+                pinTags = respone.body;
                 getTags();
             })
             .catch((reason) => {
@@ -93,18 +91,17 @@
         if (isPin) {
             pinTags = [...pinTags, { _id: "", tag: tag }];
             allTags = allTags.filter((item) => {
-                return item != tag;
+                return item !== tag;
             });
         } else {
             pinTags = pinTags.filter((item) => {
-                return item.tag != tag;
+                return item.tag !== tag;
             });
             allTags = [...allTags, tag];
         }
 
         pin({ tag: tag })
             .then((respone) => {
-                let re = respone;
             })
             .catch((reason) => {
                 console.log(reason);
@@ -159,7 +156,7 @@
             <div class="dark:text-slate-300">NENO</div>
 
             <a href="https://github.com/Mran/neno" target="_blank">
-                <i class="ri-github-fill ri-xl " /></a
+                <i class="ri-github-fill ri-xl "></i></a
             >
         </div>
 
@@ -169,15 +166,13 @@
                     class="ri-sun-line text-white"
                     on:click={() => {
                         changeDarkMode();
-                    }}
-                />
+                    }}></i>
             {:else}
                 <i
                     class="ri-moon-line"
                     on:click={() => {
                         changeDarkMode();
-                    }}
-                />
+                    }}></i>
             {/if}
 
             <button
@@ -186,7 +181,7 @@
                     $pagedd = "setting";
                 }}
             >
-                <i class="ri-settings-fill " />
+                <i class="ri-settings-fill "></i>
             </button>
         </div>
     </div>
@@ -222,7 +217,7 @@
                 $searchNenoByTag.tag = "";
             }}
             class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
-                ($pagedd == 'neno' ? 'bg-green-500 text-white' : '')}      "
+                ($pagedd === 'neno' ? 'bg-green-500 text-white' : '')}      "
         >
             <i class="ri-quill-pen-fill mr-2" />NENO
         </button>
@@ -232,7 +227,7 @@
                 $pagedd = "daily";
             }}
             class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
-                ($pagedd == 'daily' ? 'bg-green-500 text-white' : '')}        "
+                ($pagedd === 'daily' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-calendar-event-fill mr-2" />每日回顾
         </button>
