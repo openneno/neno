@@ -98,12 +98,11 @@
         return pContent;
     }
 
-    async function getImageurl(imgDomain, key, platform) {
-        if (platform === "indexedDB") {
-            var url = await getFileFromIndexedDB(key);
-            return url.key;
-        }
-        return ""
+    async function getImageurl( key) {
+        console.log(key)
+        console.log(content)
+        const url = await getFileFromIndexedDB(key);
+        return url.key;
     }
 </script>
 
@@ -204,8 +203,8 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each images as {imgDomain, key, platform}, index (index)}
-            {#await getImageurl(imgDomain, key, platform) then value}
+        {#each images as { key}, index (index)}
+            {#await getImageurl( key) then value}
                 <img
                         on:click={() => {
                         showPictureView(images, index);

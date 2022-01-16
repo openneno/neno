@@ -88,25 +88,21 @@
         show = false;
     }
 
-    async function getImageurl(imgDomain, key, platform, index) {
-        if (platform == "indexedDB") {
-            var url = await getFileFromIndexedDB(key);
-            if (index == images.length - 1) {
-                setTimeout(() => {
-                    console.log(card);
-                    html2canvas(card, { allowTaint: true }).then((canvas) => {
-                        let ac = card.children;
-                        console.log(ac);
-                        card.style.display = "none";
+    async function getImageurl( key, index) {
+        const url = await getFileFromIndexedDB(key);
+        if (index === images.length - 1) {
+            setTimeout(() => {
+                console.log(card);
+                html2canvas(card, { allowTaint: true }).then((canvas) => {
+                    let ac = card.children;
+                    console.log(ac);
+                    card.style.display = "none";
 
-                        cardcontainer.appendChild(canvas);
-                    });
-                }, 200);
-            }
-            return url.key;
-        } else {
-            return imgDomain + "/" + key;
+                    cardcontainer.appendChild(canvas);
+                });
+            }, 200);
         }
+        return url.key;
     }
     function praseTag(rawContent, tags) {
         let pContent = "";
@@ -170,8 +166,8 @@
                     </p>
                 </div>
                 <div>
-                    {#each images as { imgDomain, key, platform }, index (index)}
-                        {#await getImageurl(imgDomain, key, platform, index) then value}
+                    {#each images as {  key }, index (index)}
+                        {#await getImageurl( key, index) then value}
                             <img
                                 class="w-full  rounded mr-2 mb-2 object-cover"
                                 src={value}

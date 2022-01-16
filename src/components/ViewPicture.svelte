@@ -32,18 +32,14 @@
         show = false;
     }
     async function getPIcUrl(showImageInfo) {
+        let url;
         if (showImageInfo.file == null) {
             if (showImageInfo.uploadInfo == undefined) {
-                if (showImageInfo.platform == "indexedDB") {
-                    var url = await getFileFromIndexedDB(showImageInfo.key);
-                    return url.key;
-                } else return showImageInfo.imgDomain + "/" + showImageInfo.key; //网络加载
+                url = await getFileFromIndexedDB(showImageInfo.key);
+                return url.key;
             } else {
-                if (showImageInfo.uploadInfo.platform == "indexedDB") {
-                    var url = await getFileFromIndexedDB(showImageInfo.uploadInfo.key);
-                    return url.key;
-                } else
-                    return `${showImageInfo.uploadInfo.imgDomain}/${showImageInfo.uploadInfo.key}`; //预览模式已上传
+                url = await getFileFromIndexedDB(showImageInfo.uploadInfo.key);
+                return url.key;
             }
         } else {
             return getObjectURL(showImageInfo.file); //预览模式未上传

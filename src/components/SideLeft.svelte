@@ -1,5 +1,5 @@
 <script>
-    import {count, pin, pins, rename, tags} from "../request/fetchApi";
+    import {count, pin, pins, renameTag, tags} from "../request/fetchApi";
     import {
         countStore,
         pagedd,
@@ -131,7 +131,7 @@
     }
 
     function renameName(detail) {
-        rename({ oldTag: detail.oldTag, newTag: detail.newTag })
+        renameTag({ oldTag: detail.oldTag, newTag: detail.newTag })
             .then((respone) => {
                 getPins();
             })

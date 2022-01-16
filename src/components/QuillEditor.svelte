@@ -90,7 +90,7 @@
         };
         quillEditor.on("text-change", function (delta, oldDelta, source) {
             isContentEmpty = quillEditor.getText().length == 1;
-            console.log("text-change", delta, oldDelta, source);
+            // console.log("text-change", delta, oldDelta, source);
 
             toolTip();
         });
@@ -139,7 +139,6 @@
                     percent_completed: 100,
                     uploadInfo: element,
                     timeStamp: Date.now() + Math.random(),
-                    uploadingstatus: "已上传", //"上传中","已上传"
                 },
             ];
         });
@@ -154,7 +153,7 @@
 
         let cIndex = selection.index;
         var text = quillEditor.getText();
-        console.log(text.length);
+        // console.log(text.length);
         if (text.length == 1) {
             showTip = false;
             return;
@@ -210,23 +209,14 @@
         quillEditor.setSelection(tagStartIndex + tag.length, 0, "api");
     }
 
-    $: imageFiles = joinFile(uploadimagefiles);
-
-    $: {
-        for (let index = 0; index < imageFiles.length; index++) {
-            const element = imageFiles[index];
-            if (element.uploadingstatus == "未上传") {
-                element.uploadingstatus = "上传中";
-                // uploadPic(element, index);
-                if ($settingStore.useMode == "github") {
-                    uploadPicLocal(element, index);
-                }
-            }
-        }
+    $:{
+        imageFiles = joinFile(uploadimagefiles);
     }
 
-    function joinFile(uploadimagefiles) {
-        let filelist = Array.from(uploadimagefiles);
+
+
+    function joinFile(uploadimagefilesa) {
+        let filelist = Array.from(uploadimagefilesa);
         let tempfiles = imageFiles;
         filelist.forEach((element) => {
             tempfiles = [
@@ -235,15 +225,14 @@
                     file: element,
                     percent_completed: 0,
                     uploadInfo: {
-                        platform: "",
                         url: "",
                         key: "",
                     },
                     timeStamp: Date.now() + Math.random(),
-                    uploadingstatus: "未上传", //"上传中","已上传"
                 },
             ];
         });
+        uploadimagefiles=[]
         return tempfiles;
     }
     function cancelInput() {
@@ -273,53 +262,9 @@
         }
         quillEditor.insertText(index, "#");
     }
-    async function uploadPicLocal(imageFile, index) {
-        console.log(imageFile);
 
-        var response = await uploadPicIndexedDB(imageFile.file);
-        imageFiles[index].uploadingstatus = "已上传";
-        imageFiles[index].uploadInfo.key = response.key;
-        imageFiles[index].uploadInfo.platform = "indexedDB";
-    }
 
-    function uploadPic(imageFile, index) {
-        var formData = new FormData();
-        var fileField = imageFile.file;
-        formData.append("file", fileField);
-
-        let request = new XMLHttpRequest();
-        request.open("POST", "http://127.0.0.1:8888/cat/uploadPic");
-
-        // upload progress event
-        request.upload.addEventListener("progress", function (e) {
-            // upload progress as percentage
-            let percent_completed = (e.loaded / e.total) * 100;
-            imageFiles[index].percent_completed = parseInt(
-                percent_completed + ""
-            );
-            if (percent_completed >= 100) {
-                imageFiles[index].uploadingstatus = "已上传";
-            }
-            console.log(
-                percent_completed,
-                index,
-                imageFiles[index].percent_completed
-            );
-        });
-
-        // request finished event
-        request.addEventListener("load", function (e) {
-            // HTTP status message (200, 404 etc)
-            console.log(request.status);
-
-            // request.response holds response from the server
-            console.log(request.response);
-        });
-
-        // send POST request to server
-        request.send(formData);
-    }
-    function sendBiu() {
+    async function sendBiu() {
         let sContent = editor.childNodes[0].innerHTML;
         isSending = true;
         let cc = quillEditor.getContents();
@@ -333,19 +278,17 @@
         let imagesInfo = [];
         for (let index = 0; index < imageFiles.length; index++) {
             const element = imageFiles[index];
-            if (element.uploadingstatus != "已上传") {
-                return;
-            }
+            const response = await uploadPicIndexedDB(element.file);
             imagesInfo = [
                 ...imagesInfo,
                 {
-                    key: element.uploadInfo.key,
-                    platform: element.uploadInfo.platform,
-                    imgDomain: $settingStore.imgDomain,
+                    suffixName:response.suffixName,
+                    key: response.key,
                     timeStamp: element.timeStamp,
                 },
             ];
         }
+
 
         addNeno({
             content: sContent,
@@ -373,11 +316,7 @@
     }
     async function getPIcUrl(file, uploadInfo) {
         if (file == null) {
-            if (uploadInfo.platform == "indexedDB") {
-                return (await getFileFromIndexedDB(uploadInfo.key)).key;
-            } else {
-                return uploadInfo.imgDomain + "/" + uploadInfo.key;
-            }
+            return (await getFileFromIndexedDB(uploadInfo.key)).key;
         } else {
             return getObjectURL(file);
         }

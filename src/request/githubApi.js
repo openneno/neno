@@ -212,12 +212,12 @@ export const deleteContent = async (data) => {
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status == 401) {
-            if (error.message == "Bad credentials") {
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
                 return await getContentSha(data)
             }
         }
-        if (error.status == 404) {
+        if (error.status === 404) {
             return new Promise(async (resolve, rej) => {
                 return resolve({body: {commit: {sha: ""}}})
             })
