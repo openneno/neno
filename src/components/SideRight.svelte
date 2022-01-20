@@ -124,11 +124,19 @@
 </script>
 
 <svelte:window bind:innerHeight/>
-<div class="  flex-1 flex flex-col justify-start  pt-4  w-0">
+<div class="  flex-1 flex flex-col justify-start  pt-4  w-0  overflow-visible">
     <div class="  flex flex-row items-center justify-between ">
         <div class="flex flex-row items-center pl-4 ">
             {#if changeTag === ""}
                 <div class="font-bold dark:text-slate-300">NENO</div>
+                <button
+                        class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
+                        on:click={() => {
+                        showSlide();
+                    }}
+                >
+                    <i class="ri-function-fill dark:text-slate-300"></i>
+                </button>
             {:else}
                 <div
                         class="flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1"
@@ -147,14 +155,7 @@
                 </div>
             {/if}
             {#if changeTag === ""}
-                <button
-                        class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
-                        on:click={() => {
-                        showSlide();
-                    }}
-                >
-                    <i class="ri-function-fill dark:text-slate-300"></i>
-                </button>
+
             {/if}
 
             <div
@@ -221,7 +222,7 @@
     {/if}
     <div
             bind:this={flowClient}
-            class="flex flex-col overflow-y-scroll p-2 "
+            class="flex flex-col overflow-y-scroll p-2  overflow-visible "
             style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length === 0}

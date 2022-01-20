@@ -9,7 +9,7 @@
         syncNenoToNotion,
     } from "../request/notionSyncAction";
     import {
-        pagedd,
+        paged,
         settingStore,
         githubStore,
         notionStore,
@@ -120,7 +120,7 @@
         <button
                 class="focus:outline-none    sm:hidden md:hidden mr-4"
                 on:click={() => {
-                $pagedd = "neno";
+                $paged = "neno";
             }}
         >
             <i class="ri-arrow-left-line"></i>

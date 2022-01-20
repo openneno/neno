@@ -98,7 +98,7 @@
         return pContent;
     }
 
-    async function getImageurl( key) {
+    async function getImageurl(key) {
         console.log(key)
         console.log(content)
         const url = await getFileFromIndexedDB(key);
@@ -109,15 +109,15 @@
 <div
         class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-sm  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
 >
-    <div class="flex justify-between">
+    <div class="flex justify-between relative ">
         <div class="text-sm text-gray-500 dark:text-slate-300">
-            {dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")}
+            {dayjs(created_at).format("YYYY-MM-DD HH:mm")}
         </div>
-        <div class="relative">
+        <div class=" relative z-auto ">
             <button on:click={() => toggleMenu(1)} class="focus:outline-none ">
-                <i class="ri-more-line dark:text-slate-300"/>
+                <i class="ri-more-line dark:text-slate-300"></i>
             </button>
-            {#if openMenu == true}
+            {#if openMenu === true}
                 <div
                         use:action
                         tabindex="0"
@@ -130,7 +130,7 @@
                         out:fade={{ duration: 100 }}
                         bind:this={menuList}
                         class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-none"
-                        style="left:-16px;"
+                        style="left:-32px;"
                 >
                     <button
                             class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300 "
@@ -203,8 +203,8 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each images as { key}, index (index)}
-            {#await getImageurl( key) then value}
+        {#each images as {key}, index (index)}
+            {#await getImageurl(key) then value}
                 <img
                         on:click={() => {
                         showPictureView(images, index);
@@ -224,8 +224,7 @@
             }}
         >
             <i
-                    class="ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500"
-            />
+                    class="ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500"></i>
             <div
                     class="text-gray-500 text-sm"
                     style="-webkit-line-clamp: 1;
@@ -247,8 +246,7 @@
             }}
         >
             <i
-                    class="ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500"
-            />
+                    class="ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500"></i>
             <div
                     class="text-gray-500 text-sm"
                     style="-webkit-line-clamp: 1;

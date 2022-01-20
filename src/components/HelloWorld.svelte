@@ -8,24 +8,24 @@
   import Daily from "./Daily.svelte";
   import Share from "./Share.svelte";
 
-  import { pagedd } from "../store/store.js";
+  import { paged } from "../store/store.js";
   import { settingStore } from "../store/store.js";
 </script>
 
-<div class:dark={$settingStore.isDark}>
+<div class:dark={$settingStore.isDark} class=" overflow-visible">
   <div
-    class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100 dark:bg-black "
+    class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100 dark:bg-black   overflow-visible"
   >
-    <div class="max-w-6xl min-w-0 w-full  flex  ">
+    <div class="max-w-6xl min-w-0 w-full  flex   overflow-visible ">
       <div
-        class="hidden  sm:flex md:flex flex-col items-start dark:bg-black"
+        class="hidden  sm:flex md:flex flex-col items-start dark:bg-black  overflow-visible"
         style="width:240px"
       >
         <SideLeft />
       </div>
-      {#if $pagedd === "neno"}
+      {#if $paged === "neno"}
         <SideRight />
-      {:else if $pagedd === "setting"}
+      {:else if $paged === "setting"}
         <Setting />
       {:else}
         <Daily />

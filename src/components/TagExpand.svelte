@@ -17,17 +17,22 @@
 
 <div>
     <button
-        class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm text-slate-800  dark:text-slate-300"
-        class:bg-green-500={selectionTag == tag}
-        class:text-white={selectionTag == tag}
+        class="rounded-r  group p-4 pt-2 pb-2  focus:outline-none w-full hover:text-white hover:bg-green-400 flex justify-between text-sm   dark:text-slate-300"
+        class:bg-green-500={selectionTag === tag}
+        class:text-slate-800={selectionTag !== tag}
+        class:text-white={selectionTag === tag}
+        on:mouseenter={()=>{
+            console.log("selectTag", tag,selectionTag)
+
+        }}
         on:click={() => {
             dispatch("selectTag", tag);
         }}
     >
         <div class="flex">
-            <div class=""><i class="ri-hashtag" /></div>
+            <div class=""><i class="ri-hashtag"></i></div>
             <div class="ml-1">
-                {showTag.indexOf("#") == 0 ? showTag.substring(1) : showTag}
+                {showTag.indexOf("#") === 0 ? showTag.substring(1) : showTag}
             </div>
         </div>
         <div>
@@ -38,7 +43,7 @@
                     selfTag = tag.substring(1);
                 }}
             >
-                <i class="ri-edit-fill" />
+                <i class="ri-edit-fill"></i>
             </button>
             <button
                 class="focus:outline-none group-hover:opacity-100 opacity-0   pr-1"
@@ -46,10 +51,10 @@
                     dispatch("pinTag", tag);
                 }}
             >
-                <i class="ri-pushpin-fill" />
+                <i class="ri-pushpin-fill"></i>
             </button>
 
-            {#if children.length != 0}
+            {#if children.length !== 0}
                 <button
                     class="focus:outline-none group-hover:opacity-100 opacity-0  pr-1"
                     on:click|stopPropagation={() => {
@@ -57,9 +62,9 @@
                     }}
                 >
                     {#if showSub}
-                        <i class="ri-arrow-right-s-line" />
+                        <i class="ri-arrow-right-s-line"></i>
                     {:else}
-                        <i class="ri-arrow-down-s-line" />
+                        <i class="ri-arrow-down-s-line"></i>
                     {/if}
                 </button>
             {/if}
@@ -70,7 +75,7 @@
             <div
                 class="flex items-center bg-gray-200 rounded-lg border-solid border-4  "
             >
-                <div class=""><i class="ri-hashtag" /></div>
+                <div class=""><i class="ri-hashtag"></i></div>
                 <input
                     class="focus:outline-none  h-8 p-2 pl-1 rounded-sm w-full text-gray-700"
                     type="text"

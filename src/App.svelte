@@ -5,7 +5,7 @@
 
     import {
         settingStore,
-        pagedd,
+        paged,
         githubStore,
         commitToGithubTag,
         notionStore,
@@ -43,7 +43,7 @@
         let notion = window.localStorage.getItem("notionStore");
 
         if (setting == null) {
-            $pagedd = "setting";
+            $paged = "setting";
         } else {
             $settingStore = JSON.parse(setting);
         }

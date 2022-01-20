@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-export const pagedd = writable("neno");//neno(NENO),dayily(每日回顾),luck(每日漫步),setting(设置)
+export const paged = writable("neno");//neno(NENO),dayily(每日回顾),luck(每日漫步),setting(设置)
 export const settingStore = writable({
     isDark: false
 });
