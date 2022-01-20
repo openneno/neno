@@ -13,6 +13,15 @@ NENO
 - **支持完全离线使用**
 - **支持完整版数据导入导出**
 - **支持同步内容到Notion(使用gihub action)**
+- **支持utools的neno插件**
+- **支持微信公众号记录笔记到neno**
+
+### neno的外部扩展工具
+1. [utools](https://u.tools/#/) 是一个快速的工具平台。在utools上搜索neno插件，即可使用。
+项目地址[neno-extension](https://github.com/Mran/neno-extension#/)
+2. 使用微信公众号进行输入。项目地址[neno-w](https://github.com/Mran/neno-wx#/)
+   ![](https://github.com/Mran/neno-extension/raw/master/asset/neno-wx.png)
+
 
 [马上体验](https://neno.pages.dev/)
 
@@ -44,6 +53,7 @@ dist 目录下面为构建好的前端页面
 - [X] 完全基于浏览器的离线版本
 - [X] 使用github进行存储
 - [X] 基于github action 的notion 同步
+- [X] 基于serverless的 的微信公众号输入笔记
 - [ ] 每日回顾
 - [ ] 随机漫步
 
