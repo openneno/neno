@@ -1,4 +1,4 @@
-![icon](https://github.com/Mran/neno/blob/master/dist/assets/neno.ico)
+![icon](https://github.com/Mran/neno/blob/master/public/neno.ico)
 
 ![](https://visitor-badge.glitch.me/badge?page_id=neno)
 
