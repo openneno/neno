@@ -19,7 +19,7 @@ NENO
 ### neno的外部扩展工具
 1. [utools](https://u.tools/#/) 是一个快速的工具平台。在utools上搜索neno插件，即可使用。
 项目地址[neno-extension](https://github.com/Mran/neno-extension#/)
-2. 使用微信公众号进行输入。项目地址[neno-w](https://github.com/Mran/neno-wx#/)
+2. 使用微信公众号进行输入。项目地址[neno-wx](https://github.com/Mran/neno-wx#/)
    ![](https://github.com/Mran/neno-extension/raw/master/asset/neno-wx.png)
 
 
