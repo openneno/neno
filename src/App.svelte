@@ -2,7 +2,7 @@
     import HelloWorld from "./pages/HelloWorld.svelte";
     import Router from "./components/Router.svelte";
     import Tailwind from "./Tailwind.svelte";
-
+    import ReloadPrompt from './lib/ReloadPrompt.svelte'
     import {
         settingStore,
         paged,
@@ -314,3 +314,4 @@
         <HelloWorld/>
     {/await}
 </main>
+<ReloadPrompt />
