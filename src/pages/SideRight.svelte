@@ -3,11 +3,11 @@
     import {fly} from "svelte/transition";
     import {searchNenoByTag, searchNenoByDate, reload, taskCountTag} from "../store/store.js";
 
-    import QuillEditor from "./QuillEditor.svelte";
-    import NenoItem from "./NenoItem.svelte";
+    import QuillEditor from "../components/QuillEditor.svelte";
+    import NenoItem from "../components/NenoItem.svelte";
 
     import {getAllNeno, search} from "../request/fetchApi";
-    import ProgressLine from "./ProgressLine.svelte";
+    import ProgressLine from "../components/ProgressLine.svelte";
     import {showSlide} from "./SettingSlide.svelte";
 
     let flowClient;
@@ -251,4 +251,3 @@
         {/if}
     </div>
 </div>
-

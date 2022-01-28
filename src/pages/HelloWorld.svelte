@@ -3,10 +3,10 @@
   import SideRight from "./SideRight.svelte";
   import Setting from "./Setting.svelte";
   import SettingSlide from "./SettingSlide.svelte";
-  import NenoDetail from "./NenoDetail.svelte";
-  import ViewPicture from "./ViewPicture.svelte";
-  import Daily from "./Daily.svelte";
-  import Share from "./Share.svelte";
+  import NenoDetail from "../components/NenoDetail.svelte";
+  import ViewPicture from "../components/ViewPicture.svelte";
+  import Daily from "../components/Daily.svelte";
+  import Share from "../components/Share.svelte";
 
   import { paged } from "../store/store.js";
   import { settingStore } from "../store/store.js";

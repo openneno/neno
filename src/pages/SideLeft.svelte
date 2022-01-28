@@ -9,8 +9,8 @@
         settingStore,
         tagStore,
     } from "../store/store.js";
-    import GreenMap from "./GreenMap.svelte";
-    import TagExpand from "./TagExpand.svelte";
+    import GreenMap from "../components/GreenMap.svelte";
+    import TagExpand from "../components/TagExpand.svelte";
 
     import {onMount} from "svelte";
     import dayjs from "dayjs";
@@ -141,6 +141,11 @@
     }
     function changeDarkMode() {
         $settingStore.isDark = !$settingStore.isDark;
+        if ($settingStore.isDark) {
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#000");
+        }else {
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f3f4f6");
+        }
         window.localStorage.setItem(
             "settingStore",
             JSON.stringify($settingStore)
