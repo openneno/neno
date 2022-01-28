@@ -34,9 +34,9 @@
     } from "./request/fetchApi";
     import {is_empty} from "svelte/internal";
 
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/public/service-worker.js");
-    }
+    // if ("serviceWorker" in navigator) {
+    //     navigator.serviceWorker.register("/public/service-worker.js");
+    // }
     let tasking = false;
     onMount(() => {
         let setting = window.localStorage.getItem("settingStore");
