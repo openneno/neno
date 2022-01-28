@@ -21,6 +21,9 @@ NENO
 项目地址[neno-extension](https://github.com/Mran/neno-extension#/)
 2. 使用微信公众号进行输入。项目地址[neno-wx](https://github.com/Mran/neno-wx#/)
    ![](https://github.com/Mran/neno-extension/raw/master/asset/neno-wx.png)
+3. 使用Telegram Botjs进行输入。项目地址[neno-telegram](https://github.com/openneno/neno-tg) 
+
+   [neno Bot](https://t.me/NenoTG_Bot)
 
 
 [马上体验](https://neno.pages.dev/)
@@ -68,4 +71,3 @@ dist 目录下面为构建好的前端页面
 ## License
 
 GPL
-
