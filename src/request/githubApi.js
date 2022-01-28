@@ -86,7 +86,7 @@ export const pushToGithub = async (data) => {
 export const getGithubContent = async (data) => {
     try {
 
-        var re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
+        const re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
             headers: {
                 authorization: `token ${gitubToken}`,
                 accept: `application/vnd.github.v3${data.raw ? ".raw" : ""}+json`
@@ -95,28 +95,60 @@ export const getGithubContent = async (data) => {
             repo: repoName,
             path: data.path
 
-        })
+        });
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
 
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status == 401) {
-            if (error.message == "Bad credentials") {
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
                 return await getGithubContent(data)
             }
 
         }
         //HttpError: This repository is empty.
-        if (error.message.indexOf("empty") != -1) {
+        if (error.message.indexOf("empty") !== -1) {
             return new Promise(async (resolve, rej) => {
                 return resolve({body: {}})
 
             })
         }
+    }
+}
+export const getGithubBlob = async (data) => {
+    try {
 
+        const re = await request('GET /repos/{owner}/{repo}/git/blobs/{file_sha}', {
+            headers: {
+                authorization: `token ${gitubToken}`,
+                accept: `application/vnd.github.v3+json`
+            },
+            owner: githubName,
+            repo: repoName,
+            file_sha: data.file_sha
 
+        });
+        return new Promise(async (resolve, rej) => {
+            return resolve({body: re.data})
+
+        })
+    } catch (error) {
+        console.log("getContentShaerror", error);
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
+                return await getGithubContent(data)
+            }
+
+        }
+        //HttpError: This repository is empty.
+        if (error.message.indexOf("empty") !== -1) {
+            return new Promise(async (resolve, rej) => {
+                return resolve({body: {}})
+
+            })
+        }
     }
 }
 export const getLastCommitRecord = async (data) => {

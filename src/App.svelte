@@ -21,6 +21,7 @@
         getLastCommitRecord,
         getGithubContent,
         deleteContent,
+        getGithubBlob
     } from "./request/githubApi";
     import {
         insertToIndexedDB,
@@ -108,50 +109,60 @@
                                 await deleteOneFromIndexedDB({
                                     _id: element.filename.substring(11, 35),
                                 });
-                            }else  if (element.filename.indexOf("picData") === 0){
+                            } else if (element.filename.indexOf("picData") === 0) {
                                 //判断是否是图片文件
                                 await deletePicFromIndexedDB({
                                     key: element.filename.substring(8, element.filename.lastIndexOf(".")),
                                 });
                             }
                         } else {
-                            var nenoBodyRaw = (
-                                await getGithubContent({
-                                    path: encodeURI(element.filename),
-                                    raw: element.filename.indexOf("picData/") === -1,
-                                })
-                            ).body;
-                            let nenoData = {};
-                            if (element.filename.indexOf(".json") === 35) {
-                                try {
-                                    nenoData = JSON.parse(nenoBodyRaw);
-                                } catch (error) {
-                                }
-                                if (!is_empty(nenoData)) await insertToIndexedDB(nenoData);
-                                reload.set({tag: Date.now(), action: "neno"});
-                            } else if (element.filename === "countDate/countDate.json") {
-                                try {
-                                    nenoData = JSON.parse(nenoBodyRaw);
-                                } catch (error) {
-                                }
-                                if (!is_empty(nenoData))
-                                    await insertCountDateToIndexedDB(nenoData);
-                            } else if (element.filename.indexOf("picData/") === 0) {
-                                nenoData = {
-                                    _id: nenoBodyRaw.name.substring(
-                                        0,
-                                        nenoBodyRaw.name.indexOf(".")
+                            if (element.filename.indexOf("picData/") === 0) {
+                                const picRaw = (
+                                    await getGithubBlob({
+                                        file_sha: element.sha,
+                                    })
+                                ).body;
+                                let picData = {
+                                    _id: element.filename.substring(
+                                        element.filename.indexOf("/")+1,
+                                        element.filename.indexOf(".")
                                     ),
-                                    base64: "data:image/png;base64," + nenoBodyRaw.content,
+                                    base64: "data:image/png;base64," + picRaw.content,
                                 };
-                                if (!is_empty(nenoData)) await insertPicToIndexedDB(nenoData);
-                            } else if (element.filename.indexOf("pinTags/") === 0) {
-                                try {
-                                    nenoData = JSON.parse(nenoBodyRaw);
-                                } catch (error) {
+                                await insertPicToIndexedDB(picData);
+                            } else {
+                                const nenoBodyRaw = (
+                                    await getGithubContent({
+                                        path: encodeURI(element.filename),
+                                        raw: element.filename.indexOf("picData/") === -1,
+                                    })
+                                ).body;
+                                let nenoData = {};
+                                if (element.filename.indexOf(".json") === 35) {
+                                    try {
+                                        nenoData = JSON.parse(nenoBodyRaw);
+                                    } catch (error) {
+                                    }
+                                    if (!is_empty(nenoData)) await insertToIndexedDB(nenoData);
+                                    reload.set({tag: Date.now(), action: "neno"});
+                                } else if (element.filename === "countDate/countDate.json") {
+                                    try {
+                                        nenoData = JSON.parse(nenoBodyRaw);
+                                    } catch (error) {
+                                    }
+                                    if (!is_empty(nenoData))
+                                        await insertCountDateToIndexedDB(nenoData);
+                                } else if (element.filename.indexOf("picData/") === 0) {
+
+                                } else if (element.filename.indexOf("pinTags/") === 0) {
+                                    try {
+                                        nenoData = JSON.parse(nenoBodyRaw);
+                                    } catch (error) {
+                                    }
+                                    if (!is_empty(nenoData)) await insertPinTagsToIndexedDB(nenoData);
                                 }
-                                if (!is_empty(nenoData)) await insertPinTagsToIndexedDB(nenoData);
                             }
+
                         }
                     }
                     reload.set({tag: Date.now(), action: "neno"});
