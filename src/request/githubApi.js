@@ -262,19 +262,19 @@ export const deleteContent = async (data) => {
 export const cloneGithubRepo = async (contentPath) => {
     let nenoBodyRaw;
     console.log("contentPath", contentPath);
-    var contentData = (await getGithubContent({path: encodeURI(contentPath), raw: true}))
+    const contentData = (await getGithubContent({path: encodeURI(contentPath), raw: true}))
         .body;
     if (is_empty(contentData)) {
         return;
     }
     for (let index = 0; index < contentData.length; index++) {
         const element = contentData[index];
-        if (element.type == "dir") {
+        if (element.type === "dir") {
             await cloneGithubRepo(element.path);
-        } else if (element.type == "file") {
+        } else if (element.type === "file") {
             let nenoData = {};
 
-            if (element.name.lastIndexOf(".json") == 24) {
+            if (element.name.lastIndexOf(".json") === 24) {
                 nenoBodyRaw = (
                     await getGithubContent({path: encodeURI(element.path), raw: true})
                 ).body;
@@ -283,7 +283,7 @@ export const cloneGithubRepo = async (contentPath) => {
                 } catch (error) {
                 }
                 if (!is_empty(nenoData)) insertToIndexedDB(nenoData);
-            } else if (element.name == "countDate.json") {
+            } else if (element.name === "countDate.json") {
                 nenoBodyRaw = (
                     await getGithubContent({path: encodeURI(element.path), raw: true})
                 ).body;
@@ -292,7 +292,7 @@ export const cloneGithubRepo = async (contentPath) => {
                 } catch (error) {
                 }
                 if (!is_empty(nenoData)) await insertCountDateToIndexedDB(nenoData);
-            } else if (element.name == "pinTags.json") {
+            } else if (element.name === "pinTags.json") {
                 nenoBodyRaw = (
                     await getGithubContent({path: encodeURI(element.path), raw: true})
                 ).body;
@@ -302,14 +302,19 @@ export const cloneGithubRepo = async (contentPath) => {
                 }
                 if (!is_empty(nenoData)) await insertPinTagsToIndexedDB(nenoData);
             } else if (element.path.indexOf("picData/") === 0) {
-                nenoBodyRaw = (
-                    await getGithubContent({path: encodeURI(element.path), raw: false})
+                const picRaw = (
+                    await getGithubBlob({
+                        file_sha: element.sha,
+                    })
                 ).body;
-                nenoData = {
-                    _id: nenoBodyRaw.name.substring(0, nenoBodyRaw.name.indexOf(".")),
-                    base64: "data:image/png;base64," + nenoBodyRaw.content
-                }
-                if (!is_empty(nenoData)) await insertPicToIndexedDB(nenoData);
+                let picData = {
+                    _id: element.path.substring(
+                        element.path.indexOf("/") + 1,
+                        element.path.indexOf(".")
+                    ),
+                    base64: "data:image/png;base64," + picRaw.content,
+                };
+                await insertPicToIndexedDB(picData);
             }
             reload.set({tag: Date.now(), action: "neno"})
 
