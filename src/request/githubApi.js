@@ -20,17 +20,6 @@ githubStore.subscribe(value => {
     githubName = value.githubName
 });
 
-function genergeParams(data) {
-    return {
-        body: JSON.stringify(data),
-        method: "post",
-        headers: {
-            'content-type': 'application/json'
-        },
-        mode: "cors",
-    }
-
-}
 export const loginWithGithub = async (data) => {
     try {
         var re = await request('GET /user', {
@@ -44,8 +33,8 @@ export const loginWithGithub = async (data) => {
             return resolve({body: re.data})
         })
     } catch (error) {
-        if (error.status == 401) {
-            if (error.message == "Bad credentials") {
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
                 return new Promise(async (resolve, rej) => {
                     return resolve({body: {}, code: 401})
                 })
@@ -201,6 +190,7 @@ export const getContentSha = async (data) => {
         var re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
             headers: {
                 authorization: `token ${gitubToken}`,
+                accept: `application/vnd.github.v3.sha`
             },
             owner: githubName,
             repo: repoName,

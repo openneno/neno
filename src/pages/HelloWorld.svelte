@@ -5,7 +5,7 @@
   import SettingSlide from "./SettingSlide.svelte";
   import NenoDetail from "../components/NenoDetail.svelte";
   import ViewPicture from "../components/ViewPicture.svelte";
-  import Daily from "../components/Daily.svelte";
+  import Daily from "./Daily.svelte";
   import Share from "../components/Share.svelte";
 
   import { paged } from "../store/store.js";
