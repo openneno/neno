@@ -1,5 +1,5 @@
 <script>
-    import { createEventDispatcher, onMount } from "svelte";
+    import { createEventDispatcher} from "svelte";
     export let tag = "";
     export let selectionTag = "";
     export let parentTag = "";
@@ -108,7 +108,7 @@
             </div>
         </div>
     {/if}
-    {#if children.length != 0 && showSub}
+    {#if children.length !== 0 && showSub}
         {#each children as item}
             <div class="ml-2">
                 <svelte:self

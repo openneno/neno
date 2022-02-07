@@ -7,7 +7,7 @@
 </script>
 
 <script>
-    import { fly, fade } from "svelte/transition";
+    import { fade } from "svelte/transition";
     import { getObjectURL } from "../utils/process";
     import { getFileFromIndexedDB } from "../request/fetchApi";
 
@@ -34,7 +34,7 @@
     async function getPIcUrl(showImageInfo) {
         let url;
         if (showImageInfo.file == null) {
-            if (showImageInfo.uploadInfo == undefined) {
+            if (showImageInfo.uploadInfo === undefined) {
                 url = await getFileFromIndexedDB(showImageInfo.key);
                 return url.key;
             } else {

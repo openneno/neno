@@ -22,7 +22,7 @@
     $: {
         console.log(importFile);
         // await importIndexedDB();
-        if (importFile != "") {
+        if (importFile !== "") {
             let reader = new FileReader();
             reader.readAsText(importFile[0]);
             reader.onload = async (oFREvent) => {
@@ -59,8 +59,8 @@
         let alldata = await exportIndexedDBToFile();
         let stringAllData = JSON.stringify(alldata);
         console.log(stringAllData);
-        var blob = new Blob([stringAllData], {type: "application/json"});
-        var objectURL = window.URL.createObjectURL(blob);
+        const blob = new Blob([stringAllData], {type: "application/json"});
+        const objectURL = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = objectURL;
         link.download = "nenodata.txt";
@@ -140,7 +140,7 @@
                     ></label
                     >
                     <div>
-                        {$githubStore.githubName == ""
+                        {$githubStore.githubName === ""
                             ? "输入Github Token获取github用户名"
                             : $githubStore.githubName}
                     </div>
@@ -154,12 +154,12 @@
                         <button
                                 class=" border-2  mt-4 outline-white p-2"
                                 on:click={async () => {
-                                if (access_token.length != 40) {
+                                if (access_token.length !== 40) {
                                 } else {
-                                    var response = await loginWithGithub({
+                                    const response = await loginWithGithub({
                                         access_token: access_token,
                                     });
-                                    if (response.code != 401) {
+                                    if (response.code !== 401) {
                                         githubStore.set({
                                             githubName: response.body.login,
                                             access_token: access_token,

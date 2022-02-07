@@ -9,7 +9,7 @@
     let toDay = dayjs().format("YYYY-MM-DD");
 
     $: {
-        if (countDate != undefined) {
+        if (countDate !== undefined) {
             name(countDate);
         }
     }
@@ -24,7 +24,7 @@
                     .subtract(startDay, "day")
                     .format("YYYY-MM-DD");
                 count = countDate[date];
-                if (count == undefined) {
+                if (count === undefined) {
                     count = 0;
                 }
                 dmap = [

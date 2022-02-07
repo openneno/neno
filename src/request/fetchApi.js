@@ -10,7 +10,7 @@ const db = openDB("neno", 4, {
     upgrade(db, oldVersion, newVersion, transaction) {
         console.log('数据库新建成功');
 
-        var objectStore;
+        let objectStore;
         if (!db.objectStoreNames.contains('nenoitem')) {
             objectStore = db.createObjectStore('nenoitem', {keyPath: '_id'});
             objectStore.createIndex('_id', '_id', {unique: true});// 创建索引
@@ -53,7 +53,7 @@ export const exportIndexedDBToFile = async () => {
     let allNenoPic = await (await db).getAll("nenoPic")
     let allNenopicBase64 = []
     for (const element of allNenoPic) {
-        var blob = element.file;
+        const blob = element.file;
         let picbase64 = await readUploadedFileAsText(blob)
         allNenopicBase64 = [...allNenopicBase64, {_id: element._id, file: picbase64}]
     }
@@ -113,7 +113,7 @@ export const imporFileTotIndexedDB = async (allData) => {
 export const getFileFromIndexedDB = async (key) => {
     let result = await (await db).get("nenoPic", key)
     return new Promise((resolve, rej) => {
-        var url = getObjectURL(result.file)
+        const url = getObjectURL(result.file);
         return resolve({key: url})
 
     })
@@ -273,7 +273,7 @@ async function getParentDetail(result) {
 
 export const addNeno = async (data) => {
     if (data._id !== "") {
-        var old = await (await db).getFromIndex('nenoitem', "_id", data._id);
+        const old = await (await db).getFromIndex('nenoitem', "_id", data._id);
         if (old) {
             data.created_at = old.created_at
             data.sha = old.sha || ""
@@ -414,7 +414,7 @@ export const search = async (data) => {
     while ((cursor)) {
         let value = cursor.value;
 
-        if (value.created_at.substring(0, 10) == data.created_at || value.tags.includes(data.tag) || (data.content != "" && value.content.indexOf(data.content) != -1)) {
+        if (value.created_at.substring(0, 10) === data.created_at || value.tags.includes(data.tag) || (data.content !== "" && value.content.indexOf(data.content) !== -1)) {
             nenos = [...nenos, value]
         }
         cursor = await cursor.continue();
@@ -490,9 +490,3 @@ export const renameTag = async (data) => {
         })
     })
 }
-
-
-
-
-
-

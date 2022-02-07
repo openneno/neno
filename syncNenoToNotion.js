@@ -7,7 +7,7 @@ let notionDatabaseId = process.env.NOTION_DATABASEID
 console.log(sha, githubToken, notionToken, notionDatabaseId);
 async function getTriggeredContent() {
 
-    var requestOptions = {
+    const requestOptions = {
         method: 'GET',
         headers: {
             "authorization": `token ${githubToken}`
@@ -20,7 +20,7 @@ async function getTriggeredContent() {
 
 }
 async function getCommitContent(contentUrl) {
-    var requestOptions = {
+    const requestOptions = {
         method: 'GET',
         headers: {
             "authorization": `token ${githubToken}`,
@@ -39,7 +39,7 @@ async function getCommitContent(contentUrl) {
 //创建符合neno笔记结构的数据结构
 async function createNotionDatabaseProperty(params) {
 
-    var raw = JSON.stringify({
+    const raw = JSON.stringify({
         "parent": {
             "type": "database_id",
             "database_id": notionDatabaseId
@@ -73,15 +73,13 @@ async function createNotionDatabaseProperty(params) {
             "tags": {
                 "type": "multi_select",
                 "multi_select": {
-                    "options": [
-
-                    ]
+                    "options": []
                 }
             }
         }
     });
 
-    var requestOptions = {
+    const requestOptions = {
         method: 'PATCH',
         headers: {
             "Notion-Version": "2021-05-13",
@@ -97,7 +95,7 @@ async function createNotionDatabaseProperty(params) {
 //获取数据库结构
 async function getDatabaseStracture(params) {
 
-    var requestOptions = {
+    const requestOptions = {
         method: 'GET',
         headers: {
             "Notion-Version": "2021-05-13",
@@ -129,7 +127,7 @@ async function syncNenoItemToNotion(nenoItem) {
         }]
     });
 
-    var raw = JSON.stringify({
+    const raw = JSON.stringify({
         "parent": {
             "type": "database_id",
             "database_id": notionDatabaseId
@@ -166,7 +164,7 @@ async function syncNenoItemToNotion(nenoItem) {
         }
     });
 
-    var requestOptions = {
+    const requestOptions = {
         method: 'POST',
         headers: {
             "Notion-Version": "2021-05-13",
@@ -184,7 +182,7 @@ async function syncNenoItemToNotion(nenoItem) {
 async function run() {
     //判断数据库结构是否创立
     let databaseStractureResult = await getDatabaseStracture()
-    if (databaseStractureResult.properties.tags == undefined) {
+    if (databaseStractureResult.properties.tags === undefined) {
         //先创建数据库结构
         let createNotionDatabasePropertyResult = await createNotionDatabaseProperty()
         console.log(createNotionDatabasePropertyResult);

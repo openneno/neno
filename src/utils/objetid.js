@@ -14,17 +14,17 @@ if (!document) var document = { cookie: '' }; // fix crashes on node
 /**
  * Javascript class that mimics how WCF serializes a object of type MongoDB.Bson.ObjectId
  * and converts between that format and the standard 24 character representation.
-*/
-var ObjectId = (function () {
-    var increment = Math.floor(Math.random() * (16777216));
-    var pid = Math.floor(Math.random() * (65536));
-    var machine = Math.floor(Math.random() * (16777216));
+ */
+const ObjectId = (function () {
+    let increment = Math.floor(Math.random() * (16777216));
+    const pid = Math.floor(Math.random() * (65536));
+    let machine = Math.floor(Math.random() * (16777216));
 
-    var setMachineCookie = function() {
-        var cookieList = document.cookie.split('; ');
-        for (var i in cookieList) {
-            var cookie = cookieList[i].split('=');
-            var cookieMachineId = parseInt(cookie[1], 10);
+    const setMachineCookie = function () {
+        const cookieList = document.cookie.split('; ');
+        for (let i in cookieList) {
+            const cookie = cookieList[i].split('=');
+            const cookieMachineId = parseInt(cookie[1], 10);
             if (cookie[0] == 'mongoMachineId' && cookieMachineId && cookieMachineId >= 0 && cookieMachineId <= 16777215) {
                 machine = cookieMachineId;
                 break;
@@ -34,7 +34,7 @@ var ObjectId = (function () {
     };
     if (typeof (localStorage) != 'undefined') {
         try {
-            var mongoMachineId = parseInt(localStorage['mongoMachineId']);
+            const mongoMachineId = parseInt(localStorage['mongoMachineId']);
             if (mongoMachineId >= 0 && mongoMachineId <= 16777215) {
                 machine = Math.floor(localStorage['mongoMachineId']);
             }
@@ -43,8 +43,7 @@ var ObjectId = (function () {
         } catch (e) {
             setMachineCookie();
         }
-    }
-    else {
+    } else {
         setMachineCookie();
     }
 
@@ -58,20 +57,17 @@ var ObjectId = (function () {
             this.machine = arguments[0].machine;
             this.pid = arguments[0].pid;
             this.increment = arguments[0].increment;
-        }
-        else if (typeof (arguments[0]) == 'string' && arguments[0].length == 24) {
+        } else if (typeof (arguments[0]) == 'string' && arguments[0].length == 24) {
             this.timestamp = Number('0x' + arguments[0].substr(0, 8)),
-            this.machine = Number('0x' + arguments[0].substr(8, 6)),
-            this.pid = Number('0x' + arguments[0].substr(14, 4)),
-            this.increment = Number('0x' + arguments[0].substr(18, 6))
-        }
-        else if (arguments.length == 4 && arguments[0] != null) {
+                this.machine = Number('0x' + arguments[0].substr(8, 6)),
+                this.pid = Number('0x' + arguments[0].substr(14, 4)),
+                this.increment = Number('0x' + arguments[0].substr(18, 6))
+        } else if (arguments.length == 4 && arguments[0] != null) {
             this.timestamp = arguments[0];
             this.machine = arguments[1];
             this.pid = arguments[2];
             this.increment = arguments[3];
-        }
-        else {
+        } else {
             this.timestamp = Math.floor(new Date().valueOf() / 1000);
             this.machine = machine;
             this.pid = pid;
@@ -89,9 +85,9 @@ ObjectId.prototype.getDate = function () {
 };
 
 ObjectId.prototype.toArray = function () {
-    var strOid = this.toString();
-    var array = [];
-    var i;
+    const strOid = this.toString();
+    const array = [];
+    let i;
     for(i = 0; i < 12; i++) {
         array[i] = parseInt(strOid.slice(i*2, i*2+2), 16);
     }
@@ -109,10 +105,10 @@ ObjectId.prototype.toString = function () {
         return 'Invalid ObjectId';
     }
 
-    var timestamp = this.timestamp.toString(16);
-    var machine = this.machine.toString(16);
-    var pid = this.pid.toString(16);
-    var increment = this.increment.toString(16);
+    const timestamp = this.timestamp.toString(16);
+    const machine = this.machine.toString(16);
+    const pid = this.pid.toString(16);
+    const increment = this.increment.toString(16);
     return '00000000'.substr(0, 8 - timestamp.length) + timestamp +
            '000000'.substr(0, 6 - machine.length) + machine +
            '0000'.substr(0, 4 - pid.length) + pid +

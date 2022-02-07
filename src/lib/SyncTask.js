@@ -35,7 +35,7 @@ export async function doTask(value) {
                     branch: githubStorelocal.branch,
                     fileName: `${value.data.created_at.substring(0, 10)}/${value.data._id}.json`,
                     content: JSON.stringify(value.data, null, "\t"),
-                    commitMessage: `${shadata.body.sha == "" ? "[ADD]" : "[MODIFY]"} ${value.data.pureContent}`,
+                    commitMessage: `${shadata.body.sha === "" ? "[ADD]" : "[MODIFY]"} ${value.data.pureContent}`,
                     encode: true,
                     sha: shadata.body.sha,
                 });

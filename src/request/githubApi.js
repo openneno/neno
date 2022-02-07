@@ -22,12 +22,12 @@ githubStore.subscribe(value => {
 
 export const loginWithGithub = async (data) => {
     try {
-        var re = await request('GET /user', {
+        const re = await request('GET /user', {
             headers: {
                 authorization: `token ${data.access_token}`,
             },
 
-        })
+        });
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
@@ -47,10 +47,10 @@ export const loginWithGithub = async (data) => {
 
 export const pushToGithub = async (data) => {
     try {
-        var re = await request('PUT /repos/{owner}/{repo}/contents/{path}', {
+        const re = await request('PUT /repos/{owner}/{repo}/contents/{path}', {
             headers: {
                 authorization: `token ${gitubToken}`,
-                accept:"application/vnd.github.v3+json"
+                accept: "application/vnd.github.v3+json"
             },
             owner: githubName,
             repo: repoName,
@@ -58,14 +58,14 @@ export const pushToGithub = async (data) => {
             message: data.commitMessage,
             content: data.encode ? Base64.encode(data.content) : data.content,
             sha: data.sha
-        })
+        });
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
         })
     } catch (error) {
-        if (error.status == 401) {
-            if (error.message == "Bad credentials") {
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
                 return await pushToGithub(data)
             }
         }
@@ -142,21 +142,21 @@ export const getGithubBlob = async (data) => {
 }
 export const getLastCommitRecord = async (data) => {
     try {
-        var re = await request('GET /repos/{owner}/{repo}/branches', {
+        const re = await request('GET /repos/{owner}/{repo}/branches', {
             headers: {
                 authorization: `token ${gitubToken}`,
             },
             owner: githubName,
             repo: repoName,
-        })
+        });
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data[0]})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status == 401) {
-            if (error.message == "Bad credentials") {
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
                 return await getLastCommitRecord(data)
             }
         }
@@ -165,21 +165,21 @@ export const getLastCommitRecord = async (data) => {
 export const compare2Commits = async (data) => {
     try {
 
-        var re = await request('GET /repos/{owner}/{repo}/compare/{basehead}', {
+        const re = await request('GET /repos/{owner}/{repo}/compare/{basehead}', {
             headers: {
                 authorization: `token ${gitubToken}`,
             },
             owner: githubName,
             repo: repoName,
             basehead: `${data.base}...${data.head}`
-        })
+        });
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status == 401) {
-            if (error.message == "Bad credentials") {
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
                 return await compare2Commits(data)
             }
         }
@@ -187,7 +187,7 @@ export const compare2Commits = async (data) => {
 }
 export const getContentSha = async (data) => {
     try {
-        var re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
+        const re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
             headers: {
                 authorization: `token ${gitubToken}`,
                 accept: `application/vnd.github.v3.sha`
@@ -195,19 +195,19 @@ export const getContentSha = async (data) => {
             owner: githubName,
             repo: repoName,
             path: data.fileName,
-        })
+        });
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status == 401) {
-            if (error.message == "Bad credentials") {
+        if (error.status === 401) {
+            if (error.message === "Bad credentials") {
                 return await getContentSha(data)
             }
         }
-        if (error.status == 404) {
+        if (error.status === 404) {
             return new Promise(async (resolve, rej) => {
                 return resolve({body: {sha: ""}})
             })
@@ -218,7 +218,7 @@ export const getContentSha = async (data) => {
 }
 export const deleteContent = async (data) => {
     try {
-        var re = await request('DELETE /repos/{owner}/{repo}/contents/{path}', {
+        const re = await request('DELETE /repos/{owner}/{repo}/contents/{path}', {
             headers: {
                 authorization: `token ${gitubToken}`,
             },
@@ -227,7 +227,7 @@ export const deleteContent = async (data) => {
             path: data.fileName,
             message: "delete",
             sha: data.sha
-        })
+        });
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})

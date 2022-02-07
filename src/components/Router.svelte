@@ -8,8 +8,8 @@
   window.onload = function () {
     console.log(window.location);
     if (window.location.search.length > 0) {
-      var searchParams = new URLSearchParams(window.location.search);
-      searchParams.forEach((value, key) => {
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.forEach((value, key) => {
         console.log(`Parameter of ${key} is ${value} `);
       });
 

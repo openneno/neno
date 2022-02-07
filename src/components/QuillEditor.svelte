@@ -14,7 +14,7 @@
     import {getObjectURL} from "../utils/process";
     import {showPictureView} from "./ViewPicture.svelte";
 
-    import {settingStore, tagStore} from "../store/store.js";
+    import {tagStore} from "../store/store.js";
 
     import ProgressLine from "./ProgressLine.svelte";
 
@@ -51,7 +51,7 @@
     let isSending = false;
 
     onMount(() => {
-        var options = {
+        const options = {
             // debug: "info",
             modules: {
                 toolbar: toolbar,
@@ -62,26 +62,26 @@
         const delta = quillEditor.clipboard.convert(content);
         quillEditor.setContents(delta, "silent");
         quillEditor.focus();
-        if (content.length != 0) {
+        if (content.length !== 0) {
             isContentEmpty = false;
         }
         editor.onkeydown = function (event) {
             if (
-                (event.code == "ArrowUp" ||
-                    event.code == "ArrowDown" ||
-                    event.keyCode == 13) &&
+                (event.code === "ArrowUp" ||
+                    event.code === "ArrowDown" ||
+                    event.keyCode === 13) &&
                 tagTips.length > 0
             ) {
-                if (event.code == "ArrowUp" && tagTipsFocusIndex > 0) {
+                if (event.code === "ArrowUp" && tagTipsFocusIndex > 0) {
                     tagTipsFocusIndex--;
                 }
                 if (
-                    event.code == "ArrowDown" &&
+                    event.code === "ArrowDown" &&
                     tagTipsFocusIndex < tagTips.length - 1
                 ) {
                     tagTipsFocusIndex++;
                 }
-                if (event.code == "Enter") {
+                if (event.code === "Enter") {
                     tipTagInsert(tagTips[tagTipsFocusIndex]);
                     showTip = false;
                 }
@@ -90,7 +90,7 @@
             }
         };
         quillEditor.on("text-change", function (delta, oldDelta, source) {
-            isContentEmpty = quillEditor.getText().length == 1;
+            isContentEmpty = quillEditor.getText().length === 1;
             // console.log("text-change", delta, oldDelta, source);
 
             toolTip();
@@ -137,7 +137,6 @@
                 ...tempfiles,
                 {
                     file: null,
-                    percent_completed: 100,
                     uploadInfo: element,
                     timeStamp: Date.now() + Math.random(),
                 },
@@ -154,20 +153,20 @@
         }
 
         let cIndex = selection.index;
-        var text = quillEditor.getText();
+        const text = quillEditor.getText();
         // console.log(text.length);
-        if (text.length == 1) {
+        if (text.length === 1) {
             showTip = false;
             return;
         }
         let sIndex = text.lastIndexOf("#", cIndex);
-        if (sIndex != -1) {
+        if (sIndex !== -1) {
             let tagMay = text.substring(sIndex, cIndex);
 
             tagTips = [];
             for (let index = 0; index < $tagStore.allTags.length; index++) {
                 const element = $tagStore.allTags[index];
-                if (element.indexOf(tagMay) == 0) {
+                if (element.indexOf(tagMay) === 0) {
                     tagTips = [...tagTips, element];
                 }
             }
@@ -175,7 +174,7 @@
                 return b.length - a.length;
             });
 
-            if (tagTips.length != 0) {
+            if (tagTips.length !== 0) {
                 if (tagTips.length <= tagTipsFocusIndex) {
                     tagTipsFocusIndex = tagTips.length - 1;
                 }
@@ -198,7 +197,7 @@
         let updateContents = {
             ops: [],
         };
-        if (tagStartIndex != 0) {
+        if (tagStartIndex !== 0) {
             updateContents.ops = [{retain: tagStartIndex}];
         }
         updateContents.ops = [
@@ -225,9 +224,7 @@
                 ...tempfiles,
                 {
                     file: element,
-                    percent_completed: 0,
                     uploadInfo: {
-                        url: "",
                         key: "",
                     },
                     timeStamp: Date.now() + Math.random(),
@@ -253,15 +250,15 @@
 
     function deleteImage(timeStamp) {
         imageFiles = imageFiles.filter((item) => {
-            return item.timeStamp != timeStamp;
+            return item.timeStamp !== timeStamp;
         });
     }
 
     function insertHashTag() {
-        var range = quillEditor.getSelection(true);
+        const range = quillEditor.getSelection(true);
         let index = 0;
         if (range) {
-            if (range.length == 0) {
+            if (range.length === 0) {
                 index = range.index;
             } else {
                 index = range.index + range.length;
@@ -285,17 +282,28 @@
         let imagesInfo = [];
         for (let index = 0; index < imageFiles.length; index++) {
             const element = imageFiles[index];
-            const response = await uploadPicIndexedDB(element.file);
-            imagesInfo = [
-                ...imagesInfo,
-                {
-                    suffixName: response.suffixName,
-                    key: response.key,
-                    timeStamp: element.timeStamp,
-                },
-            ];
-        }
+            if (element.file != null) {
+                const response = await uploadPicIndexedDB(element.file);
+                imagesInfo = [
+                    ...imagesInfo,
+                    {
+                        suffixName: response.suffixName,
+                        key: response.key,
+                        timeStamp: element.timeStamp,
+                    },
+                ];
+            }else {
+                imagesInfo = [
+                    ...imagesInfo,
+                    {
+                        suffixName: element.uploadInfo.suffixName,
+                        key: element.uploadInfo.key,
+                        timeStamp: element.timeStamp,
+                    },
+                ];
+            }
 
+        }
 
         addNeno({
             content: sContent,
@@ -310,7 +318,7 @@
                 console.log(respone);
                 let re = respone;
                 isSending = false;
-                if (re.errorMessage == undefined) {
+                if (re.errorMessage === undefined) {
                     quillEditor.setContents([]);
                     dispatch("update", re.body);
                     cancelInput();
@@ -356,7 +364,7 @@
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each imageFiles as {file, percent_completed, uploadInfo, timeStamp}, index}
+        {#each imageFiles as {file, uploadInfo, timeStamp}, index}
             <div
                     in:fly={{ y: -100, duration: 500, easing: cubicOut }}
                     out:fly={{ y: -100, duration: 300 }}
@@ -376,15 +384,7 @@
                         <i class="m-auto ri-delete-bin-line ri-xl text-white"></i>
                     </button>
                 </div>
-                {#if percent_completed < 100 && percent_completed > 0}
-                    <div
-                            class=" w-full  h-full box-border absolute top-0 bg-black  bg-opacity-25 focus:outline-none flex justify-around  items-center "
-                    >
-                        <div class="m-auto text-white">
-                            {percent_completed}%
-                        </div>
-                    </div>
-                {/if}
+
                 {#await getPIcUrl(file, uploadInfo) then value}
                     <img
                             class=" w-full h-full object-cover"
@@ -393,27 +393,7 @@
                     />
                 {/await}
 
-                {#if percent_completed === 100}
-                    <lable
-                            class="block"
-                            style="                position: absolute;
-                right: -15px;
-                top: -6px;
-                width: 40px;
-                height: 24px;
-                background: #13ce66;
-                text-align: center;
-                transform: rotate(45deg);
-                box-shadow: 0 0 1px 1px rgba(0, 0 ,0 , 0.2);"
-                    >
-                        <div
-                                for=""
-                                style="    transform: rotate(-45deg); margin-top:2px"
-                        >
-                            <i class="ri-check-line text-white"></i>
-                        </div>
-                    </lable>
-                {/if}
+
             </div>
         {/each}
     </div>

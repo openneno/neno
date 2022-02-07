@@ -1,5 +1,6 @@
 <script context="module">
-    var showDetailss ;
+    let showDetailss;
+
     export function showNeno(nenoId, isHidden) {
         console.log("showNeno", nenoId, isHidden);
         showDetailss(nenoId, isHidden);
