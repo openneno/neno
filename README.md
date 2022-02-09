@@ -9,21 +9,22 @@ NENO
 
 - svelte+tailwindcss构建的PWA应用
 - 基本功能上与[浮墨](https://flomoapp.com/)保持相同
-- **无需后端,完全使用github进行存储你的所有数据,文字和图片**
+- **无需后端,完全使用github或者gitee进行存储你的所有数据,文字和图片**
 - **支持完全离线使用**
 - **支持完整版数据导入导出**
 - **支持同步内容到Notion(使用gihub action)**
 - **支持utools的neno插件**
 - **支持微信公众号记录笔记到neno**
-
+- **支持Telegram Bot记录笔记到neno**
 ### neno的外部扩展工具
-1. [utools](https://u.tools/#/) 是一个快速的工具平台。在utools上搜索neno插件，即可使用。
-项目地址[neno-extension](https://github.com/Mran/neno-extension#/)
-2. 使用微信公众号进行输入。项目地址[neno-wx](https://github.com/Mran/neno-wx#/)
-   ![](https://github.com/Mran/neno-extension/raw/master/asset/neno-wx.png)
-3. 使用Telegram Botjs进行输入。项目地址[neno-telegram](https://github.com/openneno/neno-tg) 
+  1. [utools](https://u.tools/#/) 是一个快速的工具平台。在utools上搜索neno插件，即可使用。
 
-   [neno Bot](https://t.me/NenoTG_Bot)
+     >项目地址[neno-extension](https://github.com/Mran/neno-extension#/)
+  2. 使用微信公众号进行输入。
+      >项目地址[neno-wx](https://github.com/Mran/neno-wx#/)
+     ![](https://github.com/Mran/neno-extension/raw/master/asset/neno-wx.png)
+  3. 使用Telegram Bot进行输入。
+      >项目地址[neno-telegram](https://github.com/openneno/neno-tg) 体验地址[neno Bot](https://t.me/NenoTG_Bot)
 
 
 [马上体验](https://neno.pages.dev/)
@@ -57,6 +58,7 @@ dist 目录下面为构建好的前端页面
 - [X] 使用github进行存储
 - [X] 基于github action 的notion 同步
 - [X] 基于serverless的 的微信公众号输入笔记
+- [X] 基于serverless的 的TelegramBot输入笔记
 - [ ] 每日回顾
 - [ ] 随机漫步
 
