@@ -27,7 +27,7 @@
         trySyncGithub();
         let syncInterval = setInterval(async () => {
             // console.log(tasking);
-            if ($githubStore.access_token !== "" && $githubStore.repoName !== "") {
+            if ($githubStore.access_token !== "" && $githubStore.repoName !== ""&& $githubStore.githubName !== "") {
                 if (!tasking) {
                     tasking = true;
                     let taskData = (await popTaskToIndexedDB()).body;

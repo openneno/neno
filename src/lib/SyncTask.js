@@ -117,7 +117,7 @@ export async function doTask(value) {
 }
 
 export async function trySyncGithub() {
-    if (githubStorelocal.access_token !== "" && githubStorelocal.repoName !== "") {
+    if (githubStorelocal.access_token !== "" && githubStorelocal.repoName !== ""&& githubStorelocal.githubName !== "") {
         // 先检查老数据,第一次就获取所有的数据
         if (githubStorelocal.lastCommitSha === "") {
             await cloneGithubRepo("");

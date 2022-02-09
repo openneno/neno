@@ -1,65 +1,46 @@
-import { githubStore, reload} from "../store/store.js";
+import {githubStore, reload} from "../store/store.js";
 import {request} from "../utils/githubtool/index";
 import {Base64} from 'js-base64';
 import {
-    insertCountDateToIndexedDB,
-    insertPicToIndexedDB,
-    insertPinTagsToIndexedDB,
-    insertToIndexedDB
+    insertCountDateToIndexedDB, insertPicToIndexedDB, insertPinTagsToIndexedDB, insertToIndexedDB
 } from "./fetchApi";
 import {is_empty} from "svelte/internal";
 
 let gitubToken = ""
 let repoName = ""
 let githubName = ""
+let gitUrl = ""
 
 
 githubStore.subscribe(value => {
     gitubToken = value.access_token
     repoName = value.repoName
     githubName = value.githubName
+    gitUrl = value.gitUrl
+
 });
 
-export const loginWithGithub = async (data) => {
-    try {
-        const re = await request('GET /user', {
-            headers: {
-                authorization: `token ${data.access_token}`,
-            },
-
-        });
-        console.log(re);
-        return new Promise(async (resolve, rej) => {
-            return resolve({body: re.data})
-        })
-    } catch (error) {
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return new Promise(async (resolve, rej) => {
-                    return resolve({body: {}, code: 401})
-                })
-            }
-        }
-        console.log("error", error);
+function gitConfig() {
+    return {
+        baseUrl: gitUrl,
+        headers: {
+            authorization: `token ${gitubToken}`,
+        },
     }
 }
 
-
 export const pushToGithub = async (data) => {
     try {
-        const re = await request('PUT /repos/{owner}/{repo}/contents/{path}', {
-            headers: {
-                authorization: `token ${gitubToken}`,
-                accept: "application/vnd.github.v3+json"
-            },
+
+        const re = await request(`${gitUrl==="https://api.github.com"||data.sha?"PUT" : 'POST'} /repos/{owner}/{repo}/contents/{path}`, Object.assign(gitConfig(), {
+
             owner: githubName,
             repo: repoName,
             path: data.fileName,
             message: data.commitMessage,
             content: data.encode ? Base64.encode(data.content) : data.content,
             sha: data.sha
-        });
-        console.log(re);
+        }));
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
         })
@@ -74,29 +55,19 @@ export const pushToGithub = async (data) => {
 }
 export const getGithubContent = async (data) => {
     try {
-
-        const re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
-            headers: {
-                authorization: `token ${gitubToken}`,
-                accept: `application/vnd.github.v3${data.raw ? ".raw" : ""}+json`
-            },
+        const re = await request('GET /repos/{owner}/{repo}/contents/{path}', Object.assign(gitConfig(), {
             owner: githubName,
             repo: repoName,
             path: data.path
 
-        });
+        }));
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
 
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return await getGithubContent(data)
-            }
 
-        }
         //HttpError: This repository is empty.
         if (error.message.indexOf("empty") !== -1) {
             return new Promise(async (resolve, rej) => {
@@ -109,28 +80,20 @@ export const getGithubContent = async (data) => {
 export const getGithubBlob = async (data) => {
     try {
 
-        const re = await request('GET /repos/{owner}/{repo}/git/blobs/{file_sha}', {
-            headers: {
-                authorization: `token ${gitubToken}`,
-                accept: `application/vnd.github.v3+json`
-            },
+        const re = await request('GET /repos/{owner}/{repo}/git/blobs/{file_sha}', Object.assign(gitConfig(), {
+
             owner: githubName,
             repo: repoName,
             file_sha: data.file_sha
 
-        });
+        }));
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
 
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return await getGithubContent(data)
-            }
 
-        }
         //HttpError: This repository is empty.
         if (error.message.indexOf("empty") !== -1) {
             return new Promise(async (resolve, rej) => {
@@ -142,60 +105,42 @@ export const getGithubBlob = async (data) => {
 }
 export const getLastCommitRecord = async (data) => {
     try {
-        const re = await request('GET /repos/{owner}/{repo}/branches', {
-            headers: {
-                authorization: `token ${gitubToken}`,
-            },
+        const re = await request('GET /repos/{owner}/{repo}/branches', Object.assign(gitConfig(), {
             owner: githubName,
             repo: repoName,
-        });
+        }));
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data[0]})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return await getLastCommitRecord(data)
-            }
-        }
+
     }
 }
 export const compare2Commits = async (data) => {
     try {
 
-        const re = await request('GET /repos/{owner}/{repo}/compare/{basehead}', {
-            headers: {
-                authorization: `token ${gitubToken}`,
-            },
+        const re = await request('GET /repos/{owner}/{repo}/compare/{basehead}', Object.assign(gitConfig(), {
             owner: githubName,
             repo: repoName,
             basehead: `${data.base}...${data.head}`
-        });
+        }));
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return await compare2Commits(data)
-            }
-        }
+
     }
 }
 export const getContentSha = async (data) => {
     try {
-        const re = await request('GET /repos/{owner}/{repo}/contents/{path}', {
-            headers: {
-                authorization: `token ${gitubToken}`,
-                accept: `application/vnd.github.v3.sha`
-            },
+        const re = await request('GET /repos/{owner}/{repo}/contents/{path}', Object.assign(gitConfig(), {
             owner: githubName,
             repo: repoName,
             path: data.fileName,
-        });
+        }));
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
@@ -218,27 +163,20 @@ export const getContentSha = async (data) => {
 }
 export const deleteContent = async (data) => {
     try {
-        const re = await request('DELETE /repos/{owner}/{repo}/contents/{path}', {
-            headers: {
-                authorization: `token ${gitubToken}`,
-            },
+        const re = await request('DELETE /repos/{owner}/{repo}/contents/{path}', Object.assign(gitConfig(), {
             owner: githubName,
             repo: repoName,
             path: data.fileName,
             message: "delete",
             sha: data.sha
-        });
+        }));
         console.log(re);
         return new Promise(async (resolve, rej) => {
             return resolve({body: re.data})
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return await getContentSha(data)
-            }
-        }
+
         if (error.status === 404) {
             return new Promise(async (resolve, rej) => {
                 return resolve({body: {commit: {sha: ""}}})
@@ -252,8 +190,7 @@ export const deleteContent = async (data) => {
 export const cloneGithubRepo = async (contentPath) => {
     let nenoBodyRaw;
     console.log("contentPath", contentPath);
-    const contentData = (await getGithubContent({path: encodeURI(contentPath), raw: true}))
-        .body;
+    const contentData = (await getGithubContent({path: encodeURI(contentPath), raw: true})).body;
     if (is_empty(contentData)) {
         return;
     }
@@ -265,43 +202,32 @@ export const cloneGithubRepo = async (contentPath) => {
             let nenoData = {};
 
             if (element.name.lastIndexOf(".json") === 24) {
-                nenoBodyRaw = (
-                    await getGithubContent({path: encodeURI(element.path), raw: true})
-                ).body;
+                nenoBodyRaw = (await getGithubContent({path: encodeURI(element.path), raw: true})).body;
                 try {
-                    nenoData = JSON.parse(nenoBodyRaw);
+                    nenoData = JSON.parse(Base64.decode(nenoBodyRaw.content));
                 } catch (error) {
                 }
                 if (!is_empty(nenoData)) insertToIndexedDB(nenoData);
             } else if (element.name === "countDate.json") {
-                nenoBodyRaw = (
-                    await getGithubContent({path: encodeURI(element.path), raw: true})
-                ).body;
+                nenoBodyRaw = (await getGithubContent({path: encodeURI(element.path), raw: true})).body;
                 try {
-                    nenoData = JSON.parse(nenoBodyRaw);
+                    nenoData = JSON.parse(Base64.decode(nenoBodyRaw.content));
                 } catch (error) {
                 }
                 if (!is_empty(nenoData)) await insertCountDateToIndexedDB(nenoData);
             } else if (element.name === "pinTags.json") {
-                nenoBodyRaw = (
-                    await getGithubContent({path: encodeURI(element.path), raw: true})
-                ).body;
+                nenoBodyRaw = (await getGithubContent({path: encodeURI(element.path), raw: true})).body;
                 try {
-                    nenoData = JSON.parse(nenoBodyRaw);
+                    nenoData = JSON.parse(Base64.decode(nenoBodyRaw.content));
                 } catch (error) {
                 }
                 if (!is_empty(nenoData)) await insertPinTagsToIndexedDB(nenoData);
             } else if (element.path.indexOf("picData/") === 0) {
-                const picRaw = (
-                    await getGithubBlob({
-                        file_sha: element.sha,
-                    })
-                ).body;
+                const picRaw = (await getGithubBlob({
+                    file_sha: element.sha,
+                })).body;
                 let picData = {
-                    _id: element.path.substring(
-                        element.path.indexOf("/") + 1,
-                        element.path.indexOf(".")
-                    ),
+                    _id: element.path.substring(element.path.indexOf("/") + 1, element.path.indexOf(".")),
                     base64: "data:image/png;base64," + picRaw.content,
                 };
                 await insertPicToIndexedDB(picData);

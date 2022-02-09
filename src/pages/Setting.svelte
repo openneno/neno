@@ -3,7 +3,7 @@
         exportIndexedDBToFile,
         imporFileTotIndexedDB,
     } from "../request/fetchApi";
-    import {getContentSha, loginWithGithub, pushToGithub} from "../request/githubApi";
+    import {getContentSha, pushToGithub} from "../request/githubApi";
     import {
         syncAllNenoToNotion,
         syncNenoToNotion,
@@ -17,6 +17,9 @@
 
     let access_token = $githubStore.access_token;
     let repoName = $githubStore.repoName;
+    let githubName = $githubStore.githubName;
+    let gitUrl = $githubStore.gitUrl;
+
     let importFile = "";
     let importButtonUploadNode = "";
     $: {
@@ -38,7 +41,8 @@
 
     function saveSetting() {
         $githubStore.repoName = repoName;
-
+        $githubStore.access_token = access_token;
+        $githubStore.githubName = githubName;
         console.log($settingStore);
         window.localStorage.setItem(
             "settingStore",
@@ -111,6 +115,7 @@
 
 
     }
+
 </script>
 
 <div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 ">
@@ -131,19 +136,50 @@
     <div>
         <div class="m-4 flex flex-col dark:text-gray-100 ">
             <div class="mb-4">
+                <div class="m-4 flex flex-col">
+                    <div>
+
+                    </div>
+                    <div class="flex flex-row space-x-4">
+                        <div>
+                            <label for="isSyncToNotion">github</label>
+                            <input
+                                    type="checkbox"
+                                    id="isGithub"
+                                    checked={$githubStore.gitUrl==="https://api.github.com"}
+                                    on:click={() => {
+                                    $githubStore.gitUrl="https://api.github.com";
+                                    }}
+                                    class="  bg-fuchsia-100"
+                            />
+                        </div>
+                        <div>
+                            <label for="isSyncToNotion">gitee</label>
+                            <input
+                                    type="checkbox"
+                                    id="isGitee"
+                                    checked={$githubStore.gitUrl==="https://gitee.com/api/v5"}
+
+                                    on:click={() => {
+                                    $githubStore.gitUrl="https://gitee.com/api/v5";
+                                    }}
+                                    class="  bg-fuchsia-100"
+                            />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="bg-gray-200  w-full h-[2px]"/>
+
                 <div class="m-4">
                     <label
-                    >用户Github Token<a
+                    >用户 Token<a
                             class="text-sm ml-4"
                             href="https://github.com/settings/tokens"
                             target="_blank">(如何获取 tips:使用同步notion功能要勾选workflow权限)</a
                     ></label
                     >
-                    <div>
-                        {$githubStore.githubName === ""
-                            ? "输入Github Token获取github用户名"
-                            : $githubStore.githubName}
-                    </div>
+
                     <div class="flex justify-between">
                         <input
                                 type="text"
@@ -151,36 +187,20 @@
                                 class=" w-8/12 border-2  mt-4 outline-white p-2 text-black"
                                 placeholder="用户Token"
                         />
-                        <button
-                                class=" border-2  mt-4 outline-white p-2"
-                                on:click={async () => {
-                                if (access_token.length !== 40) {
-                                } else {
-                                    const response = await loginWithGithub({
-                                        access_token: access_token,
-                                    });
-                                    if (response.code !== 401) {
-                                        githubStore.set({
-                                            githubName: response.body.login,
-                                            access_token: access_token,
-                                            lastCommitSha: "",
-                                        });
-                                    } else {
-                                        githubStore.set({
-                                            githubName: "",
-                                            access_token: "",
-                                            lastCommitSha: "",
-                                        });
-                                    }
-                                }
-                            }}
-                        >
-                            点击获取github用户名
-                        </button>
+
                     </div>
                 </div>
                 <div class="m-4">
-                    <label for="">仓库设置</label>
+                    <label for="">用户名</label>
+                    <input
+                            type="text"
+                            bind:value={githubName}
+                            class="w-full border-2  mt-4 outline-white p-2 text-black"
+                            placeholder="用户名"
+                    />
+                </div>
+                <div class="m-4">
+                    <label for="">neno数据存储仓库</label>
                     <input
                             type="text"
                             bind:value={repoName}
@@ -203,7 +223,8 @@
                     <div class="ml-2  text-sm text-yellow-500">
                         <p>
                             同步功能由github
-                            action完成,可进行手动的全量同步(在笔记存储仓库的action中手动执行 sync all neno to notion action)和每次提交到github保存的自动进行的增量同步
+                            action完成,可进行手动的全量同步(在笔记存储仓库的action中手动执行 sync all neno to notion
+                            action)和每次提交到github保存的自动进行的增量同步
                         </p>
                         <p>
                             由于notion
@@ -253,7 +274,7 @@
                     {/if}
                 </div>
                 <div class="m-4">
-                    <label >导入/导出离线数据</label>
+                    <label>导入/导出离线数据</label>
                     <div class="flex items-center space-x-4">
                         <button
                                 class="w-full border-2  mt-4 outline-white p-2"
