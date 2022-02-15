@@ -21,6 +21,7 @@ import {
     insertToIndexedDB
 } from "../request/fetchApi";
 import {is_empty} from "svelte/internal";
+import {Base64} from "js-base64";
 
 //执行日常的增删改查的任务
 export async function doTask(value) {
@@ -170,31 +171,24 @@ export async function trySyncGithub() {
                         const nenoBodyRaw = (
                             await getGithubContent({
                                 path: encodeURI(element.filename),
-                                raw: element.filename.indexOf("picData/") === -1,
                             })
                         ).body;
                         let nenoData = {};
+                        try {
+                            nenoData = JSON.parse(Base64.decode(nenoBodyRaw.content));
+                        } catch (error) {
+                            console.log("error", error);
+                        }
                         if (element.filename.indexOf(".json") === 35) {
-                            try {
-                                nenoData = JSON.parse(nenoBodyRaw);
-                            } catch (error) {
-                            }
+
                             if (!is_empty(nenoData)) await insertToIndexedDB(nenoData);
                             reload.set({tag: Date.now(), action: "neno"});
                         } else if (element.filename === "countDate/countDate.json") {
-                            try {
-                                nenoData = JSON.parse(nenoBodyRaw);
-                            } catch (error) {
-                            }
+
                             if (!is_empty(nenoData))
                                 await insertCountDateToIndexedDB(nenoData);
-                        } else if (element.filename.indexOf("picData/") === 0) {
+                        }  else if (element.filename.indexOf("pinTags/") === 0) {
 
-                        } else if (element.filename.indexOf("pinTags/") === 0) {
-                            try {
-                                nenoData = JSON.parse(nenoBodyRaw);
-                            } catch (error) {
-                            }
                             if (!is_empty(nenoData)) await insertPinTagsToIndexedDB(nenoData);
                         }
                     }

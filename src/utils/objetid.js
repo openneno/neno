@@ -57,12 +57,12 @@ const ObjectId = (function () {
             this.machine = arguments[0].machine;
             this.pid = arguments[0].pid;
             this.increment = arguments[0].increment;
-        } else if (typeof (arguments[0]) == 'string' && arguments[0].length == 24) {
+        } else if (typeof (arguments[0]) == 'string' && arguments[0].length === 24) {
             this.timestamp = Number('0x' + arguments[0].substr(0, 8)),
                 this.machine = Number('0x' + arguments[0].substr(8, 6)),
                 this.pid = Number('0x' + arguments[0].substr(14, 4)),
                 this.increment = Number('0x' + arguments[0].substr(18, 6))
-        } else if (arguments.length == 4 && arguments[0] != null) {
+        } else if (arguments.length === 4 && arguments[0] != null) {
             this.timestamp = arguments[0];
             this.machine = arguments[1];
             this.pid = arguments[2];
