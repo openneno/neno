@@ -16,6 +16,9 @@ NENO
 - **支持utools的neno插件**
 - **支持微信公众号记录笔记到neno**
 - **支持Telegram Bot记录笔记到neno**
+- **支持CLI工具记录笔记到neno**
+- **支持浏览器插件记录笔记到neno**
+
 ### neno的外部扩展工具
   1. [utools](https://u.tools/#/) 是一个快速的工具平台。在utools上搜索neno插件，即可使用。
 
@@ -25,6 +28,10 @@ NENO
      ![](https://github.com/Mran/neno-extension/raw/master/asset/neno-wx.png)
   3. 使用Telegram Bot进行输入。
       >项目地址[neno-telegram](https://github.com/openneno/neno-tg) 体验地址[neno Bot](https://t.me/NenoTG_Bot)
+  4. 使用CLI进行输入。
+      >项目地址[neno-cli](https://github.com/openneno/neno-cli)
+  5. 使用谷歌浏览器插件进行快速选择文本输入
+     >项目地址[neno-chrome-plugin](https://github.com/openneno/https://github.com/openneno/neno-chrome-plugin)
 
 
 [马上体验](https://neno.pages.dev/)

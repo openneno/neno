@@ -182,7 +182,7 @@ export async function trySyncGithub() {
                         if (element.filename.indexOf(".json") === 35) {
 
                             if (!is_empty(nenoData)) await insertToIndexedDB(nenoData);
-                            reload.set({tag: Date.now(), action: "neno"});
+                            // reload.set({tag: Date.now(), action: "neno"});
                         } else if (element.filename === "countDate/countDate.json") {
 
                             if (!is_empty(nenoData))

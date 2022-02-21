@@ -226,7 +226,7 @@
             style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length === 0}
-            {#each nenoItems as item (item._id)}
+            {#each nenoItems as item (item.created_at)}
                 <NenoItem
                         {...item}
                         on:deleteOne={(event) => {
@@ -237,7 +237,7 @@
                 />
             {/each}
         {:else}
-            {#each searchItems as item (item._id)}
+            {#each searchItems as item (item.created_at)}
                 <NenoItem
                         {...item}
                         searchContent={searchText}
