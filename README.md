@@ -31,7 +31,7 @@ NENO
   4. 使用CLI进行输入。
       >项目地址[neno-cli](https://github.com/openneno/neno-cli)
   5. 使用谷歌浏览器插件进行快速选择文本输入
-     >项目地址[neno-chrome-plugin](https://github.com/openneno/https://github.com/openneno/neno-chrome-plugin)
+     >项目地址[neno-chrome-plugin](https://github.com/openneno/neno-chrome-plugin)
 
 
 [马上体验](https://neno.pages.dev/)
