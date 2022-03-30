@@ -2,7 +2,7 @@
     import {count, pin, pins, renameTag, tags} from "../request/fetchApi";
     import {
         countStore,
-        paged,
+        currentPage,
         reload,
         searchNenoByDate,
         searchNenoByTag,
@@ -183,7 +183,7 @@
             <button
                 class="focus:outline-none "
                 on:click={() => {
-                    $paged = "setting";
+                    $currentPage = "setting";
                 }}
             >
                 <i class="ri-settings-fill "></i>
@@ -219,30 +219,30 @@
     >
         <button
             on:click={() => {
-                $paged = "neno";
+                $currentPage = "neno";
                 $searchNenoByTag.tag = "";
             }}
             class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
-                ($paged === 'neno' ? 'bg-green-500 text-white' : '')}      "
+                ($currentPage === 'neno' ? 'bg-green-500 text-white' : '')}      "
         >
             <i class="ri-quill-pen-fill mr-2"></i>NENO
         </button>
 
         <button
             on:click={() => {
-                $paged = "daily";
+                $currentPage = "daily";
             }}
             class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
-                ($paged === 'daily' ? 'bg-green-500 text-white' : '')}        "
+                ($currentPage === 'daily' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-calendar-event-fill mr-2"></i>每日回顾
         </button>
         <button
             on:click={() => {
-                $paged = "luck";
+                $currentPage = "luck";
             }}
             class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-none hover:text-white hover:bg-green-400 ' +
-                ($paged === 'luck' ? 'bg-green-500 text-white' : '')}        "
+                ($currentPage === 'luck' ? 'bg-green-500 text-white' : '')}        "
         >
             <i class="ri-bubble-chart-fill mr-2"></i>随机漫步
         </button>

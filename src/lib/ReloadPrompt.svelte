@@ -62,7 +62,7 @@
     </div>
 {/if}
 
-<div class='pwa-date'>{buildDate}</div>
+<div class='pwa-date hidden'>{buildDate}</div>
 
 <style>
     .pwa-date {

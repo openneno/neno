@@ -1,9 +1,9 @@
 <script>
-    import HelloWorld from "./pages/HelloWorld.svelte";
+    import HelloWorld from "./pages/Main.svelte";
     import Router from "./components/Router.svelte";
     import Tailwind from "./Tailwind.svelte";
     import ReloadPrompt from './lib/ReloadPrompt.svelte'
-    import {githubStore, notionStore, paged, settingStore, taskCountTag,} from "./store/store.js";
+    import {githubStore, notionStore, currentPage, settingStore, taskCountTag,} from "./store/store.js";
     import {onMount} from "svelte";
     import {deleteTaskToIndexedDB, popTaskToIndexedDB,} from "./request/fetchApi";
     import {doTask, trySyncGithub} from "./lib/SyncTask";
@@ -15,13 +15,9 @@
         let github = window.localStorage.getItem("githubStore");
         let notion = window.localStorage.getItem("notionStore");
 
-        if (setting == null) {
-            $paged = "setting";
-        } else {
-            $settingStore = JSON.parse(setting);
-        }
         github && ($githubStore = JSON.parse(github));
         notion && ($notionStore = JSON.parse(notion));
+        setting && ($settingStore = JSON.parse(setting));
 
         //打开的时候进行同步
         trySyncGithub();
