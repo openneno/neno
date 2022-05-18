@@ -1,6 +1,6 @@
 import './hmr';
 import "./main.pcss";
-
+import 'remixicon/fonts/remixicon.css'
 import App from './App.svelte' 
 
 
