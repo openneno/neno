@@ -15,7 +15,3 @@ export const getObjectURL = function getObjectURL(file) {
     return url;
 }
 
-// 替代 svelte 4 中已移除的 svelte/internal 的 is_empty
-export const isEmpty = function isEmpty(obj) {
-    return Object.keys(obj).length === 0;
-}

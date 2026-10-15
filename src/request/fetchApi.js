@@ -1,12 +1,12 @@
 import {reload} from "../store/store.js";
 import {getObjectId} from "../utils/objetid.js";
 import {getObjectURL} from "../utils/process.js";
+import {notifyLocalChange} from "../lib/sync/signal.js";
 import {openDB} from 'idb';
 import dayjs from "dayjs";
 
 
-
-const db = openDB("neno", 4, {
+const db = openDB("neno", 5, {
     upgrade(db, oldVersion, newVersion, transaction) {
         console.log('数据库新建成功');
 
@@ -27,8 +27,85 @@ const db = openDB("neno", 4, {
 
             objectStore = db.createObjectStore('nenoPinTags', {keyPath: '_id'});
         }
+        //v5: 新的同步引擎. dirty 记录待推送的本地改动, syncState 记录与远端仓库的同步进度
+        if (!db.objectStoreNames.contains('dirty')) {
+            db.createObjectStore('dirty', {keyPath: 'key'});
+        }
+        if (!db.objectStoreNames.contains('syncState')) {
+            db.createObjectStore('syncState', {keyPath: 'id'});
+        }
     },
 })
+
+// ---------- 待同步的本地改动 ----------
+//同一条笔记/图片多次修改只保留一条记录, rev 用于判断推送期间是否又有新的修改
+const dirtyKey = (kind, id) => `${kind}:${id}`
+
+export const markDirty = async (kind, id, extra = {}) => {
+    await (await db).put('dirty', {
+        key: dirtyKey(kind, id),
+        kind,
+        id,
+        deleted: false,
+        ...extra,
+        at: Date.now(),
+        rev: `${Date.now()}-${Math.random()}`,
+    })
+    notifyLocalChange()
+}
+
+export const getDirtyList = async () => (await db).getAll('dirty')
+
+//只有在记录没有被再次修改时才清除
+export const clearDirty = async (entry) => {
+    const tx = (await db).transaction('dirty', 'readwrite')
+    const current = await tx.store.get(entry.key)
+    if (current && current.rev === entry.rev) {
+        await tx.store.delete(entry.key)
+    }
+    await tx.done
+}
+
+export const getSyncState = async () => (await db).get('syncState', 'state')
+
+export const saveSyncState = async (state) => (await db).put('syncState', {...state, id: 'state'})
+
+//旧版本的同步任务队列, 只在升级时读取一次并转换为 dirty 记录
+export const takeLegacyTasks = async () => {
+    const tasks = await (await db).getAll('task')
+    if (tasks.length > 0) {
+        await (await db).clear('task')
+    }
+    return tasks.map((task) => task.data)
+}
+
+// ---------- 供同步引擎读写本地数据 ----------
+export const getNote = async (_id) => (await db).get('nenoitem', _id)
+
+export const getAllNotes = async () => (await db).getAll('nenoitem')
+
+export const putNote = async (note) => (await db).put('nenoitem', note)
+
+export const deleteNoteLocal = async (_id) => (await db).delete('nenoitem', _id)
+
+export const getPic = async (_id) => (await db).get('nenoPic', _id)
+
+export const putPic = async (_id, file) => (await db).put('nenoPic', {_id, file, created_at: "picData"})
+
+export const deletePicLocal = async (_id) => (await db).delete('nenoPic', _id)
+
+export const getPinTags = async () => {
+    const records = await (await db).getAll('nenoPinTags')
+    return records.length > 0 ? (records[0].tags || []) : []
+}
+
+//置顶标签只保存一条记录
+export const setPinTags = async (tags) => {
+    const tx = (await db).transaction('nenoPinTags', 'readwrite')
+    await tx.store.clear()
+    await tx.store.put({_id: "pinTags", tags: [...tags]})
+    await tx.done
+}
 
 
 const readUploadedFileAsText = (inputFile) => {
@@ -46,9 +123,21 @@ const readUploadedFileAsText = (inputFile) => {
         temporaryFileReader.readAsDataURL(inputFile);
     });
 };
+
+//每天的笔记数量, 由本地笔记计算(不再单独保存和同步), 按日期升序
+export const getCountDate = async () => {
+    const counts = {}
+    for (const neno of await (await db).getAll("nenoitem")) {
+        const date = neno.created_at.substring(0, 10)
+        counts[date] = (counts[date] || 0) + 1
+    }
+    return Object.fromEntries(Object.entries(counts).sort((a, b) => (a[0] < b[0] ? -1 : 1)))
+}
+
 export const exportIndexedDBToFile = async () => {
     let allNeno = await (await db).getAll("nenoitem")
-    let allNenoCount = await (await db).getAll("nenoCount")
+    //保持旧版导出文件的结构
+    let allNenoCount = [{_id: "countDate", created_at: "countDate", ...(await getCountDate())}]
     let allNenoPinTags = await (await db).getAll("nenoPinTags")
     let allNenoPic = await (await db).getAll("nenoPic")
     let allNenopicBase64 = []
@@ -58,168 +147,61 @@ export const exportIndexedDBToFile = async () => {
         allNenopicBase64 = [...allNenopicBase64, {_id: element._id, file: picbase64}]
     }
 
-    return new Promise((resolve, rej) => {
-        return resolve({
-            body: {
-                allNeno: allNeno,
-                allNenoCount: allNenoCount,
-                allNenoPinTags: allNenoPinTags,
-                allNenoPic: allNenopicBase64,
-
-            }
-        })
-
-    })
-
+    return {
+        body: {
+            allNeno: allNeno,
+            allNenoCount: allNenoCount,
+            allNenoPinTags: allNenoPinTags,
+            allNenoPic: allNenopicBase64,
+        }
+    }
 }
+
+//导入的数据会同步到仓库, 内容与仓库一致的文件不会产生提交
 export const imporFileTotIndexedDB = async (allData) => {
-    let allNeno = await (await db).getAll("nenoitem")
-
-    let allNenoCount = await (await db).getAll("nenoCount")
-    let allNenoPinTags = await (await db).getAll("nenoPinTags")
-    allData.allNeno.forEach(async (element) => {
-        let re = await (await db).put('nenoitem', element);
-        console.log("  allData.allNeno", re, element);
-    });
-    allData.allNenoCount.forEach(async (element) => {
-        let re = await (await db).put('nenoCount', element);
-        console.log("  allData.allNenoCount", re, element);
-
-    });
-    allData.allNenoPinTags.forEach(async (element) => {
-        let re = await (await db).put('nenoPinTags', element);
-        console.log("  allData.allNenoPinTags", re, element);
-
-    });
-
-
-    allData.allNenoPic.forEach(async (element) => {
+    const suffixes = {}
+    for (const element of allData.allNeno || []) {
+        await (await db).put('nenoitem', element);
+        await markDirty("note", element._id)
+        for (const image of element.images || []) {
+            suffixes[image.key] = image.suffixName
+        }
+    }
+    const importedPins = new Set()
+    for (const element of allData.allNenoPinTags || []) {
+        (element.tags || []).forEach((tag) => importedPins.add(tag))
+    }
+    if (importedPins.size > 0) {
+        await setPinTags(new Set([...(await getPinTags()), ...importedPins]))
+        await markDirty("pinTags", "pinTags")
+    }
+    for (const element of allData.allNenoPic || []) {
         let file = await (await fetch(element.file)).blob()
-        element.file = file
-        let re = await (await db).put('nenoPic', element);
-        console.log("  allData.allNenoPic", re, element);
-
-    });
-    return new Promise((resolve, rej) => {
-        return resolve({
-            body: {
-                allNeno: allNeno, allNenoCount: allNenoCount, allNenoPinTags: allNenoPinTags,
-            }
-        })
-
-    })
-
+        await putPic(element._id, file)
+        if (suffixes[element._id]) {
+            await markDirty("pic", element._id, {suffix: suffixes[element._id]})
+        }
+    }
+    reload.set({tag: Date.now(), action: "neno"})
+    reload.set({tag: Date.now(), action: "nenoCount"})
+    return {body: {}}
 }
 export const getFileFromIndexedDB = async (key) => {
     let result = await (await db).get("nenoPic", key)
-    return new Promise((resolve, rej) => {
-        const url = getObjectURL(result.file);
-        return resolve({key: url})
-
-    })
+    return {key: getObjectURL(result.file)}
 }
 export const uploadPicIndexedDB = async (imageFile) => {
     const _id = getObjectId().toString();
-    const picData = {_id: _id, file: imageFile, created_at: "picData"};
-    await (await db).put("nenoPic", picData)
-    picData.base64File = await readUploadedFileAsText(imageFile)
-    picData.suffixName = imageFile.name.substring(imageFile.name.lastIndexOf(".") + 1)
-    await pushTaskToIndexedDB({timestmp: Date.now(), data: picData, action: "uploadPic"})
-
-    return new Promise((resolve, rej) => {
-        return resolve({key: _id, suffixName: picData.suffixName})
-    })
+    const suffixName = imageFile.name.substring(imageFile.name.lastIndexOf(".") + 1)
+    await putPic(_id, imageFile)
+    await markDirty("pic", _id, {suffix: suffixName})
+    return {key: _id, suffixName: suffixName}
 }
 
-export const insertToIndexedDB = async (data) => {
-
-    await (await db).put('nenoitem', data);
-
-    return new Promise((resolve, rej) => {
-        return resolve("ok")
-
-    })
-
-}
-export const insertCountDateToIndexedDB = async (data) => {
-
-    await (await db).put('nenoCount', data);
-    return new Promise((resolve, rej) => {
-        return resolve("ok")
-
-    })
-
-}
-export const insertPinTagsToIndexedDB = async (data) => {
-
-    await (await db).put('nenoPinTags', data);
-    return new Promise((resolve, rej) => {
-        return resolve("ok")
-
-    })
-
-}
-export const insertPicToIndexedDB = async (imageBase64Data) => {
-    const picData = {
-        _id: imageBase64Data._id, file: await fetch(imageBase64Data.base64).then(r => r.blob()), created_at: "picData"
-    };
-    await (await db).put("nenoPic", picData)
-    return new Promise((resolve, rej) => {
-        return resolve({key: imageBase64Data._id})
-    })
-}
-export const deletePicFromIndexedDB = async (data) => {
-    await (await db).delete('nenoPic', data.key);
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: {}, code: 200})
-    })
-}
-export const deleteOneFromIndexedDB = async (data) => {
-    await (await db).delete('nenoitem', data._id);
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: {}, code: 200})
-    })
-}
-export const pushTaskToIndexedDB = async (data) => {
-    const taskData = await (await db).put('task', {_id: getObjectId().toString(), data: data});
-
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: taskData, code: 200})
-    })
-}
-export const popTaskToIndexedDB = async (data) => {
-    let taskData = []
-    let cursor = await (await db).transaction("task").store.openCursor();
-
-    while ((cursor)) {
-
-        taskData = [...taskData, cursor.value]
-
-        cursor = await cursor.continue();
-    }
-
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: taskData})
-
-    })
-}
-export const deleteTaskToIndexedDB = async (_id) => {
-    await (await db).delete('task', _id);
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: {}, code: 200})
-    })
-}
 export const getAllNeno = async (data) => {
     let nenos = []
     let count = 0;
     let pageing = 0;
-    // const tx = (await db).transaction("nenoitem");
-    //
-    // for await (const cursor of tx.store) {
-    //     console.log(cursor.value);
-    //     // Skip the next item
-    //     // cursor.advance(2);
-    // }
     let cursor = await (await db).transaction("nenoitem").store.openCursor(null, "prev");
 
     while ((cursor)) {
@@ -235,18 +217,12 @@ export const getAllNeno = async (data) => {
                 for (let neno of nenos) {
                     await getParentDetail(neno)
                 }
-                return new Promise((resolve, rej) => {
-                    return resolve({body: nenos})
-
-                })
+                return {body: nenos}
             }
-            console.log()
             cursor = await cursor.continue();
         }
     }
-    return new Promise((resolve, rej) => {
-        return resolve({body: nenos})
-    })
+    return {body: nenos}
 }
 
 async function getParentDetail(result) {
@@ -289,7 +265,6 @@ export const addNeno = async (data) => {
         const old = await (await db).getFromIndex('nenoitem', "_id", data._id);
         if (old) {
             data.created_at = old.created_at
-            data.sha = old.sha || ""
         }
         data.update_at = dayjs().format()
         await (await db).put('nenoitem', data);
@@ -299,62 +274,32 @@ export const addNeno = async (data) => {
         data._id = getObjectId().toString()
         data.created_at = dayjs().format()
         await (await db).put('nenoitem', data);
-        let dDate = data.created_at.substring(0, 10)
-        let countDate = {}
-
-        let cursor = await (await db).transaction("nenoCount").store.openCursor();
-
-        if (cursor) {
-            countDate = cursor.value
-            if (countDate[dDate]) {
-                countDate[dDate] += 1
-            } else {
-                countDate[dDate] = 1
-            }
-            await (await db).put('nenoCount', countDate);
-        } else {
-            countDate._id = getObjectId().toString()
-            countDate[dDate] = 1
-            await (await db).put('nenoCount', countDate);
-
-        }
-        countDate.created_at = "countDate"
-        countDate._id = "countDate"
         reload.set({tag: Date.now(), action: "nenoCount"})
-        await pushTaskToIndexedDB({timestmp: Date.now(), data: countDate, action: "countDate"})
     }
-    await pushTaskToIndexedDB({timestmp: Date.now(), data: data, action: "push"})
+    await markDirty("note", data._id)
 
-    return new Promise(async (resolve, rej) => {
-
-        return resolve({body: data})
-
-    })
-
+    return {body: data}
 }
 export const detail = async (data) => {
     const result = await (await db).getFromIndex('nenoitem', "_id", data._id);
     await getParentDetail(result)
 
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: result})
-    })
+    return {body: result}
 }
 export const deleteOne = async (data) => {
     const result = await (await db).getFromIndex('nenoitem', "_id", data._id);
-    console.log(data)
-    for (const datum of result.images) {
-        await deletePicFromIndexedDB(datum)
+    for (const datum of result.images || []) {
+        await deletePicLocal(datum.key)
+        //删除笔记的同时删除笔记中携带的图片
+        await markDirty("pic", datum.key, {suffix: datum.suffixName, deleted: true})
     }
     await (await db).delete('nenoitem', data._id);
-
-    await pushTaskToIndexedDB({timestmp: Date.now(), data: result, action: "delete"})
+    //记录删除前的创建时间, 推送时据此找到仓库中的文件
+    await markDirty("note", data._id, {deleted: true, created_at: result.created_at})
 
     reload.set({tag: Date.now(), action: "nenoCount"})
 
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: {}, code: 200})
-    })
+    return {body: {}, code: 200}
 }
 
 export const tags = async (data) => {
@@ -368,57 +313,23 @@ export const tags = async (data) => {
         });
         cursor = await cursor.continue()
     }
-    return new Promise(async (resolve, rej) => {
-        return resolve({
-            code: 200, message: "BIU", body: [...tags]
-        })
-    })
+    return {code: 200, message: "BIU", body: [...tags]}
 }
 export const pin = async (data) => {
-    let pinTags = {}
-
-    let cursor = await (await db).transaction("nenoPinTags").store.openCursor();
-    if (cursor) {
-        pinTags = cursor.value
-        pinTags.tags = new Set(pinTags.tags)
+    const pinTags = new Set(await getPinTags())
+    if (pinTags.has(data.tag)) {
+        pinTags.delete(data.tag)
     } else {
-        pinTags._id = getObjectId().toString()
-        pinTags.tags = new Set()
+        pinTags.add(data.tag)
     }
-    if (pinTags.tags.has(data.tag)) {
-        pinTags.tags.delete(data.tag)
-    } else {
-        pinTags.tags.add(data.tag)
-    }
+    await setPinTags(pinTags)
+    await markDirty("pinTags", "pinTags")
 
-    pinTags.tags = [...pinTags.tags]
-
-    await (await db).put('nenoPinTags', pinTags);
-    pinTags.created_at = "pinTags"
-    pinTags._id = "pinTags"
-    await pushTaskToIndexedDB({timestmp: Date.now(), data: pinTags, action: "pinTags"})
-
-    return new Promise(async (resolve, rej) => {
-        return resolve({
-            code: 200, message: "BIU", body: [...pinTags.tags]
-        })
-    })
+    return {code: 200, message: "BIU", body: [...pinTags]}
 }
 export const pins = async (data) => {
-    let pinTags = []
-    let cursor = await (await db).transaction("nenoPinTags").store.openCursor();
-    if (cursor) {
-        pinTags = cursor.value.tags
-    }
-    let repintags = []
-    pinTags.forEach(element => {
-        repintags = [...repintags, {_id: getObjectId().toString(), tag: element}]
-    });
-    return new Promise(async (resolve, rej) => {
-        return resolve({
-            code: 200, message: "BIU", body: [...repintags]
-        })
-    })
+    const repintags = (await getPinTags()).map((tag) => ({_id: getObjectId().toString(), tag}))
+    return {code: 200, message: "BIU", body: repintags}
 }
 //取笔记的纯文本, 旧数据可能没有 pureContent
 export const getPlainText = (neno) => {
@@ -444,29 +355,18 @@ export const search = async (data) => {
         }
         cursor = await cursor.continue();
     }
-    return new Promise((resolve, rej) => {
-        return resolve({body: nenos})
-
-    })
-
+    return {body: nenos}
 }
 
 export const count = async (data) => {
-    let cursor = await (await db).transaction("nenoCount").store.openCursor();
-    let countDate = {}
-    if (cursor) {
-        countDate = cursor.value
-    }
+    const countDate = await getCountDate()
     let count = await (await db).countFromIndex("nenoitem", "_id")
-    return new Promise(async (resolve, rej) => {
-        return resolve({body: {countDate: countDate, count: count}})
-
-    })
+    return {body: {countDate: countDate, count: count}}
 }
 export const renameTag = async (data) => {
+    const changed = []
     let cursor = await (await db).transaction("nenoitem", "readwrite").store.openCursor();
     while (cursor) {
-        console.log(cursor.key, cursor.value);
         let neno = cursor.value
         for (let index = 0; index < neno.tags.length; index++) {
             const element = neno.tags[index];
@@ -500,18 +400,22 @@ export const renameTag = async (data) => {
                 }
                 pContent += element.content.substring(pIndex);
                 element.content = pContent
+                if (typeof element.pureContent === "string") {
+                    element.pureContent = element.pureContent.split(data.oldTag).join(data.newTag)
+                }
+                element.update_at = dayjs().format()
+                //游标事务中不能等待其他事务, 改动的笔记在遍历结束后统一标记
+                changed.push(neno._id)
                 cursor.update(neno)
-                await pushTaskToIndexedDB({timestmp: Date.now(), data: neno, action: "push"})
 
                 break
             }
         }
         cursor = await cursor.continue()
     }
+    for (const _id of changed) {
+        await markDirty("note", _id)
+    }
     reload.set({tag: Date.now(), action: "nenoCount"})
-    return new Promise(async (resolve, rej) => {
-        return resolve({
-            code: 200, message: "BIU", body: {}
-        })
-    })
+    return {code: 200, message: "BIU", body: {}}
 }

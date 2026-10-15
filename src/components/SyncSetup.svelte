@@ -1,11 +1,12 @@
 <script>
     import {onMount} from "svelte";
     import {fade} from "svelte/transition";
+    import dayjs from "dayjs";
     import {githubStore, syncStatus} from "../store/store.js";
     import {
         GITHUB_URL,
-        GITEE_URL,
-        PLATFORMS,
+        TOKEN_URL,
+        FINE_GRAINED_TOKEN_URL,
         DEFAULT_REPO_NAME,
         buildSyncLink,
         createRepo,
@@ -14,14 +15,31 @@
         encodeNenoToken,
         fetchAccount,
         listRepos,
+        repoUrl,
     } from "../request/gitAccountApi.js";
+    import {syncNow} from "../lib/sync/syncEngine.js";
     import QrCode from "./QrCode.svelte";
-    import giteeIcon from "../assets/gittee.ico";
 
     $: configured = $githubStore.access_token !== "" && $githubStore.githubName !== "" && $githubStore.repoName !== "";
 
+    //从旧版本升级的 Gitee 用户, 提示一次
+    let giteeRemoved = false;
+    try {
+        giteeRemoved = window.localStorage.getItem("neno-gitee-removed") === "1";
+    } catch (e) {
+        console.log(e);
+    }
+
+    function dismissGiteeNotice() {
+        giteeRemoved = false;
+        try {
+            window.localStorage.removeItem("neno-gitee-removed");
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
     // ---------- 未配置: 引导流程 ----------
-    let gitUrl = $githubStore.gitUrl === GITEE_URL ? GITEE_URL : GITHUB_URL;
     let token = "";
     let showToken = false;
     let checking = false;
@@ -43,14 +61,6 @@
     let importError = "";
     let importing = false;
 
-    $: platform = PLATFORMS[gitUrl];
-
-    function switchPlatform(url) {
-        if (gitUrl === url) return;
-        gitUrl = url;
-        resetAccount();
-    }
-
     function resetAccount() {
         account = null;
         repos = [];
@@ -64,11 +74,11 @@
         resetAccount();
         checking = true;
         try {
-            account = await fetchAccount(gitUrl, token);
+            account = await fetchAccount(token);
             if (account.scopes && !account.scopes.includes("repo")) {
                 scopeWarning = "这个 Token 没有勾选 repo 权限, 将无法读写笔记仓库";
             }
-            repos = await listRepos(gitUrl, token);
+            repos = await listRepos(token);
             //已有同名的笔记仓库时默认直接使用
             const existing = repos.find((repo) => repo.fullName === preferredRepo)
                 || repos.find((repo) => repo.repo === DEFAULT_REPO_NAME || repo.repo === "neno");
@@ -96,10 +106,12 @@
         $githubStore = {
             ...$githubStore,
             ...config,
+            gitUrl: GITHUB_URL,
             lastCommitSha: "",
         };
-        syncStatus.set({authError: false});
+        syncStatus.update((value) => ({...value, authError: false, error: ""}));
         window.localStorage.setItem("githubStore", JSON.stringify($githubStore));
+        dismissGiteeNotice();
         //重新加载以从仓库拉取数据并开始同步
         window.location.reload();
     }
@@ -114,7 +126,7 @@
                 if (!/^[A-Za-z0-9._-]+$/.test(name)) {
                     throw {message: "仓库名只能包含字母, 数字, '.', '-' 和 '_'"};
                 }
-                target = await createRepo(gitUrl, token, name);
+                target = await createRepo(token, name);
             } else {
                 target = repos.find((repo) => repo.fullName === selectedRepo);
                 if (!target) throw {message: "请选择一个仓库"};
@@ -123,11 +135,10 @@
                 access_token: token.trim(),
                 githubName: target.owner,
                 repoName: target.repo,
-                gitUrl,
             });
         } catch (error) {
             console.log(error);
-            saveError = error.status ? describeError(error) : error.message;
+            saveError = error.status !== undefined ? describeError(error) : error.message;
             saving = false;
         }
     }
@@ -138,12 +149,12 @@
         try {
             config = decodeNenoToken(importText);
         } catch (e) {
-            importError = "无法识别, 请粘贴完整的 neno token 或同步链接";
+            importError = e.unsupported ? e.message : "无法识别, 请粘贴完整的 neno token 或同步链接";
             return;
         }
         importing = true;
         try {
-            await fetchAccount(config.gitUrl, config.access_token);
+            await fetchAccount(config.access_token);
             saveConfig(config);
         } catch (error) {
             importError = describeError(error);
@@ -156,19 +167,29 @@
     let accountError = "";
     let showShare = false;
     let copiedWhat = "";
+    let now = Date.now();
 
     $: repoFullName = `${$githubStore.githubName}/${$githubStore.repoName}`;
-    $: repoUrl = configured ? PLATFORMS[$githubStore.gitUrl === GITEE_URL ? GITEE_URL : GITHUB_URL].repoUrl(repoFullName) : "";
     $: syncLink = configured && showShare ? buildSyncLink($githubStore) : "";
+    $: lastSyncText = $syncStatus.lastSyncAt
+        ? (now - $syncStatus.lastSyncAt < 60 * 1000 ? "刚刚" : dayjs($syncStatus.lastSyncAt).format("HH:mm"))
+        : "";
 
-    onMount(async () => {
-        if (!configured) return;
-        try {
-            currentAccount = await fetchAccount($githubStore.gitUrl, $githubStore.access_token);
-        } catch (error) {
-            accountError = describeError(error);
-            if (error.status === 401) syncStatus.set({authError: true});
+    onMount(() => {
+        const clock = setInterval(() => {
+            now = Date.now();
+        }, 15 * 1000);
+        if (configured) {
+            fetchAccount($githubStore.access_token)
+                .then((value) => {
+                    currentAccount = value;
+                })
+                .catch((error) => {
+                    accountError = describeError(error);
+                    if (error.status === 401) syncStatus.update((value) => ({...value, authError: true}));
+                });
         }
+        return () => clearInterval(clock);
     });
 
     async function copy(text, what) {
@@ -196,7 +217,6 @@
 
     //Token 失效时保留仓库信息, 只重新填写 Token
     function reconfigure() {
-        gitUrl = $githubStore.gitUrl === GITEE_URL ? GITEE_URL : GITHUB_URL;
         preferredRepo = repoFullName;
         $githubStore.access_token = "";
         token = "";
@@ -205,8 +225,20 @@
 
     const inputClass = "w-full border-2 border-gray-200 dark:border-gray-500 rounded-sm p-2 text-black bg-white focus:outline-hidden focus:border-primary-500";
     const primaryButton = "rounded-sm bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 focus:outline-hidden disabled:opacity-60";
-    const secondaryButton = "rounded-sm border-2 border-gray-300 dark:border-gray-500 px-3 py-1 hover:border-primary-500 focus:outline-hidden";
+    const secondaryButton = "rounded-sm border-2 border-gray-300 dark:border-gray-500 px-3 py-1 hover:border-primary-500 focus:outline-hidden disabled:opacity-60";
 </script>
+
+{#if giteeRemoved && !configured}
+    <div class="rounded-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200 p-3 text-sm flex items-start justify-between max-w-xl mb-4">
+        <div>
+            <i class="ri-information-line mr-1"></i>
+            NENO 已不再支持 Gitee 同步。本地的笔记都还在, 配置 GitHub 同步后会自动上传到新的仓库。
+        </div>
+        <button class="ml-2 shrink-0 focus:outline-hidden" aria-label="关闭提示" on:click={dismissGiteeNotice}>
+            <i class="ri-close-line"></i>
+        </button>
+    </div>
+{/if}
 
 {#if configured}
     <div class="flex flex-col space-y-3 max-w-xl">
@@ -231,17 +263,26 @@
             <div class="flex-1 min-w-0">
                 <div class="font-bold truncate">
                     {currentAccount ? currentAccount.name : $githubStore.githubName}
-                    <span class="ml-1 text-xs font-normal rounded-xs bg-gray-200 dark:bg-gray-500 px-1">
-                        {$githubStore.gitUrl === GITEE_URL ? "Gitee" : "GitHub"}
-                    </span>
                 </div>
-                <a class="text-sm text-primary-600 dark:text-primary-300 truncate block" href={repoUrl} target="_blank" rel="noreferrer">
-                    <i class="ri-git-repository-line"></i> {repoFullName}
+                <a class="text-sm text-primary-600 dark:text-primary-300 truncate block" href={repoUrl(repoFullName)} target="_blank" rel="noreferrer">
+                    <i class="ri-github-fill"></i> {repoFullName}
                 </a>
+            </div>
+            <div class="text-xs text-right text-gray-500 dark:text-slate-300 ml-2 shrink-0" aria-live="polite">
+                {#if $syncStatus.syncing}
+                    <i class="ri-loop-right-line animate-spin inline-block"></i> 同步中
+                {:else if $syncStatus.error && !$syncStatus.authError}
+                    <span class="text-red-500" title={$syncStatus.error}><i class="ri-error-warning-line"></i> 同步失败</span>
+                {:else if lastSyncText}
+                    <i class="ri-check-line"></i> {lastSyncText}已同步
+                {/if}
             </div>
         </div>
 
         <div class="flex flex-wrap gap-2">
+            <button class={secondaryButton} disabled={$syncStatus.syncing || $syncStatus.authError} on:click={syncNow}>
+                <i class="ri-refresh-line mr-1"></i>立即同步
+            </button>
             <button class={secondaryButton} on:click={() => (showShare = !showShare)}>
                 <i class="ri-qr-code-line mr-1"></i>同步到其他设备
             </button>
@@ -271,53 +312,26 @@
     </div>
 {:else}
     <div class="flex flex-col space-y-5 max-w-xl">
-        <div class="inline-flex self-start rounded-lg bg-gray-200 dark:bg-gray-700 p-1" role="radiogroup" aria-label="存储平台">
-            {#each [GITHUB_URL, GITEE_URL] as url}
-                <button
-                        role="radio"
-                        aria-checked={gitUrl === url}
-                        class="flex items-center px-3 py-1 rounded-md text-sm focus:outline-hidden"
-                        class:bg-white={gitUrl === url}
-                        class:dark:bg-gray-500={gitUrl === url}
-                        class:shadow-xs={gitUrl === url}
-                        on:click={() => switchPlatform(url)}
-                >
-                    {#if url === GITHUB_URL}
-                        <i class="ri-github-fill mr-1"></i>
-                    {:else}
-                        <img src={giteeIcon} alt="" class="w-4 h-4 mr-1"/>
-                    {/if}
-                    {PLATFORMS[url].name}
-                </button>
-            {/each}
-        </div>
-
         <div class="flex">
             <div class="w-6 h-6 rounded-full bg-primary-500 text-white text-sm flex items-center justify-center shrink-0 mr-3">1</div>
             <div class="flex-1">
-                <div class="font-bold">生成访问 Token</div>
+                <div class="font-bold">生成 GitHub 访问 Token</div>
                 <div class="text-sm text-gray-500 dark:text-slate-300 mt-1">
-                    {#if gitUrl === GITHUB_URL}
-                        已为你预先勾选所需权限(repo, workflow), 打开后滑到页面底部点击 "Generate token" 并复制。
-                    {:else}
-                        打开后勾选 user_info 和 projects 权限, 提交后复制生成的 Token。
-                    {/if}
+                    已为你预先勾选所需权限(repo, workflow), 打开后滑到页面底部点击 "Generate token" 并复制。
                 </div>
-                <a class="{primaryButton} inline-block mt-2 text-sm" href={platform.tokenUrl} target="_blank" rel="noreferrer">
-                    前往 {platform.name} 生成 Token <i class="ri-external-link-line"></i>
+                <a class="{primaryButton} inline-block mt-2 text-sm" href={TOKEN_URL} target="_blank" rel="noreferrer">
+                    前往 GitHub 生成 Token <i class="ri-external-link-line"></i>
                 </a>
-                {#if gitUrl === GITHUB_URL}
-                    <details class="text-xs text-gray-500 dark:text-slate-300 mt-2">
-                        <summary class="cursor-pointer">想要更安全? 使用只能访问笔记仓库的细粒度 Token</summary>
-                        <div class="mt-1 leading-5">
-                            先在 GitHub 上创建好笔记仓库, 再打开
-                            <a class="text-primary-600 dark:text-primary-300 underline" href={platform.fineGrainedTokenUrl} target="_blank" rel="noreferrer">细粒度 Token 页面</a>:
-                            Repository access 选择 "Only select repositories" 并选中笔记仓库,
-                            Permissions 中把 Contents 设为 Read and write(使用 notion 同步还需要 Workflows: Read and write)。
-                            细粒度 Token 有有效期, 过期后在这里重新填写即可。
-                        </div>
-                    </details>
-                {/if}
+                <details class="text-xs text-gray-500 dark:text-slate-300 mt-2">
+                    <summary class="cursor-pointer">想要更安全? 使用只能访问笔记仓库的细粒度 Token</summary>
+                    <div class="mt-1 leading-5">
+                        先在 GitHub 上创建好笔记仓库, 再打开
+                        <a class="text-primary-600 dark:text-primary-300 underline" href={FINE_GRAINED_TOKEN_URL} target="_blank" rel="noreferrer">细粒度 Token 页面</a>:
+                        Repository access 选择 "Only select repositories" 并选中笔记仓库,
+                        Permissions 中把 Contents 设为 Read and write(使用 notion 同步还需要 Workflows: Read and write)。
+                        细粒度 Token 有有效期, 过期后在这里重新填写即可。
+                    </div>
+                </details>
             </div>
         </div>
 
@@ -333,7 +347,7 @@
                                 autocomplete="off"
                                 spellcheck="false"
                                 class="{inputClass} pr-9"
-                                placeholder={gitUrl === GITHUB_URL ? "ghp_... 或 github_pat_..." : "Gitee 私人令牌"}
+                                placeholder="ghp_... 或 github_pat_..."
                                 bind:value={token}
                                 on:paste={onTokenPaste}
                                 on:input={resetAccount}

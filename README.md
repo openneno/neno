@@ -9,7 +9,7 @@ NENO
 
 - svelte+tailwindcss构建的PWA应用
 - 基本功能上与[浮墨](https://flomoapp.com/)保持相同
-- **无需后端,完全使用github或者gitee进行存储你的所有数据,文字和图片**
+- **无需后端,完全使用github进行存储你的所有数据,文字和图片**
 - **支持完全离线使用**
 - **支持完整版数据导入导出**
 - **支持同步内容到Notion(使用gihub action)**

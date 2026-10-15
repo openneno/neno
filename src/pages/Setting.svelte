@@ -3,7 +3,7 @@
         exportIndexedDBToFile,
         imporFileTotIndexedDB,
     } from "../request/fetchApi";
-    import {getContentSha, pushToGithub} from "../request/githubApi";
+    import {commitTextFiles} from "../lib/sync/syncEngine.js";
     import {
         syncAllNenoToNotion,
         syncNenoToNotion,
@@ -71,35 +71,17 @@
             .replace("[GITHUB_TOKEN]", $githubStore.access_token)
             .replace("[NOTION_TOKEN]", $notionStore.internalIntegrationToken)
             .replace("[NOTION_DATABASEID]", $notionStore.databaseId);
-        console.log(syncNenoToNotionfile);
-        let actions = [
-            {
-                fileName: ".github/workflows/syncAllNenoToNotion.yml",
-                fileContent: syncAllNenoToNotionfile
-            }, {
-                fileName: ".github/workflows/syncNenoSingleItem.yml",
-                fileContent: syncNenoToNotionfile
-            }]
-        for (let action of actions) {
-            await getContentSha({
-                branch: $githubStore.branch,
-                fileName: encodeURI(
-                    action.fileName
-                ),
-            }).then(async (shadata) => {
-
-                await pushToGithub({
-                    branch: $githubStore.branch,
-                    fileName: action.fileName,
-                    content: action.fileContent,
-                    commitMessage: `add action ${action.fileName}`,
-                    encode: true,
-                    sha: shadata.body.sha,
-                });
-            })
+        //两个 workflow 文件在一次提交中写入
+        try {
+            await commitTextFiles([
+                {path: ".github/workflows/syncAllNenoToNotion.yml", text: syncAllNenoToNotionfile},
+                {path: ".github/workflows/syncNenoSingleItem.yml", text: syncNenoToNotionfile},
+            ], "add notion sync actions");
+            window.alert("已保存到 GitHub Action");
+        } catch (error) {
+            console.log(error);
+            window.alert(`保存失败: ${error.message}`);
         }
-
-
     }
 
 </script>
@@ -131,13 +113,13 @@
                 <div class="m-4">
                     <div class="font-bold mb-3 flex items-center"><i class="ri-refresh-line mr-1"></i>同步</div>
                     <div class="text-sm text-gray-500 dark:text-slate-300 mb-4">
-                        笔记保存在你自己的 GitHub / Gitee 私有仓库中, 无需服务器, 也可以完全离线使用。
+                        笔记保存在你自己的 GitHub 私有仓库中, 无需服务器, 也可以完全离线使用。
                     </div>
                     <SyncSetup/>
                 </div>
 
                 <div class="bg-gray-200  w-full h-[2px]"></div>
-                {#if $githubStore.gitUrl === "https://api.github.com" && $githubStore.access_token !== ""}
+                {#if $githubStore.access_token !== ""}
                     <div class="m-4 flex flex-col">
                         <div>
                             <label for="isSyncToNotion">同步到notion</label>

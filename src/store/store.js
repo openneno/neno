@@ -12,8 +12,7 @@ export const githubStore = writable({
     branch: "master",
     githubName: "",//github用户名
     lastCommitSha: "",//最后一次提交的sha
-    isCustomGitea: false,//是否自定义Gitea
-    gitUrl: "https://api.github.com",//Git地址
+    gitUrl: "https://api.github.com",//只支持 GitHub, 保留该字段以兼容 neno token
 
 });
 //notion相关的配置
@@ -34,4 +33,4 @@ export const reload = writable({ tag: 0, action: "" });
 export const commitToGithubTag = writable({ timestmp: 0, data: {} });
 export const taskCountTag = writable({ all: 0, done: 0 });
 //同步状态(不持久化): authError 表示 Token 已失效, 同步暂停直到重新配置
-export const syncStatus = writable({ authError: false });
+export const syncStatus = writable({ authError: false, syncing: false, error: "", lastSyncAt: 0 });

@@ -4,6 +4,8 @@ let sha = process.env.GITHUB_SHA
 let githubToken = process.env.GITHUB_TOKEN
 let notionToken = process.env.NOTION_TOKEN
 let notionDatabaseId = process.env.NOTION_DATABASEID
+//GitHub Action 自动提供当前仓库 owner/repo
+let repository = process.env.GITHUB_REPOSITORY
 console.log(sha, githubToken, notionToken, notionDatabaseId);
 async function getTriggeredContent() {
 
@@ -15,7 +17,7 @@ async function getTriggeredContent() {
         redirect: 'follow'
     };
 
-    let response = await fetch(`https://api.github.com/repos/Mran/nenolog/commits/${sha}?page=0&per_page=`, requestOptions)
+    let response = await fetch(`https://api.github.com/repos/${repository}/commits/${sha}`, requestOptions)
     return await response.json()
 
 }
@@ -188,16 +190,15 @@ async function run() {
         console.log(createNotionDatabasePropertyResult);
 
     }
-    //获取本次的内容
+    //获取本次提交中新增的笔记, 一次提交可能包含多条笔记
     let result = await getTriggeredContent()
-    console.log(result);
-    let contentUrl = result.files[0].contents_url
-
-
-    let contentResult = await getCommitContent(contentUrl)
-
-    let syncResult = await syncNenoItemToNotion(contentResult)
-    console.log(syncResult);
+    const addedNenos = (result.files || []).filter((file) =>
+        file.status === "added" && /^\d{4}-\d{2}-\d{2}\/[0-9a-zA-Z]+\.json$/.test(file.filename))
+    for (const file of addedNenos) {
+        let contentResult = await getCommitContent(file.contents_url)
+        let syncResult = await syncNenoItemToNotion(contentResult)
+        console.log(file.filename, syncResult);
+    }
     return
 }
 run()

@@ -22,19 +22,14 @@
     "workbox-window": "^7.4.1"
   },
   "dependencies": {
-    "@octokit/endpoint": "^11.0.5",
-    "@octokit/request-error": "^7.1.2",
-    "@octokit/types": "^18.0.0",
     "dayjs": "^1.11.23",
     "html2canvas-pro": "^2.5.2",
     "idb": "^8.0.4",
-    "is-plain-object": "^5.1.0",
     "js-base64": "^3.9.4",
     "qrcode-generator": "^2.0.4",
     "quill": "^2.0.3",
     "remixicon": "^4.9.1",
     "tailwindcss": "^4.3.3",
-    "universal-user-agent": "^7.0.3",
     "wangeditor": "^4.7.15"
   }
 }
