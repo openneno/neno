@@ -15,6 +15,7 @@
     } from "../store/store.js";
     import ThemePicker from "../components/ThemePicker.svelte";
     import SyncSetup from "../components/SyncSetup.svelte";
+    import PageHeader from "../components/PageHeader.svelte";
 
     let importButtonUploadNode = "";
     // svelte 5 的 bind:files 只接受 FileList, 改为监听 change 事件
@@ -86,142 +87,89 @@
 
 </script>
 
-<div class="  flex-1 flex flex-col justify-start  pt-4 pl-4 overflow-scroll ">
-    <div
-            class="font-bold text-lg flex  justify-start  items-center text-gray-600 dark:text-gray-100 "
-    >
-        <button
-                class="focus:outline-hidden    sm:hidden md:hidden mr-4"
-                on:click={() => {
-                $currentPage = "neno";
-            }}
-        >
-            <i class="ri-arrow-left-line"></i>
-        </button>
-        设置
+<div class="flex h-screen min-w-0 flex-1 flex-col">
+    <div class="mx-auto w-full max-w-[720px] px-4 sm:px-6">
+        <PageHeader title="设置"/>
     </div>
 
-    <div class="">
-        <div class="m-4 flex flex-col dark:text-gray-100 ">
-            <div class="mb-4 m-4">
-                <div class="font-bold mb-3 flex items-center"><i class="ri-palette-line mr-1"></i>主题</div>
+    <div class="flex-1 overflow-y-auto">
+        <div class="mx-auto flex w-full max-w-[720px] flex-col gap-4 px-4 pt-2 pb-16 sm:px-6">
+            <section class="card p-5">
+                <h2 class="text-[15px] font-semibold text-ink">外观</h2>
+                <p class="mt-1 mb-4 text-[13px] text-ink-3">选择浅色, 深色或跟随系统, 以及喜欢的主题色。</p>
                 <ThemePicker/>
-            </div>
-            <div class="bg-gray-200  w-full h-[2px]"></div>
-            <div class="mb-4 focus:outline-hidden">
+            </section>
 
-                <div class="m-4">
-                    <div class="font-bold mb-3 flex items-center"><i class="ri-refresh-line mr-1"></i>同步</div>
-                    <div class="text-sm text-gray-500 dark:text-slate-300 mb-4">
-                        笔记保存在你自己的 GitHub 私有仓库中, 无需服务器, 也可以完全离线使用。
-                    </div>
-                    <SyncSetup/>
-                </div>
+            <section class="card p-5">
+                <h2 class="text-[15px] font-semibold text-ink">同步</h2>
+                <p class="mt-1 mb-5 text-[13px] text-ink-3">笔记保存在你自己的 GitHub 私有仓库中, 无需服务器, 也可以完全离线使用。</p>
+                <SyncSetup/>
+            </section>
 
-                <div class="bg-gray-200  w-full h-[2px]"></div>
-                {#if $githubStore.access_token !== ""}
-                    <div class="m-4 flex flex-col">
+            {#if $githubStore.access_token !== ""}
+                <section class="card p-5">
+                    <div class="flex items-start justify-between gap-4">
                         <div>
-                            <label for="isSyncToNotion">同步到notion</label>
-                            <input
-                                    type="checkbox"
-                                    id="isSyncToNotion"
-                                    bind:checked={$notionStore.isSyncToNotion}
-                                    class="  bg-fuchsia-100"
-                            />
-                        </div>
-                        <div class="ml-2  text-sm text-yellow-500">
-                            <p>
-                                同步功能由github
-                                action完成,可进行手动的全量同步(在笔记存储仓库的action中手动执行 sync all neno to notion
-                                action)和每次提交到github保存的自动进行的增量同步
-                            </p>
-                            <p>
-                                由于notion
-                                API的限制,此功能只进行新增笔记(不包括图片)的单向同步到notion,在neno上对已有笔记的修改,删除不会同步到notion
+                            <h2 class="text-[15px] font-semibold text-ink">同步到 Notion</h2>
+                            <p class="mt-1 text-[13px] leading-relaxed text-ink-3">
+                                由仓库中的 GitHub Action 完成: 每次保存时增量同步, 也可以在仓库的 Actions 中手动执行 "sync all neno to notion" 全量同步。
+                                受 Notion API 限制, 只单向同步新增的笔记(不含图片), 修改和删除不会同步。
                             </p>
                         </div>
-
-                        {#if $notionStore.isSyncToNotion}
-                            <div class="ml-2 mt-2 text-">
-                                <label
-                                >Notion Internal Integration Token<a
-                                        class="text-sm ml-4"
-                                        href="https://developers.notion.com/docs/getting-started"
-                                        target="_blank">(如何获取)</a
-                                ></label
-                                >
-                                <input
-                                        type="text"
-                                        bind:value={$notionStore.internalIntegrationToken}
-                                        class="w-full border-2  mt-4 outline-white p-2 text-black"
-                                        placeholder="Internal Integration Token "
-                                />
-                            </div>
-                            <div class="ml-2 mt-2">
-                                <label
-                                >Notion Database ID<a
-                                        class="text-sm ml-4"
-                                        href="https://developers.notion.com/docs/getting-started"
-                                        target="_blank">(如何获取)</a
-                                ></label
-                                >
-                                <input
-                                        type="text"
-                                        bind:value={$notionStore.databaseId}
-                                        class="w-full border-2  mt-4 outline-white p-2 text-black"
-                                        placeholder="Notion Database ID "
-                                />
-                            </div>
-                            <button
-                                    class="ml-2 mt-2 border-2  dark:text-white outline-white p-2 hover:bg-primary-500 hover:text-white focus:outline-white"
-                                    on:click={() => {
-                                setSyncToNotionAction();
-                            }}
-                            >
-                                保存设置到github action
-                            </button>
-                        {/if}
-                    </div>
-                {/if}
-                <div class="m-4">
-                    <label>导入/导出离线数据</label>
-                    <div class="flex items-center space-x-4">
-                        <button
-                                class="w-full border-2  mt-4 outline-white p-2"
-                                on:click={() => {
-                                importNeno();
-                            }}
-                        >导入
-                        </button>
                         <input
-                                type="file"
-                                bind:this={importButtonUploadNode}
-                                on:change={onImportFileSelected}
-                                style="display:none"
-                                accept=".txt"
-                                class="w-full border-2  mt-4 outline-white p-2"
+                                type="checkbox"
+                                class="switch mt-0.5"
+                                aria-label="同步到 Notion"
+                                bind:checked={$notionStore.isSyncToNotion}
                         />
-                        <button
-                                class="w-full border-2  mt-4 outline-white p-2"
-                                on:click={() => {
-                                exportData();
-                            }}
-                        >导出
-                        </button>
                     </div>
+
+                    {#if $notionStore.isSyncToNotion}
+                        <div class="mt-5 flex flex-col gap-4">
+                            <label class="flex flex-col gap-1.5">
+                                <span class="flex items-center justify-between text-[13px] font-medium text-ink-2">
+                                    Internal Integration Token
+                                    <a class="text-xs font-normal text-primary-600 hover:underline dark:text-primary-300" href="https://developers.notion.com/docs/getting-started" target="_blank" rel="noreferrer">如何获取</a>
+                                </span>
+                                <input class="input" type="text" placeholder="secret_..." bind:value={$notionStore.internalIntegrationToken}/>
+                            </label>
+                            <label class="flex flex-col gap-1.5">
+                                <span class="flex items-center justify-between text-[13px] font-medium text-ink-2">
+                                    Database ID
+                                    <a class="text-xs font-normal text-primary-600 hover:underline dark:text-primary-300" href="https://developers.notion.com/docs/getting-started" target="_blank" rel="noreferrer">如何获取</a>
+                                </span>
+                                <input class="input" type="text" placeholder="Notion Database ID" bind:value={$notionStore.databaseId}/>
+                            </label>
+                            <div class="flex flex-wrap justify-end gap-2">
+                                <button class="btn btn-secondary" on:click={() => setSyncToNotionAction()}>
+                                    <i class="ri-github-line"></i>写入 GitHub Action
+                                </button>
+                                <button class="btn btn-primary" on:click={() => saveSetting()}>保存</button>
+                            </div>
+                        </div>
+                    {/if}
+                </section>
+            {/if}
+
+            <section class="card p-5">
+                <h2 class="text-[15px] font-semibold text-ink">数据</h2>
+                <p class="mt-1 mb-4 text-[13px] text-ink-3">把所有笔记和图片导出为一个备份文件, 或者从备份文件恢复。</p>
+                <div class="flex flex-wrap gap-2">
+                    <button class="btn btn-secondary" on:click={() => exportData()}>
+                        <i class="ri-download-2-line"></i>导出备份
+                    </button>
+                    <button class="btn btn-secondary" on:click={() => importNeno()}>
+                        <i class="ri-upload-2-line"></i>从备份导入
+                    </button>
+                    <input
+                            type="file"
+                            bind:this={importButtonUploadNode}
+                            on:change={onImportFileSelected}
+                            class="hidden"
+                            accept=".txt"
+                    />
                 </div>
-            </div>
+            </section>
         </div>
-    </div>
-    <div class="m-4">
-        <button
-                on:click={() => {
-                saveSetting();
-            }}
-                class="w-full border-2  dark:text-white outline-white p-2 hover:bg-primary-500 hover:text-white focus:outline-white"
-        >
-            保存设置
-        </button>
     </div>
 </div>

@@ -9,7 +9,7 @@
     import {getAllNeno, search} from "../request/fetchApi";
     import {applyNoteChange, onNoteChange} from "../lib/noteEvents.js";
     import ProgressLine from "../components/ProgressLine.svelte";
-    import {showSlide} from "./SettingSlide.svelte";
+    import PageHeader from "../components/PageHeader.svelte";
 
     let flowClient;
     let innerHeight = 0;
@@ -29,6 +29,9 @@
 
     let nenoItems = [];
     let searchItems = [];
+    //是否处于搜索/筛选状态; 没有结果时显示提示, 而不是退回到全部笔记
+    let searching = false;
+    let searchDateText = "";
     const freshIds = new Set();
     const removingIds = new Set();
 
@@ -54,6 +57,8 @@
                 load();
             } else if (value.date !== "") {
                 searchNeno("", value.date, "");
+            } else {
+                clearSearch();
             }
         });
         const offTag = searchNenoByTag.subscribe((value) => {
@@ -63,7 +68,7 @@
             if (value.tag !== "") {
                 searchNeno("", "", value.tag);
             } else {
-                searchItems = []
+                clearSearch();
             }
         });
         const offReload = reload.subscribe((value) => {
@@ -122,6 +127,8 @@
             searchTag.length !== 0
         ) {
             isLoding = true;
+            searching = true;
+            searchDateText = searchDate;
             search({
                 content: searchText,
                 created_at: searchDate,
@@ -137,125 +144,126 @@
                     isLoding = false;
                 });
         } else {
-            searchItems = [];
+            clearSearch();
             if (nenoItems.length === 0) {
                 load();
             }
         }
     }
+
+    function clearSearch() {
+        searching = false;
+        searchItems = [];
+        searchDateText = "";
+    }
 </script>
 
 <svelte:window bind:innerHeight/>
-<div class="  flex-1 flex flex-col justify-start  pt-4  w-0  overflow-visible">
-    <div class="  flex flex-row items-center justify-between ">
-        <div class="flex flex-row items-center pl-4 ">
-            {#if changeTag === ""}
-                <div class="font-bold dark:text-slate-300">NENO</div>
-                <button
-                        class="focus:outline-hidden text-gray-600   sm:hidden md:hidden ml-2"
-                        on:click={() => {
-                        showSlide();
-                    }}
-                >
-                    <i class="ri-function-fill dark:text-slate-300"></i>
-                </button>
-            {:else}
-                <div
-                        class="flex font-bold items-center border-gray-300 border-2 border-solid rounded-lg pl-1 pr-1"
-                >
-                    <div class="mr-1 pt-1"><i class="ri-hashtag dark:text-slate-300 "></i></div>
-                    <div class="font-bold w-auto mr-2 dark:text-slate-300" type="text">
-                        {changeTag}
-                    </div>
-                    <button class="focus:outline-hidden ">
-                        <i
-                                class="ri-close-circle-fill text-gray-400"
+<div class="flex h-screen min-w-0 flex-1 flex-col">
+    <div class="mx-auto w-full max-w-[720px] px-4 sm:px-6">
+        <PageHeader title={changeTag === "" ? "全部笔记" : ""}>
+            <svelte:fragment slot="title">
+                {#if changeTag !== ""}
+                    <span class="inline-flex h-7 min-w-0 items-center gap-1 rounded-lg bg-primary-500/10 pr-1 pl-2.5 text-[15px] font-semibold text-primary-700 dark:text-primary-300">
+                        <i class="ri-hashtag text-[13px]"></i>
+                        <span class="truncate">{changeTag}</span>
+                        <button
+                                class="flex size-5 items-center justify-center rounded-md hover:bg-primary-500/15"
+                                aria-label="取消筛选"
                                 on:click={() => {
-                                $searchNenoByTag.tag = "";
-                            }}></i>
+                                    $searchNenoByTag.tag = "";
+                                }}
+                        >
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </span>
+                {/if}
+                {#if $taskCountTag.all !== 0}
+                    <span class="ml-2 inline-flex items-center gap-1 text-xs text-ink-3 tabular-nums" title="正在同步">
+                        <i class="ri-loader-4-line animate-spin"></i>{$taskCountTag.done}/{$taskCountTag.all}
+                    </span>
+                {/if}
+            </svelte:fragment>
+            <label class="relative block w-36 sm:w-60">
+                <i class="ri-search-line pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-ink-3"></i>
+                <input
+                        class="input h-8 border-transparent bg-surface-2 pr-7 pl-8 focus:bg-surface"
+                        type="search"
+                        placeholder="搜索笔记"
+                        aria-label="搜索笔记"
+                        on:keydown={(event) => {
+                            if (event.code === "Enter" || event.key === "Enter") {
+                                searchNeno(searchText, "");
+                            }
+                        }}
+                        bind:value={searchText}
+                />
+                {#if searchText !== ""}
+                    <button
+                            class="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
+                            aria-label="清除搜索"
+                            on:click={() => {
+                                searchText = "";
+                                clearSearch();
+                            }}
+                    >
+                        <i class="ri-close-line"></i>
                     </button>
-                </div>
-            {/if}
-            {#if changeTag === ""}
+                {/if}
+            </label>
+        </PageHeader>
 
-            {/if}
+        <QuillEditor/>
 
-            <div
-                    class="flex dark:text-slate-300"
-                    class:hidden={$taskCountTag.all===0}
-
-            >
-                <svg class="animate-spin mx-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20"
-                     height="20">
-                    <path fill="none" d="M0 0h24v24H0z"/>
-                    <path d="M5.463 4.433A9.961 9.961 0 0 1 12 2c5.523 0 10 4.477 10 10 0 2.136-.67 4.116-1.81 5.74L17 12h3A8 8 0 0 0 6.46 6.228l-.997-1.795zm13.074 15.134A9.961 9.961 0 0 1 12 22C6.477 22 2 17.523 2 12c0-2.136.67-4.116 1.81-5.74L7 12H4a8 8 0 0 0 13.54 5.772l.997 1.795z"/>
-                </svg>
-                <div>
-                    {$taskCountTag.done}/{$taskCountTag.all}
-                </div>
+        {#if isLoding}
+            <div transition:fly={{ y: -8, duration: 200 }} class="mt-3">
+                <ProgressLine/>
             </div>
-        </div>
-
-        <div
-                class="bg-gray-200 rounded-lg h-8 p-2 flex items-center shrink-0 transition-shadow duration-150 focus-within:ring-2 focus-within:ring-primary-300"
-        >
-            <i class="ri-search-2-line text-gray-400"></i>
-            <input
-                    class=" ml-2 bg-gray-200 focus:outline-hidden text-sm"
-                    type="text"
-                    on:keydown={(event) => {
-                    if (event.code === "Enter") {
-                        searchNeno(searchText, "");
-                    }
-                }}
-                    bind:value={searchText}
-            />
-            <i
-                    class="ri-close-circle-fill text-gray-400"
-                    on:click={() => {
-                    searchText = "";
-                    searchItems = [];
-                }}></i>
-        </div>
+        {/if}
+        {#if isLodingError}
+            <div class="mt-3 flex items-center justify-between rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300">
+                读取笔记失败
+                <button class="btn btn-sm btn-ghost" on:click={() => load()}>重新获取</button>
+            </div>
+        {/if}
     </div>
-
-    <div class="p-2 ">
-        <QuillEditor
-        />
-    </div>
-    {#if isLoding}
-        <div transition:fly={{ y: -20, duration: 1000 }} class="w-full ">
-            <ProgressLine/>
-        </div>
-    {/if}
-    {#if isLodingError}
-        <div class="w-full pl-4 pr-4">
-            <button
-                    class=" w-full rounded-sm focus:outline-hidden m-aut bg-red-400  text-white  p-2  "
-                    on:click={() => {
-                    load();
-                }}>重新获取
-            </button
-            >
-        </div>
-    {/if}
     <div
             bind:this={flowClient}
-            class="flex flex-col overflow-y-scroll p-2  overflow-visible "
+            class="overflow-y-auto"
             style="height:{innerHeight - flowClientTop}px"
     >
-        {#if searchItems.length === 0}
-            {#each nenoItems as item (item._id)}
-                <div class="flow-root" in:noteEnter={{active: freshIds.has(item._id)}} out:noteLeave={{active: removingIds.has(item._id)}}>
-                    <NenoItem {...item}/>
-                </div>
-            {/each}
-        {:else}
-            {#each searchItems as item (item._id)}
-                <div class="flow-root" out:noteLeave={{active: removingIds.has(item._id)}}>
-                    <NenoItem {...item} searchContent={searchText}/>
-                </div>
-            {/each}
-        {/if}
+        <div class="mx-auto w-full max-w-[720px] px-4 pt-4 pb-16 sm:px-6">
+            {#if searching}
+                {#if searchDateText !== ""}
+                    <div class="mb-3 flex items-center justify-between text-[13px] text-ink-3">
+                        <span class="tabular-nums">{searchDateText} 的笔记 · {searchItems.length} 条</span>
+                        <button class="btn btn-sm btn-ghost" on:click={() => ($searchNenoByDate.date = "")}>查看全部</button>
+                    </div>
+                {/if}
+                {#each searchItems as item (item._id)}
+                    <div class="flow-root" out:noteLeave={{active: removingIds.has(item._id)}}>
+                        <NenoItem {...item} searchContent={searchText}/>
+                    </div>
+                {/each}
+                {#if !isLoding && searchItems.length === 0}
+                    <div class="py-16 text-center text-sm text-ink-3">
+                        <i class="ri-search-eye-line mb-2 block text-3xl text-ink-3/60"></i>
+                        没有找到相关笔记
+                    </div>
+                {/if}
+            {:else}
+                {#each nenoItems as item (item._id)}
+                    <div class="flow-root" in:noteEnter={{active: freshIds.has(item._id)}} out:noteLeave={{active: removingIds.has(item._id)}}>
+                        <NenoItem {...item}/>
+                    </div>
+                {/each}
+                {#if !isLoding && !isLodingError && nenoItems.length === 0}
+                    <div class="py-16 text-center text-sm text-ink-3">
+                        <i class="ri-quill-pen-line mb-2 block text-3xl text-ink-3/60"></i>
+                        还没有笔记, 在上面写下第一条想法吧
+                    </div>
+                {/if}
+            {/if}
+        </div>
     </div>
 </div>

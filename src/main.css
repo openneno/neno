@@ -109,58 +109,117 @@
 }
 
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
+/* ==========================================================
+   设计系统 · 安静的纸
+   内容优先: 正文像纸上的墨迹, 颜色只用于有含义的地方(主操作, 当前项, 标签)
+   ========================================================== */
 
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
+/* 中性色: 画布(canvas) < 卡片(surface) < 次级面(surface-2), 文字三级(ink / ink-2 / ink-3), 细线(line) */
+:root,
+.light-scope {
+    --canvas: #f6f6f3;
+    --surface: #ffffff;
+    --surface-2: #f0f0ec;
+    --surface-3: #e7e7e2;
+    --line: rgb(28 25 23 / 0.08);
+    --line-strong: rgb(28 25 23 / 0.14);
+    --ink: #1d1f23;
+    --ink-2: #565b63;
+    --ink-3: #686d75;
+    --shadow-card: 0 1px 2px rgb(28 25 23 / 0.04);
+    --shadow-pop: 0 12px 32px -8px rgb(28 25 23 / 0.18), 0 2px 6px rgb(28 25 23 / 0.06);
+}
+
+.dark :where(:not(.light-scope, .light-scope *)),
+.dark {
+    --canvas: #0f1013;
+    --surface: #17191d;
+    --surface-2: #202328;
+    --surface-3: #2a2e34;
+    --line: rgb(255 255 255 / 0.07);
+    --line-strong: rgb(255 255 255 / 0.13);
+    --ink: #e7e8ea;
+    --ink-2: #a8adb5;
+    --ink-3: #868c95;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-pop: 0 16px 40px -8px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.4);
+}
+
+@theme inline {
+    --color-canvas: var(--canvas);
+    --color-surface: var(--surface);
+    --color-surface-2: var(--surface-2);
+    --color-surface-3: var(--surface-3);
+    --color-line: var(--line);
+    --color-line-strong: var(--line-strong);
+    --color-ink: var(--ink);
+    --color-ink-2: var(--ink-2);
+    --color-ink-3: var(--ink-3);
+    --shadow-card: var(--shadow-card);
+    --shadow-pop: var(--shadow-pop);
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+}
+
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
-*,*:before,*:after {
-    box-sizing: border-box;
-}
-
-html, body {
-    min-height: 100%;
-    height: 100%;
-    margin: 0;
-}
-
-h1 {
-    font-family: 'Oswald', sans-serif;
-    margin: 0 !important;
-}
-
-body {
-    font-family: 'Roboto', sans-serif;
-    font-size: 1em;
-    line-height: 1.5;
-}
-
-a:link, a:visited, a:hover, a:focus, a:active {
-    color: SteelBlue;
-    text-decoration: none;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    margin: .75rem 0;
-}
-
-@layer components {
-    .ql-editor.ql-blank::before {
-        @apply dark:text-white;
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--line);
     }
+
+    html,
+    body {
+        min-height: 100%;
+        height: 100%;
+        margin: 0;
+    }
+
+    body {
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--font-sans);
+        font-size: 14px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--primary-400) 35%, transparent);
+    }
+
+    /* 细滚动条, 悬停时才明显 */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--surface-3) transparent;
+    }
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--surface-3);
+        border-radius: 999px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--ink-3);
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+}
+
+/* 编辑器占位文字 */
+.ql-editor.ql-blank::before {
+    color: var(--ink-3) !important;
+    font-style: normal !important;
+    left: 0 !important;
+    right: 0 !important;
 }
 
 /* quill 2 默认隐藏 li 的列表符号, 为 getSemanticHTML 输出及旧版数据中的标准列表恢复样式 */
@@ -181,9 +240,63 @@ h1, h2, h3, h4, h5, h6 {
     min-width: 0;
     white-space: normal;
     overflow-wrap: anywhere;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.75;
+    letter-spacing: 0.01em;
+}
+.neno-content p {
+    margin: 0;
+}
+.neno-content ul,
+.neno-content ol {
+    margin: 0.2em 0;
+    padding-left: 1.4em;
+}
+.neno-content ul {
+    list-style: disc;
+}
+.neno-content ol {
+    list-style: decimal;
+}
+.neno-content li::marker {
+    color: var(--ink-3);
+}
+.neno-content strong {
+    font-weight: 600;
+}
+.neno-content a {
+    color: var(--primary-600);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--primary-500) 35%, transparent);
+    text-underline-offset: 3px;
+}
+.dark .neno-content a {
+    color: var(--primary-300);
+}
+.neno-content a:hover {
+    text-decoration-color: currentColor;
 }
 .neno-content pre {
     white-space: pre-wrap;
+    margin: 0.4em 0;
+    padding: 0.75em 1em;
+    border-radius: 8px;
+    background: var(--surface-2);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* 搜索命中的文字 */
+.neno-highlight {
+    background: color-mix(in oklab, #facc15 45%, transparent);
+    border-radius: 3px;
+    padding: 0 1px;
+}
+.dark .neno-highlight {
+    background: color-mix(in oklab, #facc15 30%, transparent);
+    color: var(--ink);
 }
 .neno-content img,
 .neno-content video {
@@ -191,12 +304,32 @@ h1, h2, h3, h4, h5, h6 {
     height: auto;
 }
 
-/* 标签整体换到下一行, 只有比一行还长时才在标签内部折行 */
+/* 标签: 主题色浅底小标签; 整体换到下一行, 只有比一行还长时才在标签内部折行 */
 .neno-tag {
     display: inline-block;
     max-width: 100%;
-    vertical-align: bottom;
+    vertical-align: baseline;
     overflow-wrap: anywhere;
+    margin: 0 0.15em;
+    padding: 0 0.45em;
+    border-radius: 6px;
+    background: var(--primary-50);
+    color: var(--primary-700);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.75;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+.neno-tag:hover {
+    background: var(--primary-100);
+}
+.dark .neno-tag {
+    background: color-mix(in oklab, var(--primary-500) 16%, transparent);
+    color: var(--primary-300);
+}
+.dark .neno-tag:hover {
+    background: color-mix(in oklab, var(--primary-500) 26%, transparent);
 }
 
 /* ---------- 微交互 ---------- */
@@ -250,4 +383,173 @@ html.theme-switching *::after {
 /* 长笔记展开/收起时高度平滑变化 */
 .neno-fold {
     transition: max-height 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ---------- 组件 ---------- */
+@layer components {
+    .card {
+        @apply rounded-xl border border-line bg-surface shadow-card;
+    }
+
+    .btn {
+        @apply inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3.5 text-sm font-medium whitespace-nowrap select-none disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .btn-sm {
+        @apply h-8 gap-1 px-2.5 text-[13px];
+    }
+    .btn-primary {
+        @apply bg-primary-500 text-white shadow-xs hover:bg-primary-600 disabled:hover:bg-primary-500;
+    }
+    .btn-secondary {
+        @apply border border-line-strong bg-surface text-ink hover:bg-surface-2;
+    }
+    .btn-ghost {
+        @apply text-ink-2 hover:bg-surface-2 hover:text-ink;
+    }
+    .btn-danger {
+        @apply text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10;
+    }
+
+    .icon-btn {
+        @apply inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-[17px] text-ink-3 hover:bg-surface-2 hover:text-ink;
+    }
+
+    .input {
+        @apply h-9 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-primary-400 focus:ring-3 focus:ring-primary-500/15;
+    }
+
+    .section-label {
+        @apply px-3 text-xs font-medium tracking-wide text-ink-3;
+    }
+
+    /* 侧边栏导航项与标签项 */
+    .nav-item {
+        @apply flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 text-left text-sm text-ink-2 hover:bg-surface-2 hover:text-ink;
+    }
+    .nav-item > i {
+        @apply text-base text-ink-3;
+    }
+    .nav-item-active {
+        @apply bg-primary-500/10 font-medium text-primary-700 hover:bg-primary-500/15 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-300;
+    }
+    .nav-item-active > i {
+        @apply text-primary-600 dark:text-primary-400;
+    }
+
+    /* 分段选择器 */
+    .segmented {
+        @apply inline-flex rounded-lg bg-surface-2 p-0.5;
+    }
+    .segmented > button {
+        @apply flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] text-ink-2 hover:text-ink;
+    }
+    .segmented > button[aria-checked="true"] {
+        @apply bg-surface text-ink shadow-xs dark:bg-surface-3;
+    }
+}
+
+/* 键盘操作时显示焦点 */
+:where(.btn, .icon-btn, .nav-item, .segmented > button):focus-visible {
+    outline: 2px solid var(--primary-400);
+    outline-offset: 2px;
+}
+
+/* ---------- 编辑器(覆盖 quill snow 主题) ---------- */
+.ql-container.ql-snow,
+.ql-toolbar.ql-snow {
+    border: none !important;
+    font-family: inherit;
+}
+.ql-toolbar.ql-snow {
+    padding: 0 !important;
+}
+.ql-container {
+    font-size: 15px;
+}
+.ql-editor {
+    min-height: 72px;
+    max-height: 50vh;
+    padding: 14px 16px 8px !important;
+    color: var(--ink);
+    line-height: 1.75 !important;
+}
+.ql-editor.ql-blank::before {
+    left: 16px !important;
+    right: 16px !important;
+}
+.neno-toolbar .editor-tool,
+.ql-toolbar.ql-snow .neno-toolbar .editor-tool {
+    float: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 8px;
+    color: var(--ink-3);
+    font-size: 16px;
+    cursor: pointer;
+}
+.neno-toolbar .editor-tool:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+}
+.neno-toolbar .editor-tool.ql-active {
+    background: color-mix(in oklab, var(--primary-500) 12%, transparent);
+    color: var(--primary-600);
+}
+.dark .neno-toolbar .editor-tool.ql-active {
+    color: var(--primary-300);
+}
+
+/* 下拉菜单项 */
+@layer components {
+    .menu-item {
+        @apply flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-2.5 text-left text-ink-2 hover:bg-surface-2 hover:text-ink;
+    }
+    .menu-item > i {
+        @apply text-[15px] text-ink-3;
+    }
+    .menu-item-danger {
+        @apply text-red-600 hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-400;
+    }
+    .menu-item-danger > i {
+        @apply text-current;
+    }
+}
+
+/* 开关 */
+.switch {
+    appearance: none;
+    position: relative;
+    flex-shrink: 0;
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+.switch::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+    transition: transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+.switch:checked {
+    background: var(--primary-500);
+}
+.switch:checked::before {
+    transform: translateX(16px);
+}
+.switch:focus-visible {
+    outline: 2px solid var(--primary-400);
+    outline-offset: 2px;
 }

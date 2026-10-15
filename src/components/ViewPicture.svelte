@@ -49,48 +49,49 @@
 
 {#if show}
     <div
-        class="w-screen bg-black/50 fixed top-0 z-20 h-screen flex flex-col justify-between items-center"
-        in:fade={{ duration: 190 }}
-        out:fade={{ duration: 210 }}
-        on:click={() => {
-            hidden();
-        }}
+            class="fixed inset-0 z-40 flex flex-col items-center"
+            in:fade={{ duration: 150 }}
+            out:fade={{ duration: 150 }}
+            role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            aria-label="查看图片"
     >
-        <div
-            style="height:80vh"
-            class=" w-auto   rounded-sm relative overflow-hidden flex justify-center items-center"
-        >
+        <!-- 点击图片以外的区域关闭 -->
+        <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" on:click={() => hidden()} aria-hidden="true"></div>
+        <button class="absolute top-4 right-4 z-10 flex size-9 items-center justify-center rounded-full bg-white/10 text-lg text-white hover:bg-white/20" aria-label="关闭" on:click={() => hidden()}>
+            <i class="ri-close-line"></i>
+        </button>
+        <div class="pointer-events-none relative flex min-h-0 w-full flex-1 items-center justify-center p-6 sm:p-12">
             {#await getPIcUrl(showImageInfo) then value}
-                <img
-                    in:scale={{ start: 0.96, duration: 200 }}
-                    class=" w-full  max-h-full object-cover  shadow-lg"
-                    src={value}
-                    alt=""
-                />
-            {/await}
-        </div>
-
-        <div
-            class="flex flex-row justify-center items-baseline"
-            style="height:20vh"
-        >
-            {#each imageFilesIn as item, index}
-                <div
-                    class="w-16 h-16 box-border  border-2 rounded-sm mr-2 mb-2 relative overflow-hidden cursor-pointer transition-transform duration-150 hover:scale-105"
-                    class:border-primary-400={showImageInfo === item}
-                    on:click|stopPropagation={() => {
-                        showImageInfo = imageFilesIn[index];
-                    }}
-                >
-                    {#await getPIcUrl(item) then value}
-                        <img
-                            class=" w-full h-full object-cover"
+                {#key showImageInfo}
+                    <img
+                            in:scale={{ start: 0.96, duration: 200 }}
+                            class="pointer-events-auto max-h-full max-w-full rounded-lg object-contain shadow-pop"
                             src={value}
                             alt=""
-                        />
-                    {/await}
-                </div>
-            {/each}
+                    />
+                {/key}
+            {/await}
         </div>
+        {#if imageFilesIn.length > 1}
+            <div class="relative flex shrink-0 gap-2 pb-8">
+                {#each imageFilesIn as item, index}
+                    <button
+                            class="size-14 overflow-hidden rounded-lg opacity-60 ring-2 ring-transparent transition-[opacity,box-shadow,transform] duration-150 hover:scale-105 hover:opacity-100"
+                            class:opacity-100={showImageInfo === item}
+                            class:ring-white={showImageInfo === item}
+                            aria-label="第 {index + 1} 张"
+                            on:click={() => {
+                                showImageInfo = imageFilesIn[index];
+                            }}
+                    >
+                        {#await getPIcUrl(item) then value}
+                            <img class="size-full object-cover" src={value} alt=""/>
+                        {/await}
+                    </button>
+                {/each}
+            </div>
+        {/if}
     </div>
 {/if}

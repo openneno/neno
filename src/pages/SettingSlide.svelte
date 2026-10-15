@@ -39,24 +39,25 @@
 </script>
 
 {#if show}
-    <div
-        class="w-screen bg-black/50 fixed top-0 z-20 h-screen "
-        in:fade={{ duration: 190 }}
-        out:fade={{ duration: 210 }}
-    >
+    <div class="fixed inset-0 z-30 sm:hidden">
+        <div
+                class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                in:fade={{ duration: 150 }}
+                out:fade={{ duration: 150 }}
+                on:click={() => hidden()}
+                aria-hidden="true"
+        ></div>
         {#if showLeft}
             <div
-                in:fly={{ x: -200, duration: 200 }}
-                out:fly={{ x: -200, duration: 200 }}
-                class="dark:bg-black lt:w-8/12 w-10/12 2xl:w-4/12 float-left  shadow-xs bg-gray-100 h-full p-4 flex flex-col overflow-y-scroll"
+                    in:fly={{ x: -40, duration: 220 }}
+                    out:fly={{ x: -40, duration: 180 }}
+                    class="absolute inset-y-0 left-0 flex w-[280px] max-w-[85vw] bg-canvas shadow-pop"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="菜单"
             >
                 <SideLeft />
             </div>
         {/if}
-        <div
-            class="lt:w-4/12 w-2/12 2xl:w-8/12 float-right   h-full "
-            on:click={() => {
-                hidden();
-            }}></div>
     </div>
 {/if}

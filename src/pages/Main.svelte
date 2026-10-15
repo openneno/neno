@@ -13,34 +13,27 @@
   import { fade } from "../lib/motion.js";
 </script>
 
-<div class=" overflow-visible">
-  <div
-    class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100 dark:bg-black   overflow-visible"
-  >
-    <div class="max-w-6xl min-w-0 w-full  flex   overflow-scroll ">
-      <div
-        class="hidden  sm:flex md:flex flex-col items-start dark:bg-black  overflow-visible"
-        style="width:240px"
-      >
-        <SideLeft />
+<div class="h-screen w-full bg-canvas text-ink">
+  <div class="mx-auto flex h-screen w-full max-w-[1120px] min-w-0">
+    <aside class="hidden h-screen w-[248px] shrink-0 sm:flex">
+      <SideLeft />
+    </aside>
+    {#key $currentPage}
+      <div class="flex min-w-0 flex-1" in:fade={{ duration: 160 }}>
+        {#if $currentPage === "neno"}
+          <SideRight />
+        {:else if $currentPage === "setting"}
+          <Setting />
+        {:else if $currentPage === "luck"}
+          <Luck />
+        {:else}
+          <Daily />
+        {/if}
       </div>
-      {#key $currentPage}
-        <div class="flex-1 flex min-w-0" in:fade={{ duration: 160 }}>
-          {#if $currentPage === "neno"}
-            <SideRight />
-          {:else if $currentPage === "setting"}
-            <Setting />
-          {:else if $currentPage === "luck"}
-            <Luck />
-          {:else}
-            <Daily />
-          {/if}
-        </div>
-      {/key}
-    </div>
-    <NenoDetail />
-    <SettingSlide />
-    <ViewPicture />
-    <Share />
+    {/key}
   </div>
+  <NenoDetail />
+  <SettingSlide />
+  <ViewPicture />
+  <Share />
 </div>

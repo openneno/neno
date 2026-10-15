@@ -19,124 +19,102 @@
 
 <div>
     <div
-        role="button"
-        tabindex="0"
-        class="rounded-r  group p-4 pt-2 pb-2  focus:outline-hidden w-full hover:text-white hover:bg-primary-400 flex justify-between text-sm   dark:text-slate-300 cursor-pointer"
-        class:bg-primary-500={selectionTag === tag}
-        class:text-slate-800={selectionTag !== tag}
-        class:text-white={selectionTag === tag}
-        on:mouseenter={()=>{
-            console.log("selectTag", tag,selectionTag)
-
-        }}
-        on:click={() => {
-            dispatch("selectTag", tag);
-        }}
-        on:keydown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
-                e.preventDefault();
+            role="button"
+            tabindex="0"
+            class="nav-item group h-8 justify-between"
+            class:nav-item-active={selectionTag === tag}
+            on:click={() => {
                 dispatch("selectTag", tag);
-            }
-        }}
+            }}
+            on:keydown={(e) => {
+                if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    dispatch("selectTag", tag);
+                }
+            }}
     >
-        <div class="flex">
-            <div class=""><i class="ri-hashtag"></i></div>
-            <div class="ml-1">
-                {showTag.indexOf("#") === 0 ? showTag.substring(1) : showTag}
-            </div>
-        </div>
-        <div>
-            <button
-                class="focus:outline-hidden group-hover:opacity-100 opacity-0   pr-1"
-                on:click|stopPropagation={() => {
-                    isChangeTaging = !isChangeTaging;
-                    selfTag = tag.substring(1);
-                }}
-            >
-                <i class="ri-edit-fill"></i>
-            </button>
-            <button
-                class="focus:outline-hidden group-hover:opacity-100 opacity-0   pr-1"
-                on:click|stopPropagation={() => {
-                    dispatch("pinTag", tag);
-                }}
-            >
-                <i class="ri-pushpin-fill"></i>
-            </button>
-
+        <span class="flex min-w-0 items-center gap-2">
             {#if children.length !== 0}
                 <button
-                    class="focus:outline-hidden group-hover:opacity-100 opacity-0  pr-1"
-                    on:click|stopPropagation={() => {
-                        showSub = !showSub;
-                    }}
+                        class="flex size-4 shrink-0 items-center justify-center text-ink-3 hover:text-ink"
+                        aria-label={showSub ? "收起子标签" : "展开子标签"}
+                        aria-expanded={showSub}
+                        on:click|stopPropagation={() => {
+                            showSub = !showSub;
+                        }}
                 >
                     <i class="ri-arrow-right-s-line inline-block transition-transform duration-200" class:rotate-90={showSub}></i>
                 </button>
+            {:else}
+                <span class="flex size-4 shrink-0 items-center justify-center"><i class="ri-hashtag text-[13px] text-ink-3"></i></span>
             {/if}
-        </div>
+            <span class="truncate">{showTag.indexOf("#") === 0 ? showTag.substring(1) : showTag}</span>
+        </span>
+        <span class="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+            <button
+                    class="flex size-6 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
+                    title="重命名" aria-label="重命名"
+                    on:click|stopPropagation={() => {
+                        isChangeTaging = !isChangeTaging;
+                        selfTag = tag.substring(1);
+                    }}
+            >
+                <i class="ri-edit-line text-[13px]"></i>
+            </button>
+            <button
+                    class="flex size-6 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
+                    title="置顶" aria-label="置顶"
+                    on:click|stopPropagation={() => {
+                        dispatch("pinTag", tag);
+                    }}
+            >
+                <i class="ri-pushpin-line text-[13px]"></i>
+            </button>
+        </span>
     </div>
     {#if isChangeTaging}
-        <div class="pl-2">
-            <div
-                class="flex items-center bg-gray-200 rounded-lg border-solid border-4  "
-            >
-                <div class=""><i class="ri-hashtag"></i></div>
-                <input
-                    class="focus:outline-hidden  h-8 p-2 pl-1 rounded-xs w-full text-gray-700"
-                    type="text"
-                    bind:value={selfTag}
-                />
+        <div class="my-1 flex flex-col gap-2 rounded-lg bg-surface-2 p-2" transition:slide={{duration: 160}}>
+            <div class="relative">
+                <i class="ri-hashtag pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-[13px] text-ink-3"></i>
+                <input class="input h-8 pl-7" type="text" aria-label="新的标签名" bind:value={selfTag}/>
             </div>
-
-            <div class="flex justify-between  w-full mt-2 ">
+            <div class="flex justify-end gap-1.5">
                 <button
-                    class="w-5/12 text-gray-700 bg-white rounded-xs border-solid border-4 "
-                    on:click|stopPropagation={() => {
-                        isChangeTaging = false;
-                    }}>取消</button
-                >
+                        class="btn btn-sm btn-ghost"
+                        on:click|stopPropagation={() => {
+                            isChangeTaging = false;
+                        }}>取消
+                </button>
                 <button
-                    class="w-5/12 bg-primary-500 rounded-xs text-white"
-                    on:click|stopPropagation={() => {
-                        dispatch("renameTag", {
-                            oldTag: tag,
-                            newTag: "#" + selfTag,
-                        });
-                        console.log("确定renameTag", {
-                            oldTag: tag,
-                            newTag: "#" + selfTag,
-                        });
-
-                        isChangeTaging = false;
-                    }}>确定</button
-                >
+                        class="btn btn-sm btn-primary"
+                        on:click|stopPropagation={() => {
+                            dispatch("renameTag", {
+                                oldTag: tag,
+                                newTag: "#" + selfTag,
+                            });
+                            isChangeTaging = false;
+                        }}>确定
+                </button>
             </div>
         </div>
     {/if}
     {#if children.length !== 0 && showSub}
-        <div transition:slide={{duration: 180}}>
-        {#each children as item}
-            <div class="ml-2">
+        <div class="ml-3 border-l border-line pl-1" transition:slide={{duration: 180}}>
+            {#each children as item}
                 <TagExpand
-                    on:selectTag={(event) => {
-                        console.log("selectTag", event.detail);
-
-                        dispatch("selectTag", event.detail);
-                    }}
-                    on:pinTag={(event) => {
-                        console.log("pinTag", event.detail);
-                        dispatch("pinTag", event.detail);
-                    }}
-                    on:renameTag={(event) => {
-                        console.log("renameTag", event.detail);
-                        dispatch("renameTag", event.detail);
-                    }}
-                    {...item}
-                    {selectionTag}
+                        on:selectTag={(event) => {
+                            dispatch("selectTag", event.detail);
+                        }}
+                        on:pinTag={(event) => {
+                            dispatch("pinTag", event.detail);
+                        }}
+                        on:renameTag={(event) => {
+                            dispatch("renameTag", event.detail);
+                        }}
+                        {...item}
+                        {selectionTag}
                 />
-            </div>
-        {/each}
+            {/each}
         </div>
     {/if}
 </div>

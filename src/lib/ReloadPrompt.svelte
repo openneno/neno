@@ -38,59 +38,25 @@
 
 {#if toast}
     <div
-            class="pwa-toast"
+            class="card fixed right-4 bottom-4 z-50 flex max-w-sm items-center gap-3 p-3 pl-4 text-sm shadow-pop"
             role="alert"
             transition:fly={{ y: 20, duration: 200 }}
     >
-        <div class="message">
+        <i class="ri-download-cloud-2-line text-lg text-primary-600 dark:text-primary-400"></i>
+        <div class="flex-1 text-ink-2">
             {#if $offlineReady}
-      <span>
-        App ready to work offline
-      </span>
+                已可以离线使用
             {:else}
-      <span>
-        New content available, click on reload button to update.
-      </span>
+                有新版本可用, 刷新后生效
             {/if}
         </div>
         {#if $needRefresh}
-            <button on:click={() => updateServiceWorker(true)}>
-                Reload
-            </button>
+            <button class="btn btn-sm btn-primary" on:click={() => updateServiceWorker(true)}>刷新</button>
         {/if}
-        <button on:click={close}>
-            Close
+        <button class="icon-btn size-7" aria-label="关闭" on:click={close}>
+            <i class="ri-close-line"></i>
         </button>
     </div>
 {/if}
 
-<div class='pwa-date hidden'>{buildDate}</div>
-
-<style>
-    .pwa-date {
-        visibility: hidden;
-    }
-    .pwa-toast {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        margin: 16px;
-        padding: 12px;
-        border: 1px solid #8885;
-        border-radius: 4px;
-        z-index: 2;
-        text-align: left;
-        box-shadow: 3px 4px 5px 0 #8885;
-        background-color: white;
-    }
-    .pwa-toast .message {
-        margin-bottom: 8px;
-    }
-    .pwa-toast button {
-        border: 1px solid #8885;
-        outline: none;
-        margin-right: 5px;
-        border-radius: 2px;
-        padding: 3px 10px;
-    }
-</style>
+<div class="pwa-date hidden">{buildDate}</div>

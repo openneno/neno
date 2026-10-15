@@ -58,7 +58,7 @@ function applyTheme(setting) {
     root.style.colorScheme = dark ? "dark" : "light";
     document
         .querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", dark ? "#000" : "#f3f4f6");
+        ?.setAttribute("content", dark ? "#0f1013" : "#f6f6f3");
     isDarkTheme.set(dark);
 }
 

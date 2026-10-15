@@ -25,6 +25,7 @@
     export let children = [];
     export let searchContent = "";
     export let tags = [];
+    export let update_at = "";
     //内容过长时折叠, 详情面板中的主笔记会关闭折叠
     export let collapsible = true;
 
@@ -127,9 +128,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="neno-tag transition-colors duration-150 leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
-	${rawtag}
-	</span>`;
+                pContent += `<span class="neno-tag" id="tagtag" onclick="tagClick(this)">${rawtag}</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
                 pIndex += breakIndex + rawtag.length;
             }
@@ -141,12 +140,12 @@
             const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             pContent = pContent.replace(
                 new RegExp(`(${escaped})(?![^<]*>)`, "gi"),
-                `<span class="bg-yellow-300 rounded-xs">$1</span>`
+                `<span class="neno-highlight">$1</span>`
             );
         }
         pContent = pContent.replaceAll(
             /(https?:\/\/?[^\s<)）\]]*)/g,
-            '<a href="$1" target="_blank">$1</a>'
+            '<a href="$1" target="_blank" rel="noreferrer">$1</a>'
         );
         return pContent;
     }
@@ -159,116 +158,98 @@
     }
 </script>
 
-<div
+<article
         bind:this={cardEl}
-        class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-xs  transition-shadow duration-200 ease-out hover:shadow-md "
+        class="card mb-3 px-5 pt-3.5 pb-4 transition-[border-color,box-shadow] duration-200 hover:border-line-strong"
 >
-    <div class="flex justify-between relative ">
-        <div class="text-sm text-gray-500 dark:text-slate-300">
-            {dayjs(created_at).format("YYYY-MM-DD HH:mm")}
+    <header class="relative flex h-7 items-center justify-between">
+        <div class="flex items-center gap-1.5 text-xs text-ink-3 tabular-nums">
+            <time datetime={created_at}>{dayjs(created_at).format("YYYY-MM-DD HH:mm")}</time>
+            {#if update_at}
+                <span title="编辑于 {dayjs(update_at).format('YYYY-MM-DD HH:mm')}">· 已编辑</span>
+            {/if}
             {#if copied}
-                <span transition:fade={{ duration: 150 }} class="ml-2 text-primary-600 dark:text-primary-400">已复制</span>
+                <span transition:fade={{ duration: 150 }} class="text-primary-600 dark:text-primary-300">· 已复制</span>
             {/if}
         </div>
-        <div class=" relative z-auto ">
-            <button on:click={() => toggleMenu(1)} class="focus:outline-hidden ">
-                <i class="ri-more-line dark:text-slate-300"></i>
-            </button>
-            {#if openMenu === true}
-                <div
-                        use:action
-                        tabindex="0"
-                        on:blur|stopPropagation={() => {
+        <button class="icon-btn -mr-2 size-7" aria-label="更多操作" aria-expanded={openMenu} on:click={() => toggleMenu(1)}>
+            <i class="ri-more-fill"></i>
+        </button>
+        {#if openMenu === true}
+            <div
+                    use:action
+                    tabindex="0"
+                    role="menu"
+                    on:blur|stopPropagation={() => {
                         setTimeout(() => {
                             toggleMenu();
                         }, 150);
                     }}
-                        in:pop
-                        out:fade={{ duration: 100 }}
-                        bind:this={menuList}
-                        class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-hidden"
-                        style="left:-32px;"
+                    in:pop
+                    out:fade={{ duration: 100 }}
+                    bind:this={menuList}
+                    class="absolute top-8 -right-1 z-20 flex w-32 flex-col rounded-lg border border-line bg-surface p-1 text-sm shadow-pop outline-none"
+            >
+                <button
+                        class="menu-item"
+                        role="menuitem"
+                        on:click={() => {
+                            showShareView(_id, created_at, content, images, parent, parentId, children, searchContent, tags);
+                        }}
                 >
-                    <button
-                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300 "
-                            on:click={() => {
-                            showShareView(
-                                _id,
-                                created_at,
-                                content,
-                                images,
-                                parent,
-                                parentId,
-                                children,
-                                searchContent,
-                                tags
-                            );
-                        }}>分享
-                    </button
-                    >
-                    <button
-                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300"
-                            on:click={copyNeno}>复制
-                    </button
-                    >
-                    <button
-                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300   "
-                            on:click={() => {
-                            toggleEditMode();
-                        }}>编辑
-                    </button
-                    >
-                    <button
-                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300"
-                            on:click={() => {
-                            showNeno(_id, false);
-                        }}>批注
-                    </button
-                    >
-                    <button
-                            class="  dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300"
-                            on:click={() => {
-                            deleteNeno(_id);
-                        }}>删除
-                    </button
-                    >
-                </div>
-            {/if}
-        </div>
-    </div>
+                    <i class="ri-share-box-line"></i>分享
+                </button>
+                <button class="menu-item" role="menuitem" on:click={copyNeno}>
+                    <i class="ri-file-copy-line"></i>复制
+                </button>
+                <button class="menu-item" role="menuitem" on:click={() => toggleEditMode()}>
+                    <i class="ri-edit-line"></i>编辑
+                </button>
+                <button class="menu-item" role="menuitem" on:click={() => showNeno(_id, false)}>
+                    <i class="ri-chat-quote-line"></i>批注
+                </button>
+                <div class="mx-1 my-1 h-px bg-line"></div>
+                <button class="menu-item menu-item-danger" role="menuitem" on:click={() => deleteNeno(_id)}>
+                    <i class="ri-delete-bin-line"></i>删除
+                </button>
+            </div>
+        {/if}
+    </header>
+
     {#if editMode}
-        <QuillEditor
-                {content}
-                {images}
-                {_id}
-                {parentId}
-                canCancle={true}
-                on:cancle={() => {
-                editMode = false;
-            }}
-                on:update={(event) => {
-                console.log(event.detail);
-                images = event.detail.images;
-                content = event.detail.content;
-                tags = event.detail.tags;
-            }}
-        />
+        <div class="mt-1">
+            <QuillEditor
+                    {content}
+                    {images}
+                    {_id}
+                    {parentId}
+                    canCancle={true}
+                    on:cancle={() => {
+                        editMode = false;
+                    }}
+                    on:update={(event) => {
+                        images = event.detail.images;
+                        content = event.detail.content;
+                        tags = event.detail.tags;
+                    }}
+            />
+        </div>
     {:else}
         <div
-                class="neno-content list-decimal text-sm text-red-300 relative overflow-hidden neno-fold"
+                class="neno-content neno-fold relative mt-1 overflow-hidden"
                 style="max-height:{canCollapse ? `${collapsed ? COLLAPSED_HEIGHT : fullHeight}px` : 'none'}"
         >
             <div use:measure>
                 {@html praseTag(content, tags)}
             </div>
             {#if canCollapse}
-                <div class="absolute inset-x-0 bottom-0 h-16 pointer-events-none bg-linear-to-t from-white dark:from-gray-600 transition-opacity duration-300"
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-surface transition-opacity duration-300"
                      class:opacity-0={!collapsed}></div>
             {/if}
         </div>
         {#if canCollapse}
             <button
-                    class="mt-1 text-sm text-primary-600 dark:text-primary-300 hover:underline focus:outline-hidden flex items-center"
+                    class="mt-1.5 inline-flex items-center gap-0.5 text-[13px] font-medium text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
                     aria-expanded={expanded}
                     on:click={toggleExpanded}
             >
@@ -278,64 +259,48 @@
         {/if}
     {/if}
 
-    <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each images as {key}, index (index)}
-            {#await getImageurl(key) then value}
-                <img
-                        on:click={() => {
-                        showPictureView(images, index);
-                    }}
-                        class="w-32 h-32 rounded-md mr-2 mb-2 object-cover cursor-zoom-in transition-transform duration-200 hover:scale-[1.03]"
-                        src={value}
-                        alt=""
-                />
-            {/await}
-        {/each}
-    </div>
-    {#if parent !== undefined && parent != null}
-        <button
-                class="flex items-center space-x-1 max-w-full min-w-0 text-left hover:shadow-xs focus:outline-hidden"
-                on:click={() => {
-                showNeno(parent._id, false);
-            }}
-        >
-            <i
-                    class="ri-arrow-up-circle-fill transform -rotate-45 text-gray-500 shrink-0"></i>
-            <div
-                    class="text-gray-500 text-sm min-w-0 break-all"
-                    style="-webkit-line-clamp: 1;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;"
-            >
-                {plainContent(parent.content)}
-            </div>
-        </button>
+    {#if images.length > 0}
+        <div class="mt-3 flex flex-wrap gap-2">
+            {#each images as {key}, index (index)}
+                {#await getImageurl(key) then value}
+                    <button class="overflow-hidden rounded-lg border border-line" aria-label="查看图片" on:click={() => showPictureView(images, index)}>
+                        <img
+                                class="size-24 cursor-zoom-in object-cover transition-transform duration-200 hover:scale-[1.04] sm:size-28"
+                                src={value}
+                                alt=""
+                        />
+                    </button>
+                {/await}
+            {/each}
+        </div>
     {/if}
 
-    {#each children as item}
-        <button
-                class="flex items-center space-x-1 max-w-full min-w-0 text-left hover:shadow-xs focus:outline-hidden"
-                on:click={() => {
-                showNeno(item._id, false);
-            }}
-        >
-            <i
-                    class="ri-arrow-down-circle-fill transform -rotate-45 text-gray-500 shrink-0"></i>
-            <div
-                    class="text-gray-500 text-sm min-w-0 break-all"
-                    style="-webkit-line-clamp: 1;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            overflow: hidden;"
-            >
-                {plainContent(item.content)}
-            </div>
-        </button>
-    {/each}
-</div>
-
-<!-- <svelte:window on:click={toggleMore} /> -->
-
+    {#if (parent !== undefined && parent != null) || children.length > 0}
+        <div class="mt-3 flex flex-col gap-1 border-l-2 border-line pl-3">
+            {#if parent !== undefined && parent != null}
+                <button
+                        class="flex min-w-0 items-center gap-1.5 text-left text-[13px] text-ink-3 hover:text-ink-2"
+                        title="查看原笔记"
+                        on:click={() => {
+                            showNeno(parent._id, false);
+                        }}
+                >
+                    <i class="ri-corner-left-up-line shrink-0"></i>
+                    <span class="min-w-0 truncate">{plainContent(parent.content)}</span>
+                </button>
+            {/if}
+            {#each children as item}
+                <button
+                        class="flex min-w-0 items-center gap-1.5 text-left text-[13px] text-ink-3 hover:text-ink-2"
+                        title="查看批注"
+                        on:click={() => {
+                            showNeno(item._id, false);
+                        }}
+                >
+                    <i class="ri-chat-quote-line shrink-0"></i>
+                    <span class="min-w-0 truncate">{plainContent(item.content)}</span>
+                </button>
+            {/each}
+        </div>
+    {/if}
+</article>

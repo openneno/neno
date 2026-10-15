@@ -71,58 +71,62 @@
 </script>
 
 {#if show}
-    <div
-        class="w-screen bg-black/50 fixed top-0 z-20 h-screen "
-        in:fade={{ duration: 100 }}
-        out:fade={{ duration: 100 }}
-    >
+    <div class="fixed inset-0 z-30">
         <div
-            class="lt:w-4/12 w-2/12 2xl:w-8/12 float-left   h-full "
-            on:click={() => {
-                hidden();
-            }}></div>
+                class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                in:fade={{ duration: 150 }}
+                out:fade={{ duration: 150 }}
+                on:click={() => hidden()}
+                aria-hidden="true"
+        ></div>
         {#if showRight}
             <div
-                in:fly={{ x: 200, duration: 200 }}
-                out:fly={{ x: 200, duration: 200 }}
-                class="lt:w-8/12 w-10/12 2xl:w-4/12 float-right  shadow-xs bg-gray-100 dark:bg-gray-900 h-full p-4 flex flex-col overflow-y-scroll"
+                    in:fly={{ x: 40, duration: 220 }}
+                    out:fly={{ x: 40, duration: 180 }}
+                    class="absolute inset-y-0 right-0 flex w-full flex-col bg-canvas shadow-pop sm:w-[540px] sm:border-l sm:border-line"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="笔记详情"
             >
-                {#if isLoding}
-                    <div transition:fly={{ y: -20, duration: 1000 }}>
-                        <ProgressLine />
-                    </div>
-                {/if}
-
-                <div>
-                    <button
-                        class="focus:outline-hidden w-10 float-left"
-                        on:click={() => {
-                            hidden();
-                        }}
-                    >
-                        <i class="ri-close-fill"></i>
+                <header class="flex h-14 shrink-0 items-center justify-between border-b border-line px-5">
+                    <h2 class="text-[15px] font-semibold text-ink">笔记详情</h2>
+                    <button class="icon-btn -mr-2" aria-label="关闭" on:click={() => hidden()}>
+                        <i class="ri-close-line"></i>
                     </button>
-                </div>
+                </header>
 
-                <NenoItem
-                    _id={nenoDetail._id}
-                    created_at={nenoDetail.created_at}
-                    content={nenoDetail.content}
-                    parentId={nenoDetail.parentId}
-                    parent={nenoDetail.parent}
-                    images={nenoDetail.images}
-                    tags={nenoDetail.tags}
-                    collapsible={false}
-                />
+                <div class="flex-1 overflow-y-auto px-5 pt-4 pb-10">
+                    {#if isLoding}
+                        <div class="mb-3"><ProgressLine /></div>
+                    {/if}
 
-                <div class=" pl-6 ">
-                    {#each nenoDetail.children as item (item._id)}
-                        <div class="flow-root" in:noteEnter={{active: true}} out:noteLeave={{active: true}}>
-                            <NenoItem {...item}/>
-                        </div>
-                    {/each}
+                    <NenoItem
+                            _id={nenoDetail._id}
+                            created_at={nenoDetail.created_at}
+                            update_at={nenoDetail.update_at}
+                            content={nenoDetail.content}
+                            parentId={nenoDetail.parentId}
+                            parent={nenoDetail.parent}
+                            images={nenoDetail.images}
+                            tags={nenoDetail.tags}
+                            collapsible={false}
+                    />
+
+                    <div class="mt-6 mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink-2">
+                        <i class="ri-chat-quote-line text-ink-3"></i>批注
+                        {#if nenoDetail.children.length > 0}
+                            <span class="font-normal text-ink-3 tabular-nums">{nenoDetail.children.length}</span>
+                        {/if}
+                    </div>
+                    <div class="border-l-2 border-line pl-4">
+                        {#each nenoDetail.children as item (item._id)}
+                            <div class="flow-root" in:noteEnter={{active: true}} out:noteLeave={{active: true}}>
+                                <NenoItem {...item}/>
+                            </div>
+                        {/each}
+                        <QuillEditor parentId={nenoDetail._id} placeholder="写下你的批注..."/>
+                    </div>
                 </div>
-                <QuillEditor parentId={nenoDetail._id}/>
             </div>
         {/if}
     </div>

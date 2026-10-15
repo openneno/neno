@@ -223,13 +223,13 @@
         resetAccount();
     }
 
-    const inputClass = "w-full border-2 border-gray-200 dark:border-gray-500 rounded-sm p-2 text-black bg-white focus:outline-hidden focus:border-primary-500";
-    const primaryButton = "rounded-sm bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 focus:outline-hidden disabled:opacity-60";
-    const secondaryButton = "rounded-sm border-2 border-gray-300 dark:border-gray-500 px-3 py-1 hover:border-primary-500 focus:outline-hidden disabled:opacity-60";
+    const inputClass = "input";
+    const primaryButton = "btn btn-primary";
+    const secondaryButton = "btn btn-sm btn-secondary";
 </script>
 
 {#if giteeRemoved && !configured}
-    <div class="rounded-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200 p-3 text-sm flex items-start justify-between max-w-xl mb-4">
+    <div class="rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-200 p-3 text-[13px] flex items-start justify-between mb-4">
         <div>
             <i class="ri-information-line mr-1"></i>
             NENO 已不再支持 Gitee 同步。本地的笔记都还在, 配置 GitHub 同步后会自动上传到新的仓库。
@@ -241,9 +241,9 @@
 {/if}
 
 {#if configured}
-    <div class="flex flex-col space-y-3 max-w-xl">
+    <div class="flex flex-col space-y-3">
         {#if $syncStatus.authError || accountError}
-            <div class="rounded-sm bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200 p-3 text-sm flex items-start justify-between">
+            <div class="rounded-lg bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300 p-3 text-[13px] flex items-start justify-between">
                 <div>
                     <i class="ri-error-warning-line mr-1"></i>
                     {$syncStatus.authError ? "Token 已失效, 同步已暂停, 本地笔记不受影响" : accountError}
@@ -254,21 +254,21 @@
             </div>
         {/if}
 
-        <div class="flex items-center rounded-lg bg-white dark:bg-gray-600 p-3 shadow-xs">
+        <div class="flex items-center rounded-lg bg-surface-2 p-3">
             {#if currentAccount}
                 <img src={currentAccount.avatar} alt="" class="w-10 h-10 rounded-full mr-3"/>
             {:else}
-                <i class="ri-user-line ri-xl w-10 h-10 rounded-full mr-3 bg-gray-200 dark:bg-gray-500 flex items-center justify-center"></i>
+                <i class="ri-user-line ri-xl w-10 h-10 rounded-full mr-3 bg-surface-3 text-ink-3 flex items-center justify-center"></i>
             {/if}
             <div class="flex-1 min-w-0">
-                <div class="font-bold truncate">
+                <div class="font-semibold text-ink truncate">
                     {currentAccount ? currentAccount.name : $githubStore.githubName}
                 </div>
                 <a class="text-sm text-primary-600 dark:text-primary-300 truncate block" href={repoUrl(repoFullName)} target="_blank" rel="noreferrer">
                     <i class="ri-github-fill"></i> {repoFullName}
                 </a>
             </div>
-            <div class="text-xs text-right text-gray-500 dark:text-slate-300 ml-2 shrink-0" aria-live="polite">
+            <div class="text-xs text-right text-ink-3 ml-2 shrink-0" aria-live="polite">
                 {#if $syncStatus.syncing}
                     <i class="ri-loop-right-line animate-spin inline-block"></i> 同步中
                 {:else if $syncStatus.error && !$syncStatus.authError}
@@ -292,7 +292,7 @@
         </div>
 
         {#if showShare}
-            <div transition:fade={{duration: 150}} class="rounded-lg bg-white dark:bg-gray-600 p-4 shadow-xs flex flex-col sm:flex-row gap-4">
+            <div transition:fade={{duration: 150}} class="rounded-lg border border-line p-4 flex flex-col sm:flex-row gap-4">
                 <QrCode text={syncLink}/>
                 <div class="flex flex-col space-y-2 text-sm">
                     <div>在另一台设备上扫码, 或打开同步链接, 即可自动导入配置。</div>
@@ -302,7 +302,7 @@
                     <button class={secondaryButton} on:click={() => copy(encodeNenoToken($githubStore), "token")}>
                         {copiedWhat === "token" ? "已复制" : "复制 neno token"}
                     </button>
-                    <div class="text-xs text-gray-500 dark:text-slate-300">neno token 可用于 utools, CLI, 浏览器插件等扩展工具</div>
+                    <div class="text-xs text-ink-3">neno token 可用于 utools, CLI, 浏览器插件等扩展工具</div>
                     <div class="text-xs text-yellow-600 dark:text-yellow-400">
                         <i class="ri-alert-line"></i> 二维码和链接中包含你的 Token, 请勿分享给他人
                     </div>
@@ -311,18 +311,18 @@
         {/if}
     </div>
 {:else}
-    <div class="flex flex-col space-y-5 max-w-xl">
+    <div class="flex flex-col space-y-6">
         <div class="flex">
-            <div class="w-6 h-6 rounded-full bg-primary-500 text-white text-sm flex items-center justify-center shrink-0 mr-3">1</div>
+            <div class="w-6 h-6 rounded-full bg-primary-500/12 text-primary-700 dark:text-primary-300 text-[13px] font-semibold flex items-center justify-center shrink-0 mr-3">1</div>
             <div class="flex-1">
-                <div class="font-bold">生成 GitHub 访问 Token</div>
-                <div class="text-sm text-gray-500 dark:text-slate-300 mt-1">
+                <div class="font-semibold text-ink">生成 GitHub 访问 Token</div>
+                <div class="text-sm text-ink-3 mt-1">
                     已为你预先勾选所需权限(repo, workflow), 打开后滑到页面底部点击 "Generate token" 并复制。
                 </div>
-                <a class="{primaryButton} inline-block mt-2 text-sm" href={TOKEN_URL} target="_blank" rel="noreferrer">
+                <a class="{primaryButton} btn-sm mt-3" href={TOKEN_URL} target="_blank" rel="noreferrer">
                     前往 GitHub 生成 Token <i class="ri-external-link-line"></i>
                 </a>
-                <details class="text-xs text-gray-500 dark:text-slate-300 mt-2">
+                <details class="text-xs text-ink-3 mt-2">
                     <summary class="cursor-pointer">想要更安全? 使用只能访问笔记仓库的细粒度 Token</summary>
                     <div class="mt-1 leading-5">
                         先在 GitHub 上创建好笔记仓库, 再打开
@@ -336,9 +336,9 @@
         </div>
 
         <div class="flex">
-            <div class="w-6 h-6 rounded-full bg-primary-500 text-white text-sm flex items-center justify-center shrink-0 mr-3">2</div>
+            <div class="w-6 h-6 rounded-full bg-primary-500/12 text-primary-700 dark:text-primary-300 text-[13px] font-semibold flex items-center justify-center shrink-0 mr-3">2</div>
             <div class="flex-1">
-                <label class="font-bold" for="sync-token">粘贴 Token</label>
+                <label class="font-semibold text-ink" for="sync-token">粘贴 Token</label>
                 <div class="flex mt-2 space-x-2">
                     <div class="relative flex-1">
                         <input
@@ -354,7 +354,7 @@
                                 on:keydown={(event) => event.key === "Enter" && verifyToken()}
                         />
                         <button
-                                class="absolute right-2 top-2 text-gray-500 focus:outline-hidden"
+                                class="absolute top-1/2 right-2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-ink-3 hover:text-ink"
                                 aria-label={showToken ? "隐藏 Token" : "显示 Token"}
                                 on:click={() => (showToken = !showToken)}
                         >
@@ -381,9 +381,9 @@
         </div>
 
         <div class="flex" class:opacity-50={!account}>
-            <div class="w-6 h-6 rounded-full bg-primary-500 text-white text-sm flex items-center justify-center shrink-0 mr-3">3</div>
+            <div class="w-6 h-6 rounded-full bg-primary-500/12 text-primary-700 dark:text-primary-300 text-[13px] font-semibold flex items-center justify-center shrink-0 mr-3">3</div>
             <div class="flex-1">
-                <div class="font-bold">选择笔记仓库</div>
+                <div class="font-semibold text-ink">选择笔记仓库</div>
                 {#if account}
                     <div class="flex flex-col space-y-3 mt-2 text-sm" role="radiogroup" aria-label="笔记仓库">
                         <label class="flex items-start">
@@ -406,7 +406,7 @@
                                             <option value={repo.fullName}>{repo.fullName}{repo.private ? " 🔒" : ""}</option>
                                         {/each}
                                     </select>
-                                    <div class="text-xs text-gray-500 dark:text-slate-300 mt-1">
+                                    <div class="text-xs text-ink-3 mt-1">
                                         已有的 neno 数据会自动同步到本地; 请不要选择存放其他内容的仓库
                                     </div>
                                 {/if}
@@ -416,18 +416,18 @@
                     {#if saveError}
                         <div class="text-sm text-red-500 mt-2"><i class="ri-close-circle-line"></i> {saveError}</div>
                     {/if}
-                    <button class="{primaryButton} mt-3" disabled={saving} on:click={finishSetup}>
+                    <button class="{primaryButton} mt-4" disabled={saving} on:click={finishSetup}>
                         {saving ? "正在配置..." : "完成并开始同步"}
                     </button>
                 {:else}
-                    <div class="text-sm text-gray-500 dark:text-slate-300 mt-1">验证 Token 后选择或新建仓库</div>
+                    <div class="text-sm text-ink-3 mt-1">验证 Token 后选择或新建仓库</div>
                 {/if}
             </div>
         </div>
 
-        <details class="rounded-lg bg-white dark:bg-gray-600 p-3 shadow-xs text-sm">
-            <summary class="cursor-pointer font-bold">已经在其他设备上使用 NENO?</summary>
-            <div class="mt-2 text-gray-500 dark:text-slate-300">
+        <details class="rounded-lg border border-line p-3 text-sm">
+            <summary class="cursor-pointer font-medium text-ink-2">已经在其他设备上使用 NENO?</summary>
+            <div class="mt-2 text-ink-3">
                 在已配置的设备上打开 设置 → 同步到其他设备, 扫码即可; 也可以在这里粘贴 neno token 或同步链接。
             </div>
             <div class="flex mt-2 space-x-2">

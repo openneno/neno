@@ -5,23 +5,20 @@
     export let subtitle = "";
 </script>
 
-<div class="flex flex-row items-center justify-between pl-4 pr-4">
-    <div class="flex flex-row items-center">
-        <div class="font-bold dark:text-slate-300">{title}</div>
-        <button
-                class="focus:outline-hidden text-gray-600 sm:hidden md:hidden ml-2"
-                aria-label="打开菜单"
-                on:click={() => {
-                showSlide();
-            }}
-        >
-            <i class="ri-function-fill dark:text-slate-300"></i>
+<header class="flex h-14 shrink-0 items-center justify-between gap-3">
+    <div class="flex min-w-0 items-center gap-1.5">
+        <button class="icon-btn -ml-1.5 sm:hidden" aria-label="打开菜单" on:click={() => showSlide()}>
+            <i class="ri-menu-line"></i>
         </button>
-        {#if subtitle}
-            <div class="ml-3 text-sm text-gray-500 dark:text-slate-400">{subtitle}</div>
+        {#if title}
+            <h1 class="truncate text-[17px] font-semibold text-ink">{title}</h1>
         {/if}
+        {#if subtitle}
+            <span class="ml-1.5 truncate text-[13px] text-ink-3 tabular-nums">{subtitle}</span>
+        {/if}
+        <slot name="title"/>
     </div>
-    <div class="flex items-center space-x-2">
+    <div class="flex shrink-0 items-center gap-2">
         <slot/>
     </div>
-</div>
+</header>

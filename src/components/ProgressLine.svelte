@@ -1,7 +1,7 @@
 <script>
     export let dotSize = 13;
     export let leftSize = 8;
-    export let bgColor = "#a0aec0";
+    export let bgColor = "var(--ink-3)";
 </script>
 
 <div class="w-full flex items-center justify-center">

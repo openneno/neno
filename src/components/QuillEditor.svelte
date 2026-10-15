@@ -24,6 +24,7 @@
     export let images = [];
 
     export let canCancle = false;
+    export let placeholder = "现在的想法是...";
 
     const dispatch = createEventDispatcher();
 
@@ -48,6 +49,7 @@
     let imageFiles = [];
     let isContentEmpty = true;
     let isSending = false;
+    const shortcutHint = /Mac|iPhone|iPad/i.test(navigator.platform) ? "⌘ ↵" : "Ctrl ↵";
 
     onMount(() => {
         const options = {
@@ -70,7 +72,7 @@
                     },
                 },
             },
-            placeholder: "现在的想法是...",
+            placeholder: placeholder,
         };
         quillEditor = new Quill(editor, options);
         const delta = quillEditor.clipboard.convert({html: content});
@@ -358,22 +360,28 @@
 </script>
 
 <div
-        class="border-gray-200 border-solid dark:border-gray-500 border-4 rounded-lg mt-2 transition-colors duration-200 focus-within:border-primary-200 dark:focus-within:border-primary-800 flex flex-col justify-start  pb-2 bg-white dark:bg-gray-600 dark:text-slate-100 relative"
+        class="card relative flex flex-col transition-[border-color,box-shadow] duration-200 focus-within:border-primary-400/60 focus-within:ring-3 focus-within:ring-primary-500/10"
 >
-    <div bind:this={editor} id="editor" class="list-decimal list-inside"></div>
+    <div bind:this={editor} id="editor"></div>
     {#if tagTips.length > 0 && showTip}
         <div
                 bind:this={tipClient}
-                class="rounded-sm bg-gray-800 text-sm text-white w-auto absolute font-bold p-1 z-10"
+                class="absolute z-20 max-h-56 min-w-36 overflow-y-auto rounded-lg border border-line bg-surface p-1 text-sm shadow-pop"
                 style="top:{tipTop + tipHeight}px;left:{tipLeft}px"
+                role="listbox"
         >
             {#each tagTips as item, index}
                 <div
-                        class="hover:bg-gray-400 rounded-xs p-1 bg"
-                        class:bg-gray-400={index === tagTipsFocusIndex}
+                        role="option"
+                        tabindex="-1"
+                        aria-selected={index === tagTipsFocusIndex}
+                        class="cursor-pointer rounded-md px-2.5 py-1.5 text-ink-2 hover:bg-surface-2 hover:text-ink"
+                        class:bg-surface-2={index === tagTipsFocusIndex}
+                        class:text-ink={index === tagTipsFocusIndex}
                         on:click={() => {
-                        tipTagInsert(item);
-                    }}
+                            tipTagInsert(item);
+                        }}
+                        on:keydown={() => {}}
                 >
                     {item}
                 </div>
@@ -381,99 +389,59 @@
         </div>
     {/if}
 
-    <div class="flex flex-wrap flex-row  mt-4  pl-3">
-        {#each imageFiles as {file, uploadInfo, timeStamp}, index}
-            <div
-                    in:fly={{ y: -100, duration: 500, easing: cubicOut }}
-                    out:fly={{ y: -100, duration: 300 }}
-                    class="w-16 h-16 box-border  border-2 rounded-sm mr-2 mb-2 relative overflow-hidden"
-            >
+    {#if imageFiles.length > 0}
+        <div class="flex flex-wrap gap-2 px-4 pt-1 pb-2">
+            {#each imageFiles as {file, uploadInfo, timeStamp}, index}
                 <div
-                        class=" w-16 h-16  box-border absolute top-0 opacity-0 bg-black hover:opacity-75 focus:outline-hidden flex justify-around  "
+                        in:fly={{ y: 8, duration: 200, easing: cubicOut }}
+                        out:fly={{ y: 8, duration: 150 }}
+                        class="group relative size-16 overflow-hidden rounded-lg border border-line"
                 >
-                    <button
-                            on:click={() => {
-                            viewImage(index);
-                        }}
-                    >
-                        <i class="m-auto ri-zoom-in-line ri-xl text-white"></i>
-                    </button>
-                    <button class=" " on:click={()=>{deleteImage(timeStamp)}}>
-                        <i class="m-auto ri-delete-bin-line ri-xl text-white"></i>
-                    </button>
+                    {#await getPIcUrl(file, uploadInfo) then value}
+                        <img class="size-full object-cover" src={value} alt=""/>
+                    {/await}
+                    <div class="absolute inset-0 flex items-center justify-center gap-1 bg-black/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                        <button class="flex size-7 items-center justify-center rounded-md text-white hover:bg-white/15" aria-label="查看图片" on:click={() => viewImage(index)}>
+                            <i class="ri-zoom-in-line"></i>
+                        </button>
+                        <button class="flex size-7 items-center justify-center rounded-md text-white hover:bg-white/15" aria-label="移除图片" on:click={() => deleteImage(timeStamp)}>
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
                 </div>
+            {/each}
+        </div>
+    {/if}
 
-                {#await getPIcUrl(file, uploadInfo) then value}
-                    <img
-                            class=" w-full h-full object-cover"
-                            src={value}
-                            alt=""
-                    />
-                {/await}
-
-
-            </div>
-        {/each}
-    </div>
-    <div
-            class=" flex justify-between flex-col  sm:flex-row md:flex-row  pl-3 pr-3"
-    >
-        <div id="toolbar" class="space-x-1" bind:this={toolbar}>
-            <button
-                    class="rounded-xs  hover:bg-gray-200 p-1 focus:outline-hidden"
-                    on:click={insertHashTag}><i class="ri-hashtag"></i></button
-            >
-            <button
-                    class=" rounded-xs ql-bold hover:bg-gray-200 p-1 focus:outline-hidden"
-            ><i class="ri-bold"></i></button
-            >
-            <button
-                    class=" rounded-xs ql-list hover:bg-gray-200 p-1 focus:outline-hidden"
-                    value="bullet"
-            ><i
-                    class="ri-list-check hover:bg-gray-200 p-1 focus:outline-hidden"></i></button
-            >
-
-            <button
-                    class="rounded-xs ql-list hover:bg-gray-200 p-1 focus:outline-hidden"
-                    value="ordered"
-            ><i
-                    class="ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-hidden"></i></button
-            >
-
-            <button
-                    class=" rounded-xs ql-underline hover:bg-gray-200 p-1 focus:outline-hidden"
-            ><i class="ri-underline"></i></button
-            >
-            <button
-                    class="rounded-xs hover:bg-gray-200 p-1 focus:outline-hidden "
-                    on:click={selectImages}><i class="ri-image-2-line "></i></button
-            >
+    <div class="flex items-center justify-between gap-2 border-t border-line px-2 py-1.5">
+        <div id="toolbar" class="neno-toolbar flex items-center gap-0.5" bind:this={toolbar}>
+            <button class="editor-tool" title="插入标签" aria-label="插入标签" on:click={insertHashTag}><i class="ri-hashtag"></i></button>
+            <button class="editor-tool ql-bold" title="加粗" aria-label="加粗"><i class="ri-bold"></i></button>
+            <button class="editor-tool ql-list" value="bullet" title="无序列表" aria-label="无序列表"><i class="ri-list-unordered"></i></button>
+            <button class="editor-tool ql-list" value="ordered" title="有序列表" aria-label="有序列表"><i class="ri-list-ordered"></i></button>
+            <button class="editor-tool ql-underline" title="下划线" aria-label="下划线"><i class="ri-underline"></i></button>
+            <button class="editor-tool" title="添加图片" aria-label="添加图片" on:click={selectImages}><i class="ri-image-line"></i></button>
             <input
                     bind:this={uploadimageNode}
                     on:change={onImagesSelected}
-                    class="w-full  rounded-lg   p-2 bg-blue-400 text-white focus:outline-hidden"
                     type="file"
-                    style="display:none"
+                    class="hidden"
                     accept="image/png, image/jpeg, image/gif, image/jpg"
                     multiple
             />
         </div>
-        <div class="flex space-x-2 justify-end">
+        <div class="flex items-center gap-2">
+            <span class="hidden text-xs text-ink-3 sm:inline">{shortcutHint} 发送</span>
             {#if canCancle}
-                <button
-                        class="rounded-xs bg-white dark:bg-neutral-700 dark:text-gray-200 border-black text-black pl-2 pr-2 text-sm  focus:outline-hidden hover:shadow-xs"
-                        on:click={cancelInput}>取消
-                </button
-                >
+                <button class="btn btn-sm btn-ghost" on:click={cancelInput}>取消</button>
             {/if}
             <button
-                    class="rounded-xs bg-primary-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-hidden disabled:opacity-70 flex justify-center items-center w-16"
+                    class="btn btn-sm btn-primary min-w-16"
                     disabled={isContentEmpty || isSending}
-                    title="发送 (Ctrl/⌘ + Enter)"
+                    title="发送 ({shortcutHint})"
                     on:click={() => {
-                    sendBiu();
-                }}
+                        sendBiu();
+                    }}
             >
                 {#if isSending}
                     <ProgressLine dotSize={5} leftSize={6} bgColor={"white"}/>
@@ -484,7 +452,3 @@
         </div>
     </div>
 </div>
-
-<style>
-
-</style>

@@ -93,7 +93,7 @@
         if (index === images.length - 1) {
             setTimeout(() => {
                 console.log(card);
-                html2canvas(card, { allowTaint: true }).then((canvas) => {
+                html2canvas(card, { allowTaint: true, scale: Math.max(2, window.devicePixelRatio || 1), backgroundColor: null }).then((canvas) => {
                     let ac = card.children;
                     console.log(ac);
                     card.style.display = "none";
@@ -115,9 +115,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="neno-tag leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
-	${rawtag}
-	</span>`;
+                pContent += `<span class="neno-tag">${rawtag}</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
                 pIndex += breakIndex + rawtag.length;
             }
@@ -125,7 +123,7 @@
         pContent += copyRawContent.substring(pIndex);
         if (images.length == 0) {
             setTimeout(() => {
-                html2canvas(card, { allowTaint: true }).then((canvas) => {
+                html2canvas(card, { allowTaint: true, scale: Math.max(2, window.devicePixelRatio || 1), backgroundColor: null }).then((canvas) => {
                     card.style.display = "none";
 
                     cardcontainer.appendChild(canvas);
@@ -137,58 +135,68 @@
 </script>
 
 {#if show}
-    <div
-        class="w-screen  bg-black/50 fixed top-0 z-20 h-screen flex flex-col  items-center justify-center "
-        in:fade={{ duration: 190 }}
-        out:fade={{ duration: 210 }}
-        on:click={() => {
-            hidden();
-        }}
-    >
+    <div class="fixed inset-0 z-40 flex items-center justify-center p-4">
         <div
-            in:scale={{ start: 0.96, duration: 200 }}
-            class=" overflow-scroll bg-gray-100 rounded-sm  shadow-lg"
-            style="width:480px"
-            bind:this={cardcontainer}
+                class="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
+                in:fade={{ duration: 150 }}
+                out:fade={{ duration: 150 }}
+                on:click={() => hidden()}
+                aria-hidden="true"
+        ></div>
+        <div
+                in:scale={{ start: 0.96, duration: 200 }}
+                class="relative flex max-h-[90vh] w-[480px] max-w-full flex-col overflow-hidden rounded-xl bg-surface shadow-pop"
+                role="dialog"
+                aria-modal="true"
+                aria-label="分享卡片"
         >
-            <div class="p-4 space-y-2 ">
-                <div class="font-bold text-lg">卡片分享</div>
-                <div class="text-sm">长按或者右键保存</div>
-            </div>
-            <div class="bg-white p-4" bind:this={card}>
-                <div class="text-sm text-gray-500">
-                    {dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")}
-                </div>
-                <div
-                    class="neno-content list-decimal text-sm text-red-300  ql-editor max-w-lg "
-                >
-                    <div>
-                        {@html praseTag(content, tags)}
-                    </div>
-                </div>
+            <header class="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
                 <div>
-                    {#each images as {  key }, index (index)}
-                        {#await getImageurl( key, index) then value}
-                            <img
-                                class="w-full  rounded-sm mr-2 mb-2 object-cover"
-                                src={value}
-                                alt=""
-                            />
-                        {/await}
-                    {/each}
+                    <h2 class="text-[15px] font-semibold text-ink">分享卡片</h2>
+                    <p class="text-xs text-ink-3">长按或右键保存图片</p>
                 </div>
-                <div
-                    class=" space-y-2 flex justify-between text-gray-500 text-sm"
-                >
-                    <div>
-                        {`${$countStore.nenoCount} NENOS • ${$countStore.dayCount}DAYS `}
+                <button class="icon-btn -mr-2" aria-label="关闭" on:click={() => hidden()}>
+                    <i class="ri-close-line"></i>
+                </button>
+            </header>
+            <div class="share-canvas overflow-y-auto px-5 pb-5" bind:this={cardcontainer}>
+                <div class="light-scope rounded-xl border border-line bg-white px-7 pt-6 pb-5" bind:this={card}>
+                    <div class="text-xs text-ink-3 tabular-nums">
+                        {dayjs(created_at).format("YYYY年M月D日 HH:mm")}
                     </div>
-
-                    <div class="flex items-center space-x-2">
-                        By Neno <i class="ri-github-fill ri-xl"></i>
+                    <div class="neno-content mt-2">
+                        <div>
+                            {@html praseTag(content, tags)}
+                        </div>
+                    </div>
+                    {#if images.length > 0}
+                        <div class="mt-4 flex flex-col gap-2">
+                            {#each images as {  key }, index (index)}
+                                {#await getImageurl( key, index) then value}
+                                    <img class="w-full rounded-lg object-cover" src={value} alt=""/>
+                                {/await}
+                            {/each}
+                        </div>
+                    {/if}
+                    <div class="mt-6 flex items-center justify-between border-t border-line pt-3 text-xs text-ink-3">
+                        <span class="flex items-center gap-1.5 font-medium text-ink-2">
+                            <span class="flex size-4 items-center justify-center rounded bg-primary-500 text-[10px] text-white"><i class="ri-quill-pen-fill"></i></span>
+                            NENO
+                        </span>
+                        <span class="tabular-nums">{$countStore.nenoCount} 条笔记 · {$countStore.dayCount} 天</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 {/if}
+
+<style>
+    /* html2canvas 生成的图片替换卡片后, 按容器宽度显示 */
+    .share-canvas :global(canvas) {
+        display: block;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 12px;
+    }
+</style>

@@ -141,158 +141,153 @@
     }
 </script>
 
-<div class="w-full flex flex-col overflow-auto   h-screen    overflow-visible">
-    <div
-        class="flex  items-center justify-between  text-gray-600 w-full p-4 font-bold dark:text-slate-300"
-    >
-        <div class="flex  items-center justify-between space-x-2">
-            <div class="dark:text-slate-300">NENO</div>
-
-            <a href="https://github.com/Mran/neno" target="_blank">
-                <i class="ri-github-fill ri-xl "></i></a
-            >
+<div class="flex h-screen w-full flex-col overflow-y-auto px-3 pb-8 [scrollbar-width:none]">
+    <div class="flex h-14 shrink-0 items-center justify-between pl-1.5">
+        <div class="flex items-center gap-2">
+            <span class="flex size-6 items-center justify-center rounded-md bg-primary-500 text-[13px] text-white shadow-xs" aria-hidden="true">
+                <i class="ri-quill-pen-fill"></i>
+            </span>
+            <span class="text-[15px] font-semibold tracking-wide text-ink">NENO</span>
         </div>
-
-        <div>
+        <div class="flex items-center">
+            <a class="icon-btn" href="https://github.com/Mran/neno" target="_blank" rel="noreferrer" title="GitHub" aria-label="GitHub">
+                <i class="ri-github-line"></i>
+            </a>
             <button
-                class="focus:outline-hidden mr-1"
-                title={$isDarkTheme ? "切换到浅色" : "切换到深色"}
-                aria-label={$isDarkTheme ? "切换到浅色" : "切换到深色"}
-                on:click={toggleDarkMode}
+                    class="icon-btn"
+                    title={$isDarkTheme ? "切换到浅色" : "切换到深色"}
+                    aria-label={$isDarkTheme ? "切换到浅色" : "切换到深色"}
+                    on:click={toggleDarkMode}
             >
-                <i class={$isDarkTheme ? "ri-sun-line text-white" : "ri-moon-line"}></i>
+                <i class={$isDarkTheme ? "ri-sun-line" : "ri-moon-line"}></i>
             </button>
-
             <button
-                class="focus:outline-hidden "
-                on:click={() => {
-                    $currentPage = "setting";
+                    class="icon-btn"
+                    class:text-primary-600={$currentPage === "setting"}
+                    title="设置"
+                    aria-label="设置"
+                    on:click={() => {
+                        $currentPage = "setting";
+                    }}
+            >
+                <i class="ri-settings-3-line"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card p-3">
+        <div class="mb-3 grid grid-cols-3">
+            <div>
+                <div class="text-lg leading-tight font-semibold text-ink tabular-nums">{$countStore.nenoCount}</div>
+                <div class="text-xs text-ink-3">笔记</div>
+            </div>
+            <div>
+                <div class="text-lg leading-tight font-semibold text-ink tabular-nums">{$countStore.tagCount}</div>
+                <div class="text-xs text-ink-3">标签</div>
+            </div>
+            <div>
+                <div class="text-lg leading-tight font-semibold text-ink tabular-nums">{$countStore.dayCount}</div>
+                <div class="text-xs text-ink-3">天</div>
+            </div>
+        </div>
+        <GreenMap
+                countDate={$countStore.countDate}
+                on:greenmapClick={(event) => {
+                    $searchNenoByDate.date = event.detail;
                 }}
-            >
-                <i class="ri-settings-fill "></i>
-            </button>
-        </div>
+        />
     </div>
-    <GreenMap
 
-        countDate={$countStore.countDate}
-        on:greenmapClick={(event) => {
-            $searchNenoByDate.date = event.detail;
-        }}
-    />
-
-    <div
-        class="flex justify-around  w-full mt-4 text-gray-500 dark:text-slate-300"
-    >
-        <div class="font-bold text-lg">
-            <div class="text-xl">{$countStore.nenoCount}</div>
-            NENO
-        </div>
-        <div class="font-bold text-lg">
-            <div class="text-xl">{$countStore.tagCount}</div>
-            TAGS
-        </div>
-        <div class="font-bold text-lg">
-            <div class="text-xl">{$countStore.dayCount}</div>
-            DAY
-        </div>
-    </div>
-    <div
-        class="flex flex-col items-start text-sm text-gray-600   dark:text-slate-200 w-full mt-2"
-    >
+    <nav class="mt-4 flex flex-col gap-0.5" aria-label="页面">
         <button
-            on:click={() => {
-                $currentPage = "neno";
-                $searchNenoByTag.tag = "";
-            }}
-            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-primary-400 ' +
-                ($currentPage === 'neno' ? 'bg-primary-500 text-white' : '')}      "
+                class="nav-item"
+                class:nav-item-active={$currentPage === "neno" && $searchNenoByTag.tag === ""}
+                on:click={() => {
+                    $currentPage = "neno";
+                    $searchNenoByTag.tag = "";
+                }}
         >
-            <i class="ri-quill-pen-fill mr-2"></i>NENO
-        </button>
-
-        <button
-            on:click={() => {
-                $currentPage = "daily";
-            }}
-            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-primary-400 ' +
-                ($currentPage === 'daily' ? 'bg-primary-500 text-white' : '')}        "
-        >
-            <i class="ri-calendar-event-fill mr-2"></i>每日回顾
+            <i class="ri-quill-pen-line"></i>全部笔记
         </button>
         <button
-            on:click={() => {
-                $currentPage = "luck";
-            }}
-            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-primary-400 ' +
-                ($currentPage === 'luck' ? 'bg-primary-500 text-white' : '')}        "
+                class="nav-item"
+                class:nav-item-active={$currentPage === "daily"}
+                on:click={() => {
+                    $currentPage = "daily";
+                }}
         >
-            <i class="ri-bubble-chart-fill mr-2"></i>随机漫步
+            <i class="ri-calendar-check-line"></i>每日回顾
         </button>
-    </div>
+        <button
+                class="nav-item"
+                class:nav-item-active={$currentPage === "luck"}
+                on:click={() => {
+                    $currentPage = "luck";
+                }}
+        >
+            <i class="ri-footprint-line"></i>随机漫步
+        </button>
+    </nav>
 
     {#if pinTags.length !== 0}
-        <div class=" p-4 w-full text-sm text-yellow-500">置顶</div>
-
-        {#each pinTags as { _id, tag }}
-            <div
-                role="button"
-                tabindex="0"
-                class="rounded-r  group p-4 pt-2 pb-2  focus:outline-hidden w-full hover:text-white hover:bg-primary-400 flex justify-between text-sm cursor-pointer"
-                class:bg-primary-500={$searchNenoByTag.tag === tag}
-                class:text-white={$searchNenoByTag.tag === tag}
-                on:click={() => {
-                    $searchNenoByTag.tag = tag;
-                }}
-                on:keydown={(e) => {
-                    if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
-                        e.preventDefault();
-                        $searchNenoByTag.tag = tag;
-                    }
-                }}
-            >
-                <div class="flex">
-                    <div class=""><i class="ri-hashtag"></i></div>
-                    <div class="ml-1">
-                        {tag.indexOf("#") === 0 ? tag.substring(1) : tag}
-                    </div>
-                </div>
-                <button
-                    class="focus:outline-hidden group-hover:opacity-100 opacity-0  pl-2 pr-2"
-                    on:click={() => {
-                        pinNeno(tag, false);
-                    }}
+        <div class="section-label mt-6 mb-1">置顶</div>
+        <div class="flex flex-col gap-0.5">
+            {#each pinTags as { _id, tag }}
+                <div
+                        role="button"
+                        tabindex="0"
+                        class="nav-item group h-8 justify-between"
+                        class:nav-item-active={$searchNenoByTag.tag === tag}
+                        on:click={() => {
+                            $currentPage = "neno";
+                            $searchNenoByTag.tag = tag;
+                        }}
+                        on:keydown={(e) => {
+                            if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                                e.preventDefault();
+                                $currentPage = "neno";
+                                $searchNenoByTag.tag = tag;
+                            }
+                        }}
                 >
-                    <i class="ri-pushpin-fill"></i>
-                </button>
-            </div>
-        {/each}
+                    <span class="flex min-w-0 items-center gap-2">
+                        <span class="flex size-4 shrink-0 items-center justify-center"><i class="ri-pushpin-2-line text-[13px] text-ink-3"></i></span>
+                        <span class="truncate">{tag.indexOf("#") === 0 ? tag.substring(1) : tag}</span>
+                    </span>
+                    <button
+                            class="flex size-6 shrink-0 items-center justify-center rounded-md text-ink-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-surface-3 hover:text-ink"
+                            title="取消置顶"
+                            aria-label="取消置顶"
+                            on:click|stopPropagation={() => {
+                                pinNeno(tag, false);
+                            }}
+                    >
+                        <i class="ri-unpin-line text-[13px]"></i>
+                    </button>
+                </div>
+            {/each}
+        </div>
     {/if}
 
     {#if allTags.length !== 0}
-        <div class="  p-4 pt-2 pb-2 w-full text-sm text-blue-500">标签</div>
-
-        {#each allTags as tag}
-            <TagExpand
-                {...tag}
-                selectionTag={$searchNenoByTag.tag}
-                on:selectTag={(event) => {
-                    $searchNenoByTag.tag = event.detail;
-
-                }}
-                on:pinTag={(event) => {
-                    pinNeno(event.detail, true);
-                }}
-                on:renameTag={(event) => {
-                    renameName(event.detail);
-                }}
-            />
-        {/each}
+        <div class="section-label mt-6 mb-1">标签</div>
+        <div class="flex flex-col gap-0.5">
+            {#each allTags as tag}
+                <TagExpand
+                        {...tag}
+                        selectionTag={$searchNenoByTag.tag}
+                        on:selectTag={(event) => {
+                            $currentPage = "neno";
+                            $searchNenoByTag.tag = event.detail;
+                        }}
+                        on:pinTag={(event) => {
+                            pinNeno(event.detail, true);
+                        }}
+                        on:renameTag={(event) => {
+                            renameName(event.detail);
+                        }}
+                />
+            {/each}
+        </div>
     {/if}
 </div>
-
-<style>
-    ::-webkit-scrollbar {
-        width: 0 !important;
-    }
-</style>

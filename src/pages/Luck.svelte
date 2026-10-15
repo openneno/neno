@@ -143,65 +143,63 @@
 
 <svelte:window on:keydown={onKeydown}/>
 
-<div class="flex-1 flex flex-col justify-start pt-4 w-0 h-screen">
-    <PageHeader title="随机漫步" subtitle={candidateCount > 0 ? `共 ${candidateCount} 条笔记` : ""}>
-        {#if allTags.length > 0}
-            <select
-                    class="text-sm rounded-lg bg-gray-200 dark:bg-gray-700 dark:text-slate-200 h-8 px-2 focus:outline-hidden max-w-40"
-                    aria-label="按标签漫步"
-                    value={filterTag}
-                    on:change={(event) => changeFilter(event.currentTarget.value)}
-            >
-                <option value="">全部笔记</option>
-                {#each allTags as tag}
-                    <option value={tag}>{tag}</option>
-                {/each}
-            </select>
-        {/if}
-    </PageHeader>
+<div class="flex h-screen min-w-0 flex-1 flex-col">
+    <div class="mx-auto w-full max-w-[720px] px-4 sm:px-6">
+        <PageHeader title="随机漫步" subtitle={candidateCount > 0 ? `共 ${candidateCount} 条` : ""}>
+            {#if allTags.length > 0}
+                <label class="relative block">
+                    <select
+                            class="input h-8 w-auto max-w-44 cursor-pointer appearance-none pr-8"
+                            aria-label="按标签漫步"
+                            value={filterTag}
+                            on:change={(event) => changeFilter(event.currentTarget.value)}
+                    >
+                        <option value="">全部笔记</option>
+                        {#each allTags as tag}
+                            <option value={tag}>{tag}</option>
+                        {/each}
+                    </select>
+                    <i class="ri-arrow-down-s-line pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-ink-3"></i>
+                </label>
+            {/if}
+        </PageHeader>
+    </div>
 
-    <div class="flex flex-col overflow-y-auto p-2 mt-2 flex-1">
-        {#if isLoading}
-            <ProgressLine/>
-        {:else if current === null}
-            <div class="flex flex-col items-center justify-center mt-16 text-gray-500 dark:text-slate-300">
-                <img src={catImage} alt="" class="w-40"/>
-                <div class="font-bold mt-2">这里还没有可以漫步的笔记</div>
-                <button
-                        class="mt-4 rounded-sm bg-primary-500 hover:bg-primary-600 text-white px-4 py-1 focus:outline-hidden"
-                        on:click={() => {
-                        $currentPage = "neno";
-                    }}>去记录
-                </button>
+    <div class="flex-1 overflow-y-auto">
+        <div class="mx-auto w-full max-w-[720px] px-4 pt-2 pb-16 sm:px-6">
+            {#if isLoading}
+                <ProgressLine/>
+            {:else if current === null}
+            <div class="flex flex-col items-center py-16 text-center">
+                <img src={catImage} alt="" class="w-28 opacity-90"/>
+                <div class="mt-3 text-sm text-ink-2">这里还没有可以漫步的笔记</div>
+                <button class="btn btn-primary mt-4" on:click={() => ($currentPage = "neno")}>去记录</button>
             </div>
-        {:else}
-            {#key current._id}
-                <div in:fly={{x: 40 * direction, duration: 250}}>
-                    <NenoItem {...current}/>
+            {:else}
+                {#key current._id}
+                    <div in:fly={{x: 32 * direction, duration: 250}}>
+                        <NenoItem {...current}/>
+                    </div>
+                {/key}
+
+                <div class="mt-5 flex items-center justify-center gap-3">
+                    <button
+                            class="btn btn-secondary size-10 rounded-full px-0"
+                            aria-label="上一条"
+                            title="上一条 (←)"
+                            disabled={historyIndex <= 0}
+                            on:click={prev}
+                    >
+                        <i class="ri-arrow-left-s-line text-lg"></i>
+                    </button>
+                    <button class="btn btn-primary h-10 rounded-full px-6" title="再走一步 (→)" on:click={next}>
+                        <i class="ri-footprint-line"></i>再走一步
+                    </button>
                 </div>
-            {/key}
-
-            <div class="flex items-center justify-center space-x-4 mt-2">
-                <button
-                        class="rounded-full w-10 h-10 bg-white dark:bg-gray-600 dark:text-slate-200 shadow-xs hover:shadow-md focus:outline-hidden disabled:opacity-40"
-                        aria-label="上一条"
-                        title="上一条 (←)"
-                        disabled={historyIndex <= 0}
-                        on:click={prev}
-                >
-                    <i class="ri-arrow-left-s-line ri-lg"></i>
-                </button>
-                <button
-                        class="rounded-full px-6 h-10 bg-primary-500 hover:bg-primary-600 text-white shadow-xs hover:shadow-md focus:outline-hidden flex items-center"
-                        title="再走一步 (→)"
-                        on:click={next}
-                >
-                    <i class="ri-footprint-line mr-1"></i>再走一步
-                </button>
-            </div>
-            <div class="text-center text-xs text-gray-400 mt-2">
-                已漫步 {history.length} 条 · 使用 ← → 键切换
-            </div>
-        {/if}
+                <div class="mt-3 text-center text-xs text-ink-3 tabular-nums">
+                    已漫步 {history.length} 条 · 使用 ← → 键切换
+                </div>
+            {/if}
+        </div>
     </div>
 </div>

@@ -98,57 +98,58 @@
 
 </script>
 
-<div class="flex-1 flex flex-col justify-start pt-4 w-0 h-screen">
-    <PageHeader title="每日回顾" subtitle={`${today.format("YYYY年M月D日")} ${WEEK_DAYS[today.day()]}`}/>
-
-    <div class="flex flex-col overflow-y-auto p-2 mt-2 flex-1">
-        {#if isLoading}
-            <ProgressLine/>
-        {:else if allNenos.length === 0}
-            <div class="flex flex-col items-center justify-center mt-16 text-gray-500 dark:text-slate-300">
-                <img src={catImage} alt="" class="w-40"/>
-                <div class="font-bold mt-2">还没有笔记, 先去记录一些想法吧</div>
-                <button
-                        class="mt-4 rounded-sm bg-primary-500 hover:bg-primary-600 text-white px-4 py-1 focus:outline-hidden"
-                        on:click={() => {
-                        $currentPage = "neno";
-                    }}>去记录
+<div class="flex h-screen min-w-0 flex-1 flex-col">
+    <div class="mx-auto w-full max-w-[720px] px-4 sm:px-6">
+        <PageHeader title="每日回顾" subtitle={`${today.format("M月D日")} ${WEEK_DAYS[today.day()]}`}>
+            {#if !isLoading && allNenos.length > REVIEW_COUNT}
+                <button class="btn btn-sm btn-ghost" on:click={nextBatch}>
+                    <i class="ri-refresh-line inline-block transition-transform duration-500" style="transform: rotate({batch * 360}deg)"></i>换一批
                 </button>
-            </div>
-        {:else}
-            {#if onThisDay.length > 0}
-                <div class="flex items-center text-sm font-bold text-primary-600 dark:text-primary-400 pl-2 mb-2">
-                    <i class="ri-history-line mr-1"></i>那年今日
-                </div>
-                {#each onThisDay as group (group.yearsAgo)}
-                    <div class="text-xs text-gray-500 dark:text-slate-400 pl-2 mb-1">{group.yearsAgo} 年前的今天</div>
-                    {#each group.items as item (item._id)}
-                        <NenoItem {...item}/>
-                    {/each}
-                {/each}
             {/if}
+        </PageHeader>
+    </div>
 
-            <div class="flex items-center justify-between pl-2 mb-2">
-                <div class="flex items-center text-sm font-bold text-primary-600 dark:text-primary-400">
-                    <i class="ri-calendar-check-line mr-1"></i>今日回顾
-                    <span class="ml-2 font-normal text-gray-500 dark:text-slate-400">从 {allNenos.length} 条笔记中为你挑选</span>
-                </div>
-                {#if allNenos.length > REVIEW_COUNT}
-                    <button
-                            class="text-sm text-gray-500 hover:text-primary-600 dark:text-slate-300 focus:outline-hidden flex items-center"
-                            on:click={nextBatch}
-                    >
-                        <i class="ri-refresh-line mr-1 inline-block transition-transform duration-500" style="transform: rotate({batch * 360}deg)"></i>换一批
-                    </button>
-                {/if}
+    <div class="flex-1 overflow-y-auto">
+        <div class="mx-auto w-full max-w-[720px] px-4 pt-2 pb-16 sm:px-6">
+            {#if isLoading}
+                <ProgressLine/>
+            {:else if allNenos.length === 0}
+            <div class="flex flex-col items-center py-16 text-center">
+                <img src={catImage} alt="" class="w-28 opacity-90"/>
+                <div class="mt-3 text-sm text-ink-2">还没有笔记, 先去记录一些想法吧</div>
+                <button class="btn btn-primary mt-4" on:click={() => ($currentPage = "neno")}>去记录</button>
             </div>
-            {#key batch}
-                <div in:fly={{y: 20, duration: 250}}>
-                    {#each reviewItems as item (item._id)}
-                        <NenoItem {...item}/>
-                    {/each}
-                </div>
-            {/key}
-        {/if}
+            {:else}
+                {#if onThisDay.length > 0}
+                    <section class="mb-8">
+                        <h2 class="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink-2">
+                            <i class="ri-history-line text-primary-600 dark:text-primary-400"></i>那年今日
+                        </h2>
+                        {#each onThisDay as group (group.yearsAgo)}
+                            <div class="mb-2 inline-flex rounded-md bg-surface-2 px-2 py-0.5 text-xs text-ink-2">{group.yearsAgo} 年前的今天</div>
+                            {#each group.items as item (item._id)}
+                                <NenoItem {...item}/>
+                            {/each}
+                        {/each}
+                    </section>
+                {/if}
+
+                <section>
+                    <h2 class="mb-3 flex items-baseline gap-2 text-[13px] font-semibold text-ink-2">
+                        <span class="flex items-center gap-1.5">
+                            <i class="ri-calendar-check-line text-primary-600 dark:text-primary-400"></i>今日回顾
+                        </span>
+                        <span class="text-xs font-normal text-ink-3">从 {allNenos.length} 条笔记中为你挑选</span>
+                    </h2>
+                    {#key batch}
+                        <div in:fly={{y: 12, duration: 250}}>
+                            {#each reviewItems as item (item._id)}
+                                <NenoItem {...item}/>
+                            {/each}
+                        </div>
+                    {/key}
+                </section>
+            {/if}
+        </div>
     </div>
 </div>
