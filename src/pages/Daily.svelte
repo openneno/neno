@@ -7,6 +7,7 @@
     import NenoItem from "../components/NenoItem.svelte";
     import ProgressLine from "../components/ProgressLine.svelte";
     import {getAllNenoList, withRelations} from "../request/fetchApi";
+    import {applyNoteChange, onNoteChange} from "../lib/noteEvents.js";
     import {currentPage} from "../store/store.js";
     import {seededRandom, shuffle} from "../lib/random.js";
     import catImage from "../assets/猫猫.png";
@@ -24,7 +25,16 @@
     let reviewItems = [];
     let batch = 0;
 
-    onMount(async () => {
+    onMount(() => {
+        let queue = Promise.resolve();
+        const off = onNoteChange((change) => {
+            queue = queue.then(() => applyChange(change)).catch((reason) => console.log(reason));
+        });
+        loadData();
+        return off;
+    });
+
+    async function loadData() {
         try {
             allNenos = await getAllNenoList();
             onThisDay = await pickOnThisDay(allNenos);
@@ -33,7 +43,25 @@
             console.log(e);
         }
         isLoading = false;
-    });
+    }
+
+    //编辑, 批注, 删除后更新页面上的笔记
+    async function applyChange(change) {
+        if (change.type === "delete") {
+            allNenos = allNenos.filter((item) => item._id !== change.note._id);
+        } else if (change.type === "add") {
+            allNenos = [change.note, ...allNenos];
+        } else {
+            allNenos = allNenos.map((item) => (item._id === change.note._id ? change.note : item));
+        }
+        reviewItems = await applyNoteChange(reviewItems, change);
+        const groups = [];
+        for (const group of onThisDay) {
+            const items = await applyNoteChange(group.items, change);
+            if (items.length > 0) groups.push({...group, items});
+        }
+        onThisDay = groups;
+    }
 
     //那年今日: 往年同月同日记录的笔记
     async function pickOnThisDay(nenos) {
@@ -68,13 +96,6 @@
         reviewItems = await pickReview(allNenos, batch);
     }
 
-    function removeItem(_id) {
-        allNenos = allNenos.filter((item) => item._id !== _id);
-        reviewItems = reviewItems.filter((item) => item._id !== _id);
-        onThisDay = onThisDay
-            .map((group) => ({...group, items: group.items.filter((item) => item._id !== _id)}))
-            .filter((group) => group.items.length > 0);
-    }
 </script>
 
 <div class="flex-1 flex flex-col justify-start pt-4 w-0 h-screen">
@@ -102,7 +123,7 @@
                 {#each onThisDay as group (group.yearsAgo)}
                     <div class="text-xs text-gray-500 dark:text-slate-400 pl-2 mb-1">{group.yearsAgo} 年前的今天</div>
                     {#each group.items as item (item._id)}
-                        <NenoItem {...item} on:deleteOne={(event) => removeItem(event.detail._id)}/>
+                        <NenoItem {...item}/>
                     {/each}
                 {/each}
             {/if}
@@ -124,7 +145,7 @@
             {#key batch}
                 <div in:fly={{y: 20, duration: 250}}>
                     {#each reviewItems as item (item._id)}
-                        <NenoItem {...item} on:deleteOne={(event) => removeItem(event.detail._id)}/>
+                        <NenoItem {...item}/>
                     {/each}
                 </div>
             {/key}

@@ -7,6 +7,7 @@
     import NenoItem from "../components/NenoItem.svelte";
 
     import {getAllNeno, search} from "../request/fetchApi";
+    import {applyNoteChange, onNoteChange} from "../lib/noteEvents.js";
     import ProgressLine from "../components/ProgressLine.svelte";
     import {showSlide} from "./SettingSlide.svelte";
 
@@ -30,8 +31,17 @@
     let searchItems = [];
 
     onMount(() => {
+        //新增(包括批注), 修改, 删除都在这里统一更新主列表和搜索结果
+        //按顺序处理, 避免连续的改动互相覆盖
+        let queue = Promise.resolve();
+        const offNoteChange = onNoteChange((change) => {
+            queue = queue.then(async () => {
+                nenoItems = await applyNoteChange(nenoItems, change, {addToList: true});
+                searchItems = await applyNoteChange(searchItems, change);
+            }).catch((reason) => console.log(reason));
+        });
         load();
-        searchNenoByDate.subscribe((value) => {
+        const offDate = searchNenoByDate.subscribe((value) => {
             console.log("searchNenoByDate", value);
             if (value.date === "refresh") {
                 page = 0;
@@ -41,7 +51,7 @@
                 searchNeno("", value.date, "");
             }
         });
-        searchNenoByTag.subscribe((value) => {
+        const offTag = searchNenoByTag.subscribe((value) => {
             console.log("searchNenoByTag", value);
             changeTag = value.tag.substring(1);
 
@@ -51,7 +61,7 @@
                 searchItems = []
             }
         });
-        reload.subscribe((value) => {
+        const offReload = reload.subscribe((value) => {
             if (value.tag && value.action === "neno") {
                 page = 0;
                 isEnd = false
@@ -70,6 +80,13 @@
                 load();
             }
         });
+        //切换页面时组件会被销毁, 取消订阅
+        return () => {
+            offNoteChange();
+            offDate();
+            offTag();
+            offReload();
+        };
     });
 
     function load() {
@@ -199,9 +216,6 @@
 
     <div class="p-2 ">
         <QuillEditor
-                on:update={(event) => {
-                nenoItems = [event.detail, ...nenoItems];
-            }}
         />
     </div>
     {#if isLoding}
@@ -226,26 +240,16 @@
             style="height:{innerHeight - flowClientTop}px"
     >
         {#if searchItems.length === 0}
-            {#each nenoItems as item (item.created_at)}
+            {#each nenoItems as item (item._id)}
                 <NenoItem
                         {...item}
-                        on:deleteOne={(event) => {
-                        nenoItems = nenoItems.filter((item) => {
-                            return item._id !== event.detail._id;
-                        });
-                    }}
                 />
             {/each}
         {:else}
-            {#each searchItems as item (item.created_at)}
+            {#each searchItems as item (item._id)}
                 <NenoItem
                         {...item}
                         searchContent={searchText}
-                        on:deleteOne={(event) => {
-                        nenoItems = nenoItems.filter((item) => {
-                            return item._id !== event.detail._id;
-                        });
-                    }}
                 />
             {/each}
         {/if}

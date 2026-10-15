@@ -2,6 +2,7 @@ import {reload} from "../store/store.js";
 import {getObjectId} from "../utils/objetid.js";
 import {getObjectURL} from "../utils/process.js";
 import {notifyLocalChange} from "../lib/sync/signal.js";
+import {emitNoteChange} from "../lib/noteEvents.js";
 import {openDB} from 'idb';
 import dayjs from "dayjs";
 
@@ -222,6 +223,10 @@ export const getAllNeno = async (data) => {
             cursor = await cursor.continue();
         }
     }
+    //最后一页(不足 20 条)也要补充批注关系
+    for (let neno of nenos) {
+        await getParentDetail(neno)
+    }
     return {body: nenos}
 }
 
@@ -261,7 +266,8 @@ export const withRelations = async (neno) => {
 }
 
 export const addNeno = async (data) => {
-    if (data._id !== "") {
+    const isNew = data._id === ""
+    if (!isNew) {
         const old = await (await db).getFromIndex('nenoitem', "_id", data._id);
         if (old) {
             data.created_at = old.created_at
@@ -277,6 +283,7 @@ export const addNeno = async (data) => {
         reload.set({tag: Date.now(), action: "nenoCount"})
     }
     await markDirty("note", data._id)
+    emitNoteChange(isNew ? "add" : "update", data)
 
     return {body: data}
 }
@@ -296,6 +303,7 @@ export const deleteOne = async (data) => {
     await (await db).delete('nenoitem', data._id);
     //记录删除前的创建时间, 推送时据此找到仓库中的文件
     await markDirty("note", data._id, {deleted: true, created_at: result.created_at})
+    emitNoteChange("delete", result)
 
     reload.set({tag: Date.now(), action: "nenoCount"})
 
@@ -415,6 +423,7 @@ export const renameTag = async (data) => {
     }
     for (const _id of changed) {
         await markDirty("note", _id)
+        emitNoteChange("update", await getNote(_id))
     }
     reload.set({tag: Date.now(), action: "nenoCount"})
     return {code: 200, message: "BIU", body: {}}

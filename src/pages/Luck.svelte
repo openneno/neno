@@ -6,6 +6,7 @@
     import NenoItem from "../components/NenoItem.svelte";
     import ProgressLine from "../components/ProgressLine.svelte";
     import {getAllNenoList, withRelations} from "../request/fetchApi";
+    import {onNoteChange} from "../lib/noteEvents.js";
     import {currentPage} from "../store/store.js";
     import {shuffle} from "../lib/random.js";
     import catImage from "../assets/猫猫.png";
@@ -29,7 +30,28 @@
 
     $: candidateCount = (filterTag, allNenos, getCandidates().length);
 
-    onMount(async () => {
+    onMount(() => {
+        const off = onNoteChange(({type, note}) => {
+            if (type === "delete") {
+                removeItem(note._id);
+            } else if (type === "add") {
+                allNenos = [note, ...allNenos];
+                //新的批注会改变当前笔记的关联
+                if (current && note.parentId === current._id) show(current);
+            } else {
+                allNenos = allNenos.map((item) => (item._id === note._id ? note : item));
+                history = history.map((item) => (item._id === note._id ? note : item));
+                if (current && (current._id === note._id || current._id === note.parentId
+                    || (current.children || []).some((item) => item._id === note._id))) {
+                    show(current._id === note._id ? note : current);
+                }
+            }
+        });
+        loadData();
+        return off;
+    });
+
+    async function loadData() {
         try {
             allNenos = await getAllNenoList();
             allTags = [...new Set(allNenos.flatMap((neno) => neno.tags))].sort();
@@ -38,7 +60,7 @@
             console.log(e);
         }
         isLoading = false;
-    });
+    }
 
     async function show(neno) {
         current = neno ? await withRelations(neno) : null;
@@ -98,9 +120,17 @@
     }
 
     function removeItem(_id) {
+        if (!allNenos.some((item) => item._id === _id)) return;
+        const wasCurrent = current && current._id === _id;
         allNenos = allNenos.filter((item) => item._id !== _id);
         deck = deck.filter((item) => item._id !== _id);
         history = history.filter((item) => item._id !== _id);
+        if (!wasCurrent && current) {
+            //删除的是其他笔记(例如当前笔记的批注): 继续显示当前笔记, 并刷新关联
+            historyIndex = history.findIndex((item) => item._id === current._id);
+            show(current);
+            return;
+        }
         historyIndex = Math.min(historyIndex, history.length - 1);
         if (historyIndex >= 0) {
             show(history[historyIndex]);
@@ -147,7 +177,7 @@
         {:else}
             {#key current._id}
                 <div in:fly={{x: 40 * direction, duration: 250}}>
-                    <NenoItem {...current} on:deleteOne={(event) => removeItem(event.detail._id)}/>
+                    <NenoItem {...current}/>
                 </div>
             {/key}
 

@@ -13,6 +13,7 @@
     import NenoItem from "./NenoItem.svelte";
     import ProgressLine from "./ProgressLine.svelte";
     import { detail } from "../request/fetchApi";
+    import { onNoteChange } from "../lib/noteEvents.js";
 
     import { onMount } from "svelte";
     let isLoding = true;
@@ -24,6 +25,18 @@
 
         showDetailss = showDetail;
 
+        //面板中的笔记或其批注发生变化时重新读取, 删除了当前笔记时关闭面板
+        return onNoteChange(({ type, note }) => {
+            if (!show || nenoDetail._id === "") return;
+            if (type === "delete" && note._id === nenoDetail._id) {
+                hidden();
+                return;
+            }
+            const related = note._id === nenoDetail._id
+                || note.parentId === nenoDetail._id
+                || nenoDetail.children.some((item) => item._id === note._id || item._id === note.parentId);
+            if (related) getDetail(nenoDetail._id, true);
+        });
     });
 
     let _id = "";
@@ -35,8 +48,8 @@
         show = true;
         getDetail(_id);
     }
-    function getDetail(_id) {
-        isLoding = true;
+    function getDetail(_id, quiet = false) {
+        isLoding = !quiet;
         detail({ _id: _id })
             .then((respone) => {
                 nenoDetail = respone.body;
@@ -104,27 +117,10 @@
                 <div class=" pl-6 ">
                     {#each nenoDetail.children as item (item._id)}
                         <!-- content here -->
-                        <NenoItem
-                            {...item}
-                            on:deleteOne={(event) => {
-                                nenoDetail.children = nenoDetail.children.filter(
-                                    (item) => {
-                                        return item._id !== event.detail._id;
-                                    }
-                                );
-                            }}
-                        />
+                        <NenoItem {...item}/>
                     {/each}
                 </div>
-                <QuillEditor
-                    parentId={nenoDetail._id}
-                    on:update={(event) => {
-                        nenoDetail.children = [
-                            ...nenoDetail.children,
-                            event.detail,
-                        ];
-                    }}
-                />
+                <QuillEditor parentId={nenoDetail._id}/>
             </div>
         {/if}
     </div>
