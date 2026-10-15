@@ -33,3 +33,5 @@ export const reload = writable({ tag: 0, action: "" });
 
 export const commitToGithubTag = writable({ timestmp: 0, data: {} });
 export const taskCountTag = writable({ all: 0, done: 0 });
+//同步状态(不持久化): authError 表示 Token 已失效, 同步暂停直到重新配置
+export const syncStatus = writable({ authError: false });

@@ -30,6 +30,7 @@
     "idb": "^8.0.4",
     "is-plain-object": "^5.1.0",
     "js-base64": "^3.9.4",
+    "qrcode-generator": "^2.0.4",
     "quill": "^2.0.3",
     "remixicon": "^4.9.1",
     "tailwindcss": "^4.3.3",

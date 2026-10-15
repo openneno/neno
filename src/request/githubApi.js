@@ -1,4 +1,4 @@
-import {githubStore, reload} from "../store/store.js";
+import {githubStore, reload, syncStatus} from "../store/store.js";
 import {request} from "../utils/githubtool/index";
 import {Base64} from 'js-base64';
 import {
@@ -19,6 +19,12 @@ githubStore.subscribe(value => {
     gitUrl = value.gitUrl
 
 });
+
+function markAuthError(error) {
+    if (error && error.status === 401) {
+        syncStatus.set({authError: true});
+    }
+}
 
 function gitConfig() {
     return {
@@ -45,11 +51,8 @@ export const pushToGithub = async (data) => {
             return resolve({body: re.data})
         })
     } catch (error) {
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return await pushToGithub(data)
-            }
-        }
+        //Token 失效时不再无限重试, 标记状态并暂停同步
+        markAuthError(error);
         console.log("error", error);
     }
 }
@@ -67,6 +70,7 @@ export const getGithubContent = async (data) => {
         })
     } catch (error) {
         console.log("getContentShaerror", error);
+        markAuthError(error);
 
         //HttpError: This repository is empty.
         if (error.message.indexOf("empty") !== -1) {
@@ -93,6 +97,7 @@ export const getGithubBlob = async (data) => {
         })
     } catch (error) {
         console.log("getContentShaerror", error);
+        markAuthError(error);
 
         //HttpError: This repository is empty.
         if (error.message.indexOf("empty") !== -1) {
@@ -115,7 +120,7 @@ export const getLastCommitRecord = async (data) => {
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-
+        markAuthError(error);
     }
 }
 export const compare2Commits = async (data) => {
@@ -131,7 +136,7 @@ export const compare2Commits = async (data) => {
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-
+        markAuthError(error);
     }
 }
 export const getContentSha = async (data) => {
@@ -147,11 +152,7 @@ export const getContentSha = async (data) => {
         })
     } catch (error) {
         console.log("getContentShaerror", error);
-        if (error.status === 401) {
-            if (error.message === "Bad credentials") {
-                return await getContentSha(data)
-            }
-        }
+        markAuthError(error);
         if (error.status === 404) {
             return new Promise(async (resolve, rej) => {
                 return resolve({body: {sha: ""}})

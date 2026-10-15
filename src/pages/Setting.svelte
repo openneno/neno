@@ -13,13 +13,8 @@
         githubStore,
         notionStore,
     } from "../store/store.js";
-    import {Base64} from 'js-base64';
     import ThemePicker from "../components/ThemePicker.svelte";
-
-    let access_token = $githubStore.access_token;
-    let repoName = $githubStore.repoName;
-    let githubName = $githubStore.githubName;
-    let gitUrl = $githubStore.gitUrl;
+    import SyncSetup from "../components/SyncSetup.svelte";
 
     let importButtonUploadNode = "";
     // svelte 5 的 bind:files 只接受 FileList, 改为监听 change 事件
@@ -41,37 +36,13 @@
         }
     }
 
+    //保存 notion 等其他设置, 同步账号由 SyncSetup 单独保存
     function saveSetting() {
-        $githubStore.repoName = repoName;
-        $githubStore.access_token = access_token;
-        $githubStore.githubName = githubName;
-        window.localStorage.setItem(
-            "githubStore",
-            JSON.stringify($githubStore)
-        );
         window.localStorage.setItem(
             "notionStore",
             JSON.stringify($notionStore)
         );
         window.location.reload();
-    }
-
-    function clearConfig() {
-        $githubStore.access_token = "";
-        $githubStore.githubName = "";
-        $githubStore.repoName = "";
-        window.localStorage.removeItem("githubStore");
-        window.localStorage.removeItem("notionStore");
-        window.location.reload();
-    }
-
-    function copyConfig() {
-        navigator.clipboard.writeText(Base64.encode(JSON.stringify({
-            access_token: access_token,
-            repoName: repoName,
-            githubName: githubName,
-            gitUrl: gitUrl
-        })));
     }
 
     async function exportData() {
@@ -157,109 +128,16 @@
             <div class="bg-gray-200  w-full h-[2px]"></div>
             <div class="mb-4 focus:outline-hidden">
 
-                {#if $githubStore.access_token !== "" || $githubStore.githubName !== "" || $githubStore.repoName !== ""}
-                    <div class="m-4 flex  space-x-4">
-
-                        <button class="rounded-sm bg-red-500 text-white p-2 " on:click={()=>{
-                        clearConfig();
-
-                        }}>
-                            {#if ($githubStore.gitUrl==="https://api.github.com")}
-                                <i class="ri-github-line ri-xl"></i>
-                            {:else}
-                                <img src="src/assets/gittee.ico" alt=""  class="w-5 h-5">
-                            {/if}
-                            <div>
-                                清除登录信息
-                            </div>
-                        </button>
-                        <button class="rounded-sm bg-primary-500 text-white p-2" on:click={()=>{copyConfig()}}>
-                            复制neno token
-                        </button>
+                <div class="m-4">
+                    <div class="font-bold mb-3 flex items-center"><i class="ri-refresh-line mr-1"></i>同步</div>
+                    <div class="text-sm text-gray-500 dark:text-slate-300 mb-4">
+                        笔记保存在你自己的 GitHub / Gitee 私有仓库中, 无需服务器, 也可以完全离线使用。
                     </div>
-                {:else}
-                    <div class="m-4 flex flex-col">
-
-                        <div class="flex flex-row space-x-4">
-                            <div class="flex flex-row  items-center space-x-2">
-                                <label for="isSyncToNotion" class="flex flex-row items-center space-x-1"><i class="ri-github-line ri-xl"></i>
-                                    <div>github</div>
-                                </label>
-                                <input
-                                        type="checkbox"
-                                        id="isGithub"
-                                        checked={$githubStore.gitUrl==="https://api.github.com"}
-                                        on:click={() => {
-                                    $githubStore.gitUrl="https://api.github.com";
-                                    }}
-                                        class="  bg-fuchsia-100"
-                                />
-                            </div>
-                            <div class="flex flex-row  items-center space-x-2">
-                                <label for="isSyncToNotion" class="flex flex-row space-x-1 items-center"> <img src="src/assets/gittee.ico" alt=""  class="w-5 h-5">
-                                    <div>gitee</div>
-                                </label>
-                                <input
-                                        type="checkbox"
-                                        id="isGitee"
-                                        checked={$githubStore.gitUrl==="https://gitee.com/api/v5"}
-
-                                        on:click={() => {
-                                    $githubStore.gitUrl="https://gitee.com/api/v5";
-                                    }}
-                                        class="  bg-fuchsia-100"
-                                />
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="bg-gray-200  w-full h-[2px]"></div>
-                    <div>
-                        <div>
-                            <div class="m-4">
-                                <label
-                                >用户 Token<a
-                                        class="text-sm ml-4"
-                                        href="https://github.com/settings/tokens"
-                                        target="_blank">(如何获取 tips:使用同步notion功能要勾选workflow权限)</a
-                                ></label
-                                >
-
-                                <div class="flex justify-between">
-                                    <input
-                                            type="text"
-                                            bind:value={access_token}
-                                            class=" w-8/12 border-2  mt-4 outline-white p-2 text-black"
-                                            placeholder="用户Token"
-                                    />
-
-                                </div>
-                            </div>
-                            <div class="m-4">
-                                <label for="">用户名</label>
-                                <input
-                                        type="text"
-                                        bind:value={githubName}
-                                        class="w-full border-2  mt-4 outline-white p-2 text-black"
-                                        placeholder="用户名"
-                                />
-                            </div>
-                            <div class="m-4">
-                                <label for="">neno数据存储仓库</label>
-                                <input
-                                        type="text"
-                                        bind:value={repoName}
-                                        class="w-full border-2  mt-4 outline-white p-2 text-black"
-                                        placeholder="仓库名"
-                                />
-                            </div>
-                        </div>
-
-                    </div>
-                {/if}
+                    <SyncSetup/>
+                </div>
 
                 <div class="bg-gray-200  w-full h-[2px]"></div>
-                {#if $githubStore.gitUrl === "https://api.github.com"}
+                {#if $githubStore.gitUrl === "https://api.github.com" && $githubStore.access_token !== ""}
                     <div class="m-4 flex flex-col">
                         <div>
                             <label for="isSyncToNotion">同步到notion</label>
