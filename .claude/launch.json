@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "neno-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 5173 },
+    { "name": "neno-preview", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "preview", "--port", "4173"], "port": 4173 }
+  ]
+}
