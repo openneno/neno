@@ -20,8 +20,8 @@
     <div
         role="button"
         tabindex="0"
-        class="rounded-r  group p-4 pt-2 pb-2  focus:outline-hidden w-full hover:text-white hover:bg-green-400 flex justify-between text-sm   dark:text-slate-300 cursor-pointer"
-        class:bg-green-500={selectionTag === tag}
+        class="rounded-r  group p-4 pt-2 pb-2  focus:outline-hidden w-full hover:text-white hover:bg-primary-400 flex justify-between text-sm   dark:text-slate-300 cursor-pointer"
+        class:bg-primary-500={selectionTag === tag}
         class:text-slate-800={selectionTag !== tag}
         class:text-white={selectionTag === tag}
         on:mouseenter={()=>{
@@ -100,7 +100,7 @@
                     }}>取消</button
                 >
                 <button
-                    class="w-5/12 bg-green-500 rounded-xs text-white"
+                    class="w-5/12 bg-primary-500 rounded-xs text-white"
                     on:click|stopPropagation={() => {
                         dispatch("renameTag", {
                             oldTag: tag,

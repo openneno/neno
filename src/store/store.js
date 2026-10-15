@@ -2,7 +2,9 @@ import { writable } from "svelte/store";
 
 export const currentPage = writable("neno");//neno(NENO),dayily(每日回顾),luck(每日漫步),setting(设置)
 export const settingStore = writable({
-    isDark: false
+    isDark: false,
+    themeMode: "light",//light(浅色),dark(深色),system(跟随系统)
+    themeColor: "green",//主题色,见 lib/theme.js
 });
 export const githubStore = writable({
     access_token: "",//github token Or gitea token

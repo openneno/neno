@@ -54,6 +54,21 @@
             // debug: "info",
             modules: {
                 toolbar: toolbar,
+                keyboard: {
+                    //Ctrl/Cmd + Enter 快速发送, 必须通过配置注册, 否则会被 quill 默认的 Enter 绑定拦截
+                    bindings: {
+                        quickSend: {
+                            key: "Enter",
+                            shortKey: true,
+                            handler: () => {
+                                if (!isContentEmpty && !isSending) {
+                                    sendBiu();
+                                }
+                                return false;
+                            },
+                        },
+                    },
+                },
             },
             placeholder: "现在的想法是...",
         };
@@ -453,8 +468,9 @@
                 >
             {/if}
             <button
-                    class="rounded-xs bg-green-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-hidden disabled:opacity-70 fle justify-center items-center w-16"
+                    class="rounded-xs bg-primary-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-hidden disabled:opacity-70 flex justify-center items-center w-16"
                     disabled={isContentEmpty || isSending}
+                    title="发送 (Ctrl/⌘ + Enter)"
                     on:click={() => {
                     sendBiu();
                 }}

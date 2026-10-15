@@ -115,7 +115,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -138,7 +138,7 @@
 
 {#if show}
     <div
-        class="w-screen  bg-black bg-opacity-50 fixed top-0 z-20 h-screen flex flex-col  items-center justify-center "
+        class="w-screen  bg-black/50 fixed top-0 z-20 h-screen flex flex-col  items-center justify-center "
         in:fade={{ duration: 190 }}
         out:fade={{ duration: 210 }}
         on:click={() => {

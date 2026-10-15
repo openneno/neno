@@ -59,7 +59,7 @@
 
 {#if show}
     <div
-        class="w-screen bg-black bg-opacity-50 fixed top-0 z-20 h-screen "
+        class="w-screen bg-black/50 fixed top-0 z-20 h-screen "
         in:fade={{ duration: 100 }}
         out:fade={{ duration: 100 }}
     >

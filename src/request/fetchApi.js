@@ -251,7 +251,7 @@ export const getAllNeno = async (data) => {
 
 async function getParentDetail(result) {
     //查找父item
-    if (result.parentId !== "") {
+    if (result.parentId) {
         const presult = await (await db).getFromIndex('nenoitem', "_id", result.parentId);
         result.parent = presult
     }
@@ -269,6 +269,19 @@ async function getParentDetail(result) {
         children = [...children, element]
     }
     result.children = children
+}
+
+//获取所有笔记(按创建时间倒序), 用于每日回顾和随机漫步
+export const getAllNenoList = async () => {
+    let nenos = await (await db).getAll("nenoitem")
+    return nenos.sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+}
+
+//补充笔记的父笔记(批注对象)和子笔记(批注), NenoItem 需要这些字段展示关联
+export const withRelations = async (neno) => {
+    const copy = {...neno}
+    await getParentDetail(copy)
+    return copy
 }
 
 export const addNeno = async (data) => {
@@ -407,14 +420,26 @@ export const pins = async (data) => {
         })
     })
 }
+//取笔记的纯文本, 旧数据可能没有 pureContent
+export const getPlainText = (neno) => {
+    if (typeof neno.pureContent === "string" && neno.pureContent !== "") {
+        return neno.pureContent
+    }
+    const div = document.createElement("div");
+    div.innerHTML = neno.content || "";
+    return div.textContent || "";
+}
+
 export const search = async (data) => {
     let nenos = [];
+    //搜索内容时只匹配纯文本(不匹配 html 标签), 并忽略大小写
+    const keyword = (data.content || "").trim().toLowerCase();
     let cursor = await (await db).transaction("nenoitem").store.openCursor(null, "prev");
 
     while ((cursor)) {
         let value = cursor.value;
 
-        if (value.created_at.substring(0, 10) === data.created_at || value.tags.includes(data.tag) || (data.content !== "" && value.content.indexOf(data.content) !== -1)) {
+        if (value.created_at.substring(0, 10) === data.created_at || value.tags.includes(data.tag) || (keyword !== "" && getPlainText(value).toLowerCase().indexOf(keyword) !== -1)) {
             nenos = [...nenos, value]
         }
         cursor = await cursor.continue();

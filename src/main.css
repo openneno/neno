@@ -2,6 +2,113 @@
 
 @config '../tailwind.config.js';
 
+/* 主题色: 组件统一使用 primary-* 颜色, 由 <html data-theme> 切换具体色板 */
+@theme inline {
+    --color-primary-50: var(--primary-50);
+    --color-primary-100: var(--primary-100);
+    --color-primary-200: var(--primary-200);
+    --color-primary-300: var(--primary-300);
+    --color-primary-400: var(--primary-400);
+    --color-primary-500: var(--primary-500);
+    --color-primary-600: var(--primary-600);
+    --color-primary-700: var(--primary-700);
+    --color-primary-800: var(--primary-800);
+    --color-primary-900: var(--primary-900);
+    --color-primary-950: var(--primary-950);
+}
+
+/* 薄荷绿 */
+:root,
+[data-theme="green"] {
+    --primary-50: oklch(98.2% 0.018 155.826);
+    --primary-100: oklch(96.2% 0.044 156.743);
+    --primary-200: oklch(92.5% 0.084 155.995);
+    --primary-300: oklch(87.1% 0.15 154.449);
+    --primary-400: oklch(79.2% 0.209 151.711);
+    --primary-500: oklch(72.3% 0.219 149.579);
+    --primary-600: oklch(62.7% 0.194 149.214);
+    --primary-700: oklch(52.7% 0.154 150.069);
+    --primary-800: oklch(44.8% 0.119 151.328);
+    --primary-900: oklch(39.3% 0.095 152.535);
+    --primary-950: oklch(26.6% 0.065 152.934);
+}
+
+/* 青碧 */
+[data-theme="teal"] {
+    --primary-50: oklch(98.4% 0.014 180.72);
+    --primary-100: oklch(95.3% 0.051 180.801);
+    --primary-200: oklch(91% 0.096 180.426);
+    --primary-300: oklch(85.5% 0.138 181.071);
+    --primary-400: oklch(77.7% 0.152 181.912);
+    --primary-500: oklch(70.4% 0.14 182.503);
+    --primary-600: oklch(60% 0.118 184.704);
+    --primary-700: oklch(51.1% 0.096 186.391);
+    --primary-800: oklch(43.7% 0.078 188.216);
+    --primary-900: oklch(38.6% 0.063 188.416);
+    --primary-950: oklch(27.7% 0.046 192.524);
+}
+
+/* 海湾蓝 */
+[data-theme="blue"] {
+    --primary-50: oklch(97% 0.014 254.604);
+    --primary-100: oklch(93.2% 0.032 255.585);
+    --primary-200: oklch(88.2% 0.059 254.128);
+    --primary-300: oklch(80.9% 0.105 251.813);
+    --primary-400: oklch(70.7% 0.165 254.624);
+    --primary-500: oklch(62.3% 0.214 259.815);
+    --primary-600: oklch(54.6% 0.245 262.881);
+    --primary-700: oklch(48.8% 0.243 264.376);
+    --primary-800: oklch(42.4% 0.199 265.638);
+    --primary-900: oklch(37.9% 0.146 265.522);
+    --primary-950: oklch(28.2% 0.091 267.935);
+}
+
+/* 薰衣草紫 */
+[data-theme="violet"] {
+    --primary-50: oklch(96.9% 0.016 293.756);
+    --primary-100: oklch(94.3% 0.029 294.588);
+    --primary-200: oklch(89.4% 0.057 293.283);
+    --primary-300: oklch(81.1% 0.111 293.571);
+    --primary-400: oklch(70.2% 0.183 293.541);
+    --primary-500: oklch(60.6% 0.25 292.717);
+    --primary-600: oklch(54.1% 0.281 293.009);
+    --primary-700: oklch(49.1% 0.27 292.581);
+    --primary-800: oklch(43.2% 0.232 292.759);
+    --primary-900: oklch(38% 0.189 293.745);
+    --primary-950: oklch(28.3% 0.141 291.089);
+}
+
+/* 樱花粉 */
+[data-theme="rose"] {
+    --primary-50: oklch(96.9% 0.015 12.422);
+    --primary-100: oklch(94.1% 0.03 12.58);
+    --primary-200: oklch(89.2% 0.058 10.001);
+    --primary-300: oklch(81% 0.117 11.638);
+    --primary-400: oklch(71.2% 0.194 13.428);
+    --primary-500: oklch(64.5% 0.246 16.439);
+    --primary-600: oklch(58.6% 0.253 17.585);
+    --primary-700: oklch(51.4% 0.222 16.935);
+    --primary-800: oklch(45.5% 0.188 13.697);
+    --primary-900: oklch(41% 0.159 10.272);
+    --primary-950: oklch(27.1% 0.105 12.094);
+}
+
+/* 暖阳橙 */
+[data-theme="orange"] {
+    --primary-50: oklch(98% 0.016 73.684);
+    --primary-100: oklch(95.4% 0.038 75.164);
+    --primary-200: oklch(90.1% 0.076 70.697);
+    --primary-300: oklch(83.7% 0.128 66.29);
+    --primary-400: oklch(75% 0.183 55.934);
+    --primary-500: oklch(70.5% 0.213 47.604);
+    --primary-600: oklch(64.6% 0.222 41.116);
+    --primary-700: oklch(55.3% 0.195 38.402);
+    --primary-800: oklch(47% 0.157 37.304);
+    --primary-900: oklch(40.8% 0.123 38.172);
+    --primary-950: oklch(26.6% 0.079 36.259);
+}
+
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

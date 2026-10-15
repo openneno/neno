@@ -6,7 +6,6 @@
         reload,
         searchNenoByDate,
         searchNenoByTag,
-        settingStore,
         tagStore,
     } from "../store/store.js";
     import GreenMap from "../components/GreenMap.svelte";
@@ -14,6 +13,7 @@
 
     import {onMount} from "svelte";
     import dayjs from "dayjs";
+    import {isDarkTheme, toggleDarkMode} from "../lib/theme.js";
 
     let allTags = [];
     let pinTags = [];
@@ -139,18 +139,6 @@
                 console.log(reason);
             });
     }
-    function changeDarkMode() {
-        $settingStore.isDark = !$settingStore.isDark;
-        if ($settingStore.isDark) {
-            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#000");
-        }else {
-            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f3f4f6");
-        }
-        window.localStorage.setItem(
-            "settingStore",
-            JSON.stringify($settingStore)
-        );
-    }
 </script>
 
 <div class="w-full flex flex-col overflow-auto   h-screen    overflow-visible">
@@ -166,19 +154,14 @@
         </div>
 
         <div>
-            {#if $settingStore.isDark}
-                <i
-                    class="ri-sun-line text-white"
-                    on:click={() => {
-                        changeDarkMode();
-                    }}></i>
-            {:else}
-                <i
-                    class="ri-moon-line"
-                    on:click={() => {
-                        changeDarkMode();
-                    }}></i>
-            {/if}
+            <button
+                class="focus:outline-hidden mr-1"
+                title={$isDarkTheme ? "切换到浅色" : "切换到深色"}
+                aria-label={$isDarkTheme ? "切换到浅色" : "切换到深色"}
+                on:click={toggleDarkMode}
+            >
+                <i class={$isDarkTheme ? "ri-sun-line text-white" : "ri-moon-line"}></i>
+            </button>
 
             <button
                 class="focus:outline-hidden "
@@ -199,7 +182,7 @@
     />
 
     <div
-        class="flex justify-around  w-full mt-4 text-gray-500dark:text-slate-300"
+        class="flex justify-around  w-full mt-4 text-gray-500 dark:text-slate-300"
     >
         <div class="font-bold text-lg">
             <div class="text-xl">{$countStore.nenoCount}</div>
@@ -222,8 +205,8 @@
                 $currentPage = "neno";
                 $searchNenoByTag.tag = "";
             }}
-            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-green-400 ' +
-                ($currentPage === 'neno' ? 'bg-green-500 text-white' : '')}      "
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-primary-400 ' +
+                ($currentPage === 'neno' ? 'bg-primary-500 text-white' : '')}      "
         >
             <i class="ri-quill-pen-fill mr-2"></i>NENO
         </button>
@@ -232,8 +215,8 @@
             on:click={() => {
                 $currentPage = "daily";
             }}
-            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-green-400 ' +
-                ($currentPage === 'daily' ? 'bg-green-500 text-white' : '')}        "
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-primary-400 ' +
+                ($currentPage === 'daily' ? 'bg-primary-500 text-white' : '')}        "
         >
             <i class="ri-calendar-event-fill mr-2"></i>每日回顾
         </button>
@@ -241,8 +224,8 @@
             on:click={() => {
                 $currentPage = "luck";
             }}
-            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-green-400 ' +
-                ($currentPage === 'luck' ? 'bg-green-500 text-white' : '')}        "
+            class="{'     w-full    flex  items-center justify-start  rounded-r  p-4 focus:outline-hidden hover:text-white hover:bg-primary-400 ' +
+                ($currentPage === 'luck' ? 'bg-primary-500 text-white' : '')}        "
         >
             <i class="ri-bubble-chart-fill mr-2"></i>随机漫步
         </button>
@@ -255,8 +238,8 @@
             <div
                 role="button"
                 tabindex="0"
-                class="rounded-r  group p-4 pt-2 pb-2  focus:outline-hidden w-full hover:text-white hover:bg-green-400 flex justify-between text-sm cursor-pointer"
-                class:bg-green-500={$searchNenoByTag.tag === tag}
+                class="rounded-r  group p-4 pt-2 pb-2  focus:outline-hidden w-full hover:text-white hover:bg-primary-400 flex justify-between text-sm cursor-pointer"
+                class:bg-primary-500={$searchNenoByTag.tag === tag}
                 class:text-white={$searchNenoByTag.tag === tag}
                 on:click={() => {
                     $searchNenoByTag.tag = tag;

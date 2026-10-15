@@ -9,6 +9,7 @@
 <script>
     import { fly, fade } from "svelte/transition";
     import SideLeft from "./SideLeft.svelte";
+    import {currentPage} from "../store/store.js";
 
     import { onMount } from "svelte";
     let show = false;
@@ -16,6 +17,14 @@
 
     onMount(() => {
         showDetailss = showDetail;
+        //在抽屉里切换页面后自动收起
+        let lastPage;
+        return currentPage.subscribe((page) => {
+            if (lastPage !== undefined && page !== lastPage) {
+                hidden();
+            }
+            lastPage = page;
+        });
     });
 
     function showDetail() {
@@ -31,7 +40,7 @@
 
 {#if show}
     <div
-        class="w-screen bg-black bg-opacity-50 fixed top-0 z-20 h-screen "
+        class="w-screen bg-black/50 fixed top-0 z-20 h-screen "
         in:fade={{ duration: 190 }}
         out:fade={{ duration: 210 }}
     >

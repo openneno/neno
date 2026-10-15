@@ -6,6 +6,7 @@
     import {onMount} from "svelte";
     import {deleteTaskToIndexedDB, popTaskToIndexedDB,} from "./request/fetchApi";
     import {doTask, trySyncGithub} from "./lib/SyncTask";
+    import {initTheme, normalizeSetting} from "./lib/theme.js";
 
 
     let tasking = false;
@@ -16,7 +17,8 @@
 
         github && ($githubStore = JSON.parse(github));
         notion && ($notionStore = JSON.parse(notion));
-        setting && ($settingStore = JSON.parse(setting));
+        setting && ($settingStore = normalizeSetting(JSON.parse(setting)));
+        initTheme();
 
         //打开的时候进行同步
         trySyncGithub();

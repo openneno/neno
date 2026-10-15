@@ -56,12 +56,12 @@
                             );
                         }}
                             class="rounded-xs w-4 h-4  overflow-visible  "
-                            class:border-green-500={day.date === toDay}
+                            class:border-primary-500={day.date === toDay}
                             class:border-soild={day.date === toDay}
                             class:bg-gray-300={day.count === 0}
-                            class:bg-green-300={day.count > 0 && day.count <= 3}
-                            class:bg-green-400={day.count > 3 && day.count <= 8}
-                            class:bg-green-600={day.count > 8}
+                            class:bg-primary-300={day.count > 0 && day.count <= 3}
+                            class:bg-primary-400={day.count > 3 && day.count <= 8}
+                            class:bg-primary-600={day.count > 8}
                             class:border-2={day.date === toDay}
                             on:mouseenter={() => {
                             day.hover = true;
@@ -82,6 +82,6 @@
         </div>
     {/each}
     <div
-        class="border-soild bg-gray-300 bg-green-300  bg-green-400 border-green-500 bg-green-600 border-green-500 border-2 bg-gray-400 invisible"></div>
+        class="border-soild bg-gray-300 bg-primary-300  bg-primary-400 border-primary-500 bg-primary-600 border-primary-500 border-2 bg-gray-400 invisible"></div>
     <div></div>
 </div>

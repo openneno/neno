@@ -6,16 +6,13 @@
   import NenoDetail from "../components/NenoDetail.svelte";
   import ViewPicture from "../components/ViewPicture.svelte";
   import Daily from "./Daily.svelte";
+  import Luck from "./Luck.svelte";
   import Share from "../components/Share.svelte";
 
   import { currentPage } from "../store/store.js";
-  import { settingStore } from "../store/store.js";
-  $:{
-    console.log($currentPage)
-  }
 </script>
 
-<div class:dark={$settingStore.isDark} class=" overflow-visible">
+<div class=" overflow-visible">
   <div
     class="w-full  h-screen flex flex-col items-center justify-start  bg-gray-100 dark:bg-black   overflow-visible"
   >
@@ -30,6 +27,8 @@
         <SideRight />
       {:else if $currentPage === "setting"}
         <Setting />
+      {:else if $currentPage === "luck"}
+        <Luck />
       {:else}
         <Daily />
       {/if}

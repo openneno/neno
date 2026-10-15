@@ -49,7 +49,7 @@
 
 {#if show}
     <div
-        class="w-screen bg-black bg-opacity-50 fixed top-0 z-20 h-screen flex flex-col justify-between items-center"
+        class="w-screen bg-black/50 fixed top-0 z-20 h-screen flex flex-col justify-between items-center"
         in:fade={{ duration: 190 }}
         out:fade={{ duration: 210 }}
         on:click={() => {

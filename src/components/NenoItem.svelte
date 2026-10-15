@@ -35,6 +35,7 @@
     let menuList;
     let openMenu = false;
     let editMode = false;
+    let copied = false;
 
     function action(params) {
         params.focus();
@@ -48,7 +49,22 @@
         editMode = !editMode;
     }
 
+    function copyNeno() {
+        const text = plainContent(content).trim();
+        navigator.clipboard.writeText(text).then(() => {
+            copied = true;
+            setTimeout(() => {
+                copied = false;
+            }, 1500);
+        }).catch((reason) => {
+            console.log(reason);
+        });
+    }
+
     function deleteNeno(_id) {
+        if (!window.confirm("确定要删除这条笔记吗?")) {
+            return;
+        }
         deleteOne({_id: _id})
             .then((respone) => {
                 let code = respone.code;
@@ -77,7 +93,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="  whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="  whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -85,10 +101,13 @@
             }
         }
         pContent += copyRawContent.substring(pIndex);
-        if (searchContent.length !== 0) {
-            pContent = pContent.replaceAll(
-                searchContent,
-                `<span class="bg-yellow-300 rounded-xs">${searchContent}</span>`
+        const keyword = searchContent.trim();
+        if (keyword.length !== 0) {
+            //忽略大小写高亮, 且只替换标签之外的文本, 避免破坏 html 结构
+            const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            pContent = pContent.replace(
+                new RegExp(`(${escaped})(?![^<]*>)`, "gi"),
+                `<span class="bg-yellow-300 rounded-xs">$1</span>`
             );
         }
         pContent = pContent.replaceAll(
@@ -112,6 +131,9 @@
     <div class="flex justify-between relative ">
         <div class="text-sm text-gray-500 dark:text-slate-300">
             {dayjs(created_at).format("YYYY-MM-DD HH:mm")}
+            {#if copied}
+                <span transition:fade={{ duration: 150 }} class="ml-2 text-primary-600 dark:text-primary-400">已复制</span>
+            {/if}
         </div>
         <div class=" relative z-auto ">
             <button on:click={() => toggleMenu(1)} class="focus:outline-hidden ">
@@ -147,6 +169,11 @@
                                 tags
                             );
                         }}>分享
+                    </button
+                    >
+                    <button
+                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300"
+                            on:click={copyNeno}>复制
                     </button
                     >
                     <button

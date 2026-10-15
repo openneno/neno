@@ -10,11 +10,11 @@
     } from "../request/notionSyncAction";
     import {
         currentPage,
-        settingStore,
         githubStore,
         notionStore,
     } from "../store/store.js";
     import {Base64} from 'js-base64';
+    import ThemePicker from "../components/ThemePicker.svelte";
 
     let access_token = $githubStore.access_token;
     let repoName = $githubStore.repoName;
@@ -150,6 +150,11 @@
 
     <div class="">
         <div class="m-4 flex flex-col dark:text-gray-100 ">
+            <div class="mb-4 m-4">
+                <div class="font-bold mb-3 flex items-center"><i class="ri-palette-line mr-1"></i>主题</div>
+                <ThemePicker/>
+            </div>
+            <div class="bg-gray-200  w-full h-[2px]"></div>
             <div class="mb-4 focus:outline-hidden">
 
                 {#if $githubStore.access_token !== "" || $githubStore.githubName !== "" || $githubStore.repoName !== ""}
@@ -168,7 +173,7 @@
                                 清除登录信息
                             </div>
                         </button>
-                        <button class="rounded-sm bg-green-500 text-white p-2" on:click={()=>{copyConfig()}}>
+                        <button class="rounded-sm bg-primary-500 text-white p-2" on:click={()=>{copyConfig()}}>
                             复制neno token
                         </button>
                     </div>
@@ -309,7 +314,7 @@
                                 />
                             </div>
                             <button
-                                    class="ml-2 mt-2 border-2  dark:text-white outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
+                                    class="ml-2 mt-2 border-2  dark:text-white outline-white p-2 hover:bg-primary-500 hover:text-white focus:outline-white"
                                     on:click={() => {
                                 setSyncToNotionAction();
                             }}
@@ -354,7 +359,7 @@
                 on:click={() => {
                 saveSetting();
             }}
-                class="w-full border-2  dark:text-white outline-white p-2 hover:bg-green-500 hover:text-white focus:outline-white"
+                class="w-full border-2  dark:text-white outline-white p-2 hover:bg-primary-500 hover:text-white focus:outline-white"
         >
             保存设置
         </button>
