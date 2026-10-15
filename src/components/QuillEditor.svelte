@@ -45,7 +45,6 @@
     let tipHeight = 0;
 
     let uploadimageNode = "";
-    let uploadimagefiles = [];
     let imageFiles = [];
     let isContentEmpty = true;
     let isSending = false;
@@ -59,7 +58,7 @@
             placeholder: "现在的想法是...",
         };
         quillEditor = new Quill(editor, options);
-        const delta = quillEditor.clipboard.convert(content);
+        const delta = quillEditor.clipboard.convert({html: content});
         quillEditor.setContents(delta, "silent");
         quillEditor.focus();
         if (content.length !== 0) {
@@ -211,8 +210,11 @@
         quillEditor.setSelection(tagStartIndex + tag.length, 0, "api");
     }
 
-    $:{
-        imageFiles = joinFile(uploadimagefiles);
+    // svelte 5 的 bind:files 只接受 FileList, 改为监听 change 事件
+    function onImagesSelected(event) {
+        imageFiles = joinFile(event.currentTarget.files);
+        // 清空 input, 以便再次选择同一张图片
+        event.currentTarget.value = "";
     }
 
 
@@ -231,7 +233,6 @@
                 },
             ];
         });
-        uploadimagefiles = []
         return tempfiles;
     }
 
@@ -269,7 +270,9 @@
 
 
     async function sendBiu() {
-        let sContent = editor.childNodes[0].innerHTML;
+        // quill 2 的 root.innerHTML 会把无序列表输出为 <ol><li data-list="bullet">,
+        // 使用 getSemanticHTML 得到标准的 <ul>/<ol>, 并还原 quill 2 转换出的 &nbsp; 以保持 tag 的解析
+        let sContent = quillEditor.getSemanticHTML().replaceAll("&nbsp;", " ");
         isSending = true;
         let cc = quillEditor.getContents();
         let tags = [];
@@ -346,12 +349,12 @@
     {#if tagTips.length > 0 && showTip}
         <div
                 bind:this={tipClient}
-                class="rounded bg-gray-800 text-sm text-white w-auto absolute font-bold p-1 z-10"
+                class="rounded-sm bg-gray-800 text-sm text-white w-auto absolute font-bold p-1 z-10"
                 style="top:{tipTop + tipHeight}px;left:{tipLeft}px"
         >
             {#each tagTips as item, index}
                 <div
-                        class="hover:bg-gray-400 rounded-sm p-1 bg"
+                        class="hover:bg-gray-400 rounded-xs p-1 bg"
                         class:bg-gray-400={index === tagTipsFocusIndex}
                         on:click={() => {
                         tipTagInsert(item);
@@ -368,10 +371,10 @@
             <div
                     in:fly={{ y: -100, duration: 500, easing: cubicOut }}
                     out:fly={{ y: -100, duration: 300 }}
-                    class="w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden"
+                    class="w-16 h-16 box-border  border-2 rounded-sm mr-2 mb-2 relative overflow-hidden"
             >
                 <div
-                        class=" w-16 h-16  box-border absolute top-0 opacity-0 bg-black hover:opacity-75 focus:outline-none flex justify-around  "
+                        class=" w-16 h-16  box-border absolute top-0 opacity-0 bg-black hover:opacity-75 focus:outline-hidden flex justify-around  "
                 >
                     <button
                             on:click={() => {
@@ -402,39 +405,39 @@
     >
         <div id="toolbar" class="space-x-1" bind:this={toolbar}>
             <button
-                    class="rounded-sm  hover:bg-gray-200 p-1 focus:outline-none"
+                    class="rounded-xs  hover:bg-gray-200 p-1 focus:outline-hidden"
                     on:click={insertHashTag}><i class="ri-hashtag"></i></button
             >
             <button
-                    class=" rounded-sm ql-bold hover:bg-gray-200 p-1 focus:outline-none"
+                    class=" rounded-xs ql-bold hover:bg-gray-200 p-1 focus:outline-hidden"
             ><i class="ri-bold"></i></button
             >
             <button
-                    class=" rounded-sm ql-list hover:bg-gray-200 p-1 focus:outline-none"
+                    class=" rounded-xs ql-list hover:bg-gray-200 p-1 focus:outline-hidden"
                     value="bullet"
             ><i
-                    class="ri-list-check hover:bg-gray-200 p-1 focus:outline-none"></i></button
+                    class="ri-list-check hover:bg-gray-200 p-1 focus:outline-hidden"></i></button
             >
 
             <button
-                    class="rounded-sm ql-list hover:bg-gray-200 p-1 focus:outline-none"
+                    class="rounded-xs ql-list hover:bg-gray-200 p-1 focus:outline-hidden"
                     value="ordered"
             ><i
-                    class="ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-none"></i></button
+                    class="ri-list-ordered  hover:bg-gray-200 p-1 focus:outline-hidden"></i></button
             >
 
             <button
-                    class=" rounded-sm ql-underline hover:bg-gray-200 p-1 focus:outline-none"
+                    class=" rounded-xs ql-underline hover:bg-gray-200 p-1 focus:outline-hidden"
             ><i class="ri-underline"></i></button
             >
             <button
-                    class="rounded-sm hover:bg-gray-200 p-1 focus:outline-none "
+                    class="rounded-xs hover:bg-gray-200 p-1 focus:outline-hidden "
                     on:click={selectImages}><i class="ri-image-2-line "></i></button
             >
             <input
                     bind:this={uploadimageNode}
-                    bind:files={uploadimagefiles}
-                    class="w-full  rounded-lg   p-2 bg-blue-400 text-white focus:outline-none"
+                    on:change={onImagesSelected}
+                    class="w-full  rounded-lg   p-2 bg-blue-400 text-white focus:outline-hidden"
                     type="file"
                     style="display:none"
                     accept="image/png, image/jpeg, image/gif, image/jpg"
@@ -444,13 +447,13 @@
         <div class="flex space-x-2 justify-end">
             {#if canCancle}
                 <button
-                        class="rounded-sm bg-white dark:bg-neutral-700 dark:text-gray-200 border-black text-black pl-2 pr-2 text-sm  focus:outline-none hover:shadow-sm"
+                        class="rounded-xs bg-white dark:bg-neutral-700 dark:text-gray-200 border-black text-black pl-2 pr-2 text-sm  focus:outline-hidden hover:shadow-xs"
                         on:click={cancelInput}>取消
                 </button
                 >
             {/if}
             <button
-                    class="rounded-sm bg-green-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-none disabled:opacity-70 fle justify-center items-center w-16"
+                    class="rounded-xs bg-green-500 text-white md:pl-2 md:pr-2 pl-1 pr-1 text-sm  focus:outline-hidden disabled:opacity-70 fle justify-center items-center w-16"
                     disabled={isContentEmpty || isSending}
                     on:click={() => {
                     sendBiu();

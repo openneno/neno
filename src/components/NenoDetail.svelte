@@ -72,7 +72,7 @@
             <div
                 in:fly={{ x: 200, duration: 200 }}
                 out:fly={{ x: 200, duration: 200 }}
-                class="lt:w-8/12 w-10/12 2xl:w-4/12 float-right  shadow-sm bg-gray-100 dark:bg-gray-900 h-full p-4 flex flex-col overflow-y-scroll"
+                class="lt:w-8/12 w-10/12 2xl:w-4/12 float-right  shadow-xs bg-gray-100 dark:bg-gray-900 h-full p-4 flex flex-col overflow-y-scroll"
             >
                 {#if isLoding}
                     <div transition:fly={{ y: -20, duration: 1000 }}>
@@ -82,7 +82,7 @@
 
                 <div>
                     <button
-                        class="focus:outline-none w-10 float-left"
+                        class="focus:outline-hidden w-10 float-left"
                         on:click={() => {
                             hidden();
                         }}

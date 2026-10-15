@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "target": "esnext",
     "module": "esnext",
     /**
-     * svelte-preprocess cannot figure out whether you have
-     * a value or a type, so tell TypeScript to enforce using
-     * `import type` instead of `import` for Types.
+     * Svelte / Vite transpile each file on its own, so enforce
+     * `import type` for type-only imports.
      */
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
     "isolatedModules": true,
     /**
      * To have warnings / errors of the Svelte compiler at the
@@ -18,7 +17,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.
      * Disable checkJs if you'd like to use dynamic types in JS.
@@ -26,13 +24,12 @@
      * of JS in `.svelte` files.
      */
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "noEmit": true
   },
   /**
    * Use globals.d.ts instead of compilerOptions.types
    * to avoid limiting type declarations.
    */
-  // "include": ["globals.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
-   
   "include": ["globals.d.ts", "src/**/*.ts", "src/**/*.js"]
 }

@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+@config '../tailwind.config.js';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+*,*:before,*:after {
+    box-sizing: border-box;
+}
+
+html, body {
+    min-height: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+h1 {
+    font-family: 'Oswald', sans-serif;
+    margin: 0 !important;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+a:link, a:visited, a:hover, a:focus, a:active {
+    color: SteelBlue;
+    text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: .75rem 0;
+}
+
+@layer components {
+    .ql-editor.ql-blank::before {
+        @apply dark:text-white;
+    }
+}
+
+/* quill 2 默认隐藏 li 的列表符号, 为 getSemanticHTML 输出及旧版数据中的标准列表恢复样式 */
+.ql-editor ul {
+    padding-left: 1.5em;
+}
+.ql-editor ul > li:not([data-list]) {
+    list-style-type: disc;
+    padding-left: 0;
+}
+.ql-editor ol > li:not([data-list]) {
+    list-style-type: decimal;
+    padding-left: 0;
+}

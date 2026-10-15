@@ -1,10 +1,10 @@
 import {reload} from "../store/store.js";
 import {getObjectId} from "../utils/objetid.js";
 import {getObjectURL} from "../utils/process.js";
-import {openDB} from 'idb/with-async-ittr';
+import {openDB} from 'idb';
 import dayjs from "dayjs";
 
-// import { openDB } from 'idb/with-async-ittr.js';
+
 
 const db = openDB("neno", 4, {
     upgrade(db, oldVersion, newVersion, transaction) {

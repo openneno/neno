@@ -77,7 +77,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="  whitespace-no-wrap leading-6 mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="  whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -88,7 +88,7 @@
         if (searchContent.length !== 0) {
             pContent = pContent.replaceAll(
                 searchContent,
-                `<span class="bg-yellow-300 rounded-sm">${searchContent}</span>`
+                `<span class="bg-yellow-300 rounded-xs">${searchContent}</span>`
             );
         }
         pContent = pContent.replaceAll(
@@ -107,14 +107,14 @@
 </script>
 
 <div
-        class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-sm  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
+        class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-xs  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
 >
     <div class="flex justify-between relative ">
         <div class="text-sm text-gray-500 dark:text-slate-300">
             {dayjs(created_at).format("YYYY-MM-DD HH:mm")}
         </div>
         <div class=" relative z-auto ">
-            <button on:click={() => toggleMenu(1)} class="focus:outline-none ">
+            <button on:click={() => toggleMenu(1)} class="focus:outline-hidden ">
                 <i class="ri-more-line dark:text-slate-300"></i>
             </button>
             {#if openMenu === true}
@@ -129,11 +129,11 @@
                         in:fade={{ duration: 100 }}
                         out:fade={{ duration: 100 }}
                         bind:this={menuList}
-                        class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-none"
+                        class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-hidden"
                         style="left:-32px;"
                 >
                     <button
-                            class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300 "
+                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300 "
                             on:click={() => {
                             showShareView(
                                 _id,
@@ -150,21 +150,21 @@
                     </button
                     >
                     <button
-                            class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300   "
+                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300   "
                             on:click={() => {
                             toggleEditMode();
                         }}>编辑
                     </button
                     >
                     <button
-                            class="dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
+                            class="dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300"
                             on:click={() => {
                             showNeno(_id, false);
                         }}>批注
                     </button
                     >
                     <button
-                            class="  dark:hover:bg-gray-500 focus:outline-none hover:bg-gray-300"
+                            class="  dark:hover:bg-gray-500 focus:outline-hidden hover:bg-gray-300"
                             on:click={() => {
                             deleteNeno(_id);
                         }}>删除
@@ -193,10 +193,10 @@
         />
     {:else}
         <div
-                class="list-decimal text-sm text-red-300  whitespace-no-wrap "
+                class="list-decimal text-sm text-red-300  whitespace-nowrap "
                 style="height:revert"
         >
-            <p class="whitespace-no-wrap ">
+            <p class="whitespace-nowrap ">
                 {@html praseTag(content, tags)}
             </p>
         </div>
@@ -218,7 +218,7 @@
     </div>
     {#if parent !== undefined && parent != null}
         <button
-                class="flex items-center space-x-1  hover:shadow-sm focus:outline-none"
+                class="flex items-center space-x-1  hover:shadow-xs focus:outline-hidden"
                 on:click={() => {
                 showNeno(parent._id, false);
             }}
@@ -240,7 +240,7 @@
 
     {#each children as item}
         <button
-                class="flex items-center  space-x-1   hover:shadow-sm focus:outline-none"
+                class="flex items-center  space-x-1   hover:shadow-xs focus:outline-hidden"
                 on:click={() => {
                 showNeno(item._id, false);
             }}

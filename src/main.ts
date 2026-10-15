@@ -1,10 +1,12 @@
 import './hmr';
-import "./main.pcss";
+import "./main.css";
 import 'remixicon/fonts/remixicon.css'
-import App from './App.svelte' 
+import 'quill/dist/quill.snow.css'
+import { mount } from 'svelte'
+import App from './App.svelte'
 
 
-const app = new App({
+const app = mount(App, {
   target: document.body
 })
 

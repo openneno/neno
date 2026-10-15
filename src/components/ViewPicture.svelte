@@ -58,7 +58,7 @@
     >
         <div
             style="height:80vh"
-            class=" w-auto   rounded relative overflow-hidden flex justify-center items-center"
+            class=" w-auto   rounded-sm relative overflow-hidden flex justify-center items-center"
         >
             {#await getPIcUrl(showImageInfo) then value}
                 <img
@@ -75,7 +75,7 @@
         >
             {#each imageFilesIn as item, index}
                 <div
-                    class="w-16 h-16 box-border  border-2 rounded mr-2 mb-2 relative overflow-hidden"
+                    class="w-16 h-16 box-border  border-2 rounded-sm mr-2 mb-2 relative overflow-hidden"
                     on:click|stopPropagation={() => {
                         showImageInfo = imageFilesIn[index];
                     }}

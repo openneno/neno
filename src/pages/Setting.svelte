@@ -21,12 +21,13 @@
     let githubName = $githubStore.githubName;
     let gitUrl = $githubStore.gitUrl;
 
-    let importFile = "";
     let importButtonUploadNode = "";
-    $: {
+    // svelte 5 的 bind:files 只接受 FileList, 改为监听 change 事件
+    function onImportFileSelected(event) {
+        const importFile = event.currentTarget.files;
         console.log(importFile);
         // await importIndexedDB();
-        if (importFile !== "") {
+        if (importFile && importFile.length !== 0) {
             let reader = new FileReader();
             reader.readAsText(importFile[0]);
             reader.onload = async (oFREvent) => {
@@ -137,7 +138,7 @@
             class="font-bold text-lg flex  justify-start  items-center text-gray-600 dark:text-gray-100 "
     >
         <button
-                class="focus:outline-none    sm:hidden md:hidden mr-4"
+                class="focus:outline-hidden    sm:hidden md:hidden mr-4"
                 on:click={() => {
                 $currentPage = "neno";
             }}
@@ -149,12 +150,12 @@
 
     <div class="">
         <div class="m-4 flex flex-col dark:text-gray-100 ">
-            <div class="mb-4 focus:outline-none">
+            <div class="mb-4 focus:outline-hidden">
 
                 {#if $githubStore.access_token !== "" || $githubStore.githubName !== "" || $githubStore.repoName !== ""}
                     <div class="m-4 flex  space-x-4">
 
-                        <button class="rounded bg-red-500 text-white p-2 " on:click={()=>{
+                        <button class="rounded-sm bg-red-500 text-white p-2 " on:click={()=>{
                         clearConfig();
 
                         }}>
@@ -167,7 +168,7 @@
                                 清除登录信息
                             </div>
                         </button>
-                        <button class="rounded bg-green-500 text-white p-2" on:click={()=>{copyConfig()}}>
+                        <button class="rounded-sm bg-green-500 text-white p-2" on:click={()=>{copyConfig()}}>
                             复制neno token
                         </button>
                     </div>
@@ -252,7 +253,7 @@
                     </div>
                 {/if}
 
-                <div class="bg-gray-200  w-full h-[2px]"/>
+                <div class="bg-gray-200  w-full h-[2px]"></div>
                 {#if $githubStore.gitUrl === "https://api.github.com"}
                     <div class="m-4 flex flex-col">
                         <div>
@@ -331,7 +332,7 @@
                         <input
                                 type="file"
                                 bind:this={importButtonUploadNode}
-                                bind:files={importFile}
+                                on:change={onImportFileSelected}
                                 style="display:none"
                                 accept=".txt"
                                 class="w-full border-2  mt-4 outline-white p-2"

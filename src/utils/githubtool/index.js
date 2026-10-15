@@ -42,13 +42,13 @@ function fetchWrapper(requestOptions) {
                     return;
                 }
                 throw new RequestError(response.statusText, status, {
-                    headers,
+                    response: { url, status, headers, data: undefined },
                     request: requestOptions,
                 });
             }
             if (status === 304) {
                 throw new RequestError("Not modified", status, {
-                    headers,
+                    response: { url, status, headers, data: undefined },
                     request: requestOptions,
                 });
             }
@@ -57,7 +57,7 @@ function fetchWrapper(requestOptions) {
                     .text()
                     .then((message) => {
                         const error = new RequestError(message, status, {
-                            headers,
+                            response: { url, status, headers, data: message },
                             request: requestOptions,
                         });
                         try {
@@ -96,7 +96,6 @@ function fetchWrapper(requestOptions) {
                 throw error;
             }
             throw new RequestError(error.message, 500, {
-                headers,
                 request: requestOptions,
             });
         });

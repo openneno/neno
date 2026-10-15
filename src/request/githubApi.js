@@ -4,7 +4,7 @@ import {Base64} from 'js-base64';
 import {
     insertCountDateToIndexedDB, insertPicToIndexedDB, insertPinTagsToIndexedDB, insertToIndexedDB
 } from "./fetchApi";
-import {is_empty} from "svelte/internal";
+import {isEmpty as is_empty} from "../utils/process";
 
 let gitubToken = ""
 let repoName = ""

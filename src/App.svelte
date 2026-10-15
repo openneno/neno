@@ -1,7 +1,6 @@
 <script>
     import HelloWorld from "./pages/Main.svelte";
     import Router from "./components/Router.svelte";
-    import Tailwind from "./Tailwind.svelte";
     import ReloadPrompt from './lib/ReloadPrompt.svelte'
     import {githubStore, notionStore, currentPage, settingStore, taskCountTag,} from "./store/store.js";
     import {onMount} from "svelte";
@@ -65,7 +64,6 @@
     test();
 </script>
 
-<Tailwind/>
 
 <main class=" overflow-y-hidden f h-screen  ">
     <Router/>

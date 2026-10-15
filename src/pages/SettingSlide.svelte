@@ -39,7 +39,7 @@
             <div
                 in:fly={{ x: -200, duration: 200 }}
                 out:fly={{ x: -200, duration: 200 }}
-                class="dark:bg-black lt:w-8/12 w-10/12 2xl:w-4/12 float-left  shadow-sm bg-gray-100 h-full p-4 flex flex-col overflow-y-scroll"
+                class="dark:bg-black lt:w-8/12 w-10/12 2xl:w-4/12 float-left  shadow-xs bg-gray-100 h-full p-4 flex flex-col overflow-y-scroll"
             >
                 <SideLeft />
             </div>
@@ -48,7 +48,6 @@
             class="lt:w-4/12 w-2/12 2xl:w-8/12 float-right   h-full "
             on:click={() => {
                 hidden();
-            }}
-        />
+            }}></div>
     </div>
 {/if}

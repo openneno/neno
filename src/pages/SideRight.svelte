@@ -130,7 +130,7 @@
             {#if changeTag === ""}
                 <div class="font-bold dark:text-slate-300">NENO</div>
                 <button
-                        class="focus:outline-none text-gray-600   sm:hidden md:hidden ml-2"
+                        class="focus:outline-hidden text-gray-600   sm:hidden md:hidden ml-2"
                         on:click={() => {
                         showSlide();
                     }}
@@ -145,7 +145,7 @@
                     <div class="font-bold w-auto mr-2 dark:text-slate-300" type="text">
                         {changeTag}
                     </div>
-                    <button class="focus:outline-none ">
+                    <button class="focus:outline-hidden ">
                         <i
                                 class="ri-close-circle-fill text-gray-400"
                                 on:click={() => {
@@ -175,11 +175,11 @@
         </div>
 
         <div
-                class="bg-gray-200 rounded-lg h-8 p-2 flex items-center flex-shrink-0"
+                class="bg-gray-200 rounded-lg h-8 p-2 flex items-center shrink-0"
         >
             <i class="ri-search-2-line text-gray-400"></i>
             <input
-                    class=" ml-2 bg-gray-200 focus:outline-none text-sm"
+                    class=" ml-2 bg-gray-200 focus:outline-hidden text-sm"
                     type="text"
                     on:keydown={(event) => {
                     if (event.code === "Enter") {
@@ -212,7 +212,7 @@
     {#if isLodingError}
         <div class="w-full pl-4 pr-4">
             <button
-                    class=" w-full rounded focus:outline-none m-aut bg-red-400  text-white  p-2  "
+                    class=" w-full rounded-sm focus:outline-hidden m-aut bg-red-400  text-white  p-2  "
                     on:click={() => {
                     load();
                 }}>重新获取

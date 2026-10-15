@@ -22,7 +22,7 @@ const pwaOptions = {
     },
 }
 
-const replaceOptions = { __DATE__: new Date().toISOString() }
+const replaceOptions = { preventAssignment: true, __DATE__: new Date().toISOString() }
 const claims = process.env.CLAIMS === 'true'
 const reload = process.env.RELOAD_SW === 'true'
 

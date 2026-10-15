@@ -20,7 +20,7 @@ import {
     insertPicToIndexedDB, insertPinTagsToIndexedDB,
     insertToIndexedDB
 } from "../request/fetchApi";
-import {is_empty} from "svelte/internal";
+import {isEmpty as is_empty} from "../utils/process";
 import {Base64} from "js-base64";
 
 //执行日常的增删改查的任务

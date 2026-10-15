@@ -30,7 +30,7 @@
     import { getObjectURL } from "../utils/process";
     import { getFileFromIndexedDB } from "../request/fetchApi";
     import dayjs from 'dayjs'
-    import html2canvas from "html2canvas";
+    import html2canvas from "html2canvas-pro";
     import {countStore, searchNenoByTag} from "../store/store.js";
     import {onMount} from "svelte";
     let show = false;
@@ -115,7 +115,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="whitespace-no-wrap leading-6 mr-1 cursor-pointer rounded-sm bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-green-500 text-white text-sm  hover:bg-green-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -146,7 +146,7 @@
         }}
     >
         <div
-            class=" overflow-scroll bg-gray-100 rounded  shadow-lg"
+            class=" overflow-scroll bg-gray-100 rounded-sm  shadow-lg"
             style="width:480px"
             bind:this={cardcontainer}
         >
@@ -169,7 +169,7 @@
                     {#each images as {  key }, index (index)}
                         {#await getImageurl( key, index) then value}
                             <img
-                                class="w-full  rounded mr-2 mb-2 object-cover"
+                                class="w-full  rounded-sm mr-2 mb-2 object-cover"
                                 src={value}
                                 alt=""
                             />
@@ -184,7 +184,7 @@
                     </div>
 
                     <div class="flex items-center space-x-2">
-                        By Neno <i class="ri-github-fill ri-xl" />
+                        By Neno <i class="ri-github-fill ri-xl"></i>
                     </div>
                 </div>
             </div>

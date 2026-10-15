@@ -13,30 +13,26 @@
             style="   width: {dotSize}px;
         height:  {dotSize}px; 
         left: {leftSize}px;
-        "
-        />
+        "></div>
         <div
             style="   
            
             width: {dotSize}px;
         height:  {dotSize}px;      
         left:  {leftSize}px;
-        "
-        />
+        "></div>
         <div
             style="   width: {dotSize}px;
         height:  {dotSize}px;
         left:  {leftSize *
                 4}px;
-        "
-        />
+        "></div>
         <div
             style="   width: {dotSize}px;
         height:  {dotSize}px;
         left:  {leftSize *
                 7}px;
-        "
-        />
+        "></div>
     </div>
 </div>
 

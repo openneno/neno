@@ -1,4 +1,4 @@
-const tailwindcss = require('tailwindcss');
+const tailwindcss = require('@tailwindcss/postcss');
 const autoprefixer = require("autoprefixer");
 const cssnano = require("cssnano");
 
@@ -8,7 +8,7 @@ const dev = mode === "development";
 module.exports = {
 	plugins: [
 		tailwindcss,
-		autoprefixer,		
+		autoprefixer,
 		!dev && cssnano({
 			preset: "default",
 		}),
