@@ -406,6 +406,9 @@ html.theme-switching *::after {
     .btn-ghost {
         @apply text-ink-2 hover:bg-surface-2 hover:text-ink;
     }
+    .btn-destructive {
+        @apply bg-red-600 text-white shadow-xs hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600;
+    }
     .btn-danger {
         @apply text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10;
     }

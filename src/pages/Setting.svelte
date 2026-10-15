@@ -16,6 +16,7 @@
     import ThemePicker from "../components/ThemePicker.svelte";
     import SyncSetup from "../components/SyncSetup.svelte";
     import PageHeader from "../components/PageHeader.svelte";
+    import {alertDialog} from "../components/ConfirmDialog.svelte";
 
     let importButtonUploadNode = "";
     // svelte 5 的 bind:files 只接受 FileList, 改为监听 change 事件
@@ -78,10 +79,10 @@
                 {path: ".github/workflows/syncAllNenoToNotion.yml", text: syncAllNenoToNotionfile},
                 {path: ".github/workflows/syncNenoSingleItem.yml", text: syncNenoToNotionfile},
             ], "add notion sync actions");
-            window.alert("已保存到 GitHub Action");
+            alertDialog({title: "已写入 GitHub Action", message: "之后新增的笔记会自动同步到 Notion。", icon: "ri-check-line"});
         } catch (error) {
             console.log(error);
-            window.alert(`保存失败: ${error.message}`);
+            alertDialog({title: "写入失败", message: error.message, icon: "ri-error-warning-line"});
         }
     }
 

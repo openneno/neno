@@ -4,9 +4,10 @@
     import ReloadPrompt from './lib/ReloadPrompt.svelte'
     import {githubStore, notionStore, currentPage, settingStore} from "./store/store.js";
     import {onMount} from "svelte";
-    import {startSyncEngine} from "./lib/sync/syncEngine.js";
+    import {startSyncEngine, syncNow} from "./lib/sync/syncEngine.js";
     import {initTheme, normalizeSetting} from "./lib/theme.js";
     import {LEGACY_GITEE_URL, decodeNenoToken} from "./request/gitAccountApi.js";
+    import {alertDialog, confirmDialog} from "./components/ConfirmDialog.svelte";
 
 
     onMount(() => {
@@ -29,16 +30,27 @@
         if (window.location.hash.indexOf("#neno-config=") === 0) {
             const hash = window.location.hash;
             history.replaceState(null, "", window.location.pathname + window.location.search);
+            let config = null;
             try {
-                const config = decodeNenoToken(hash);
-                if (window.confirm(`检测到同步配置: ${config.githubName}/${config.repoName}, 是否导入并开始同步?`)) {
+                config = decodeNenoToken(hash);
+            } catch (e) {
+                console.log("同步链接无效", e);
+                if (e.unsupported) alertDialog({title: "无法导入同步配置", message: e.message});
+            }
+            if (config) {
+                confirmDialog({
+                    title: "导入同步配置?",
+                    message: `将使用 GitHub 仓库 ${config.githubName}/${config.repoName} 同步笔记。`,
+                    confirmText: "导入并同步",
+                    icon: "ri-links-line",
+                }).then((confirmed) => {
+                    if (!confirmed) return;
                     $githubStore = {...$githubStore, ...config, lastCommitSha: ""};
                     window.localStorage.setItem("githubStore", JSON.stringify($githubStore));
                     $currentPage = "setting";
-                }
-            } catch (e) {
-                console.log("同步链接无效", e);
-                if (e.unsupported) window.alert(e.message);
+                    //导入后立即开始同步
+                    syncNow();
+                });
             }
         }
 

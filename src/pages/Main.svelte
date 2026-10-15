@@ -8,6 +8,7 @@
   import Daily from "./Daily.svelte";
   import Luck from "./Luck.svelte";
   import Share from "../components/Share.svelte";
+  import ConfirmDialog from "../components/ConfirmDialog.svelte";
 
   import { currentPage } from "../store/store.js";
   import { fade } from "../lib/motion.js";
@@ -36,4 +37,5 @@
   <SettingSlide />
   <ViewPicture />
   <Share />
+  <ConfirmDialog />
 </div>

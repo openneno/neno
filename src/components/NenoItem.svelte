@@ -13,6 +13,7 @@
     import {deleteOne, getFileFromIndexedDB} from "../request/fetchApi";
     import {searchNenoByTag} from "../store/store.js";
     import {showShareView} from "./Share.svelte";
+    import {confirmDialog} from "./ConfirmDialog.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -96,8 +97,16 @@
         });
     }
 
-    function deleteNeno(_id) {
-        if (!window.confirm("确定要删除这条笔记吗?")) {
+    async function deleteNeno(_id) {
+        const preview = plainContent(content).replace(/\s+/g, " ").trim();
+        const confirmed = await confirmDialog({
+            title: "删除这条笔记?",
+            message: "删除后无法恢复, 同步后其他设备上的这条笔记也会被删除。",
+            preview: preview.length > 120 ? `${preview.substring(0, 120)}...` : preview,
+            confirmText: "删除",
+            danger: true,
+        });
+        if (!confirmed) {
             return;
         }
         deleteOne({_id: _id})

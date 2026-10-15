@@ -19,6 +19,7 @@
     } from "../request/gitAccountApi.js";
     import {syncNow} from "../lib/sync/syncEngine.js";
     import QrCode from "./QrCode.svelte";
+    import {confirmDialog} from "./ConfirmDialog.svelte";
 
     $: configured = $githubStore.access_token !== "" && $githubStore.githubName !== "" && $githubStore.repoName !== "";
 
@@ -204,8 +205,15 @@
         }
     }
 
-    function clearConfig() {
-        if (!window.confirm("确定要退出登录吗? 本地笔记会保留, 但不再与仓库同步")) return;
+    async function clearConfig() {
+        const confirmed = await confirmDialog({
+            title: "退出登录?",
+            message: "本地笔记会保留, 但不再与 GitHub 仓库同步。之后可以随时重新登录。",
+            confirmText: "退出登录",
+            danger: true,
+            icon: "ri-logout-box-r-line",
+        });
+        if (!confirmed) return;
         $githubStore.access_token = "";
         $githubStore.githubName = "";
         $githubStore.repoName = "";
