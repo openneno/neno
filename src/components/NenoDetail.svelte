@@ -112,6 +112,7 @@
                     parent={nenoDetail.parent}
                     images={nenoDetail.images}
                     tags={nenoDetail.tags}
+                    collapsible={false}
                 />
 
                 <div class=" pl-6 ">

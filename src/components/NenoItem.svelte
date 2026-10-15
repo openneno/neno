@@ -25,6 +25,38 @@
     export let children = [];
     export let searchContent = "";
     export let tags = [];
+    //内容过长时折叠, 详情面板中的主笔记会关闭折叠
+    export let collapsible = true;
+
+    //折叠后显示的最大高度(约 10 行), 只超出一点时不折叠
+    const COLLAPSED_HEIGHT = 240;
+    const COLLAPSE_TOLERANCE = 60;
+    let overflowing = false;
+    let expanded = false;
+    let cardEl;
+
+    //搜索时展开全文, 避免匹配的内容被折叠
+    $: canCollapse = collapsible && overflowing && searchContent.trim() === "";
+    $: collapsed = canCollapse && !expanded;
+
+    //内容高度会随编辑, 窗口宽度变化, 用 ResizeObserver 持续判断是否需要折叠
+    function measure(node) {
+        const update = () => {
+            overflowing = node.scrollHeight > COLLAPSED_HEIGHT + COLLAPSE_TOLERANCE;
+        };
+        const observer = new ResizeObserver(update);
+        observer.observe(node);
+        update();
+        return {destroy: () => observer.disconnect()};
+    }
+
+    function toggleExpanded() {
+        expanded = !expanded;
+        //收起时如果卡片顶部已经滚出视野, 滚回卡片位置
+        if (!expanded && cardEl && cardEl.getBoundingClientRect().top < 0) {
+            cardEl.scrollIntoView({block: "start"});
+        }
+    }
 
     function plainContent(content) {
         let aa = document.createElement("div");
@@ -126,6 +158,7 @@
 </script>
 
 <div
+        bind:this={cardEl}
         class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-xs  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
 >
     <div class="flex justify-between relative ">
@@ -220,13 +253,26 @@
         />
     {:else}
         <div
-                class="neno-content list-decimal text-sm text-red-300"
-                style="height:revert"
+                class="neno-content list-decimal text-sm text-red-300 relative overflow-hidden"
+                style="max-height:{collapsed ? `${COLLAPSED_HEIGHT}px` : 'none'}"
         >
-            <div>
+            <div use:measure>
                 {@html praseTag(content, tags)}
             </div>
+            {#if collapsed}
+                <div class="absolute inset-x-0 bottom-0 h-16 pointer-events-none bg-linear-to-t from-white dark:from-gray-600"></div>
+            {/if}
         </div>
+        {#if canCollapse}
+            <button
+                    class="mt-1 text-sm text-primary-600 dark:text-primary-300 hover:underline focus:outline-hidden flex items-center"
+                    aria-expanded={expanded}
+                    on:click={toggleExpanded}
+            >
+                {expanded ? "收起" : "展开全文"}
+                <i class={expanded ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}></i>
+            </button>
+        {/if}
     {/if}
 
     <div class="flex flex-wrap flex-row  mt-4  pl-3">
