@@ -46,6 +46,7 @@ import {
     serializePinTags,
 } from "./repoLayout.js";
 import {onLocalChange} from "./signal.js";
+import {emitNoteChange} from "../noteEvents.js";
 
 //单次提交的大小限制, 超过时拆成多次提交
 const MAX_COMMIT_BYTES = 8 * 1024 * 1024;
@@ -54,6 +55,17 @@ const MAX_COMMIT_FILES = 200;
 const FETCH_CONCURRENCY = 6;
 //两端同时提交导致冲突时的重试次数
 const MAX_ATTEMPTS = 3;
+//一次拉取中逐条更新列表的最大数量
+const MAX_INCREMENTAL_CHANGES = 50;
+
+//本地修改后多久推送(连续修改会合并成一次提交)
+const PUSH_DELAY = 1000;
+//前台且最近有操作时检查远端的间隔
+const ACTIVE_POLL_INTERVAL = 3000;
+//前台但长时间没有操作时的间隔
+const IDLE_POLL_INTERVAL = 30 * 1000;
+//多久没有操作算作空闲
+const IDLE_AFTER = 2 * 60 * 1000;
 
 class ConflictError extends Error {
 }
@@ -84,13 +96,21 @@ async function loadState() {
 
 // ---------- 远端读取 ----------
 
+//上一次读取分支得到的 ETag, 分支没有变化时 GitHub 返回 304, 不计入请求配额
+let refCache = {key: "", etag: null, sha: null};
+
 async function resolveHead(state, retried = false) {
     if (!state.branch) {
         state.branch = (await api("GET", "")).data.default_branch;
     }
+    const key = `${repoKey()}#${state.branch}`;
     try {
-        const ref = await api("GET", `/git/ref/heads/${encodeURIComponent(state.branch)}`);
-        return ref.data.object.sha;
+        const ref = await api("GET", `/git/ref/heads/${encodeURIComponent(state.branch)}`, {
+            etag: refCache.key === key ? refCache.etag : undefined,
+        });
+        if (ref.notModified) return refCache.sha;
+        refCache = {key, etag: ref.etag, sha: ref.data.object.sha};
+        return refCache.sha;
     } catch (error) {
         if (retried) throw error;
         if (error.status === 409) {
@@ -164,11 +184,12 @@ function startProgress(total) {
 
 // ---------- 拉取与合并 ----------
 
-//返回本地数据是否发生了变化
+//返回 {changed: 本地数据是否变化, noteChanges: 每条笔记的变化}
 async function pull(state, head, dirtyMap, legacy) {
     const remote = await fetchTree(head);
     const base = state.baseShas;
     let localChanged = false;
+    const noteChanges = [];
 
     const dropDirty = async (dirty) => {
         await clearDirty(dirty);
@@ -200,6 +221,7 @@ async function pull(state, head, dirtyMap, legacy) {
                         await putNote(remoteNote);
                         await dropDirty(dirty);
                         localChanged = true;
+                        noteChanges.push({type: "add", note: remoteNote});
                     }
                     return;
                 }
@@ -210,6 +232,7 @@ async function pull(state, head, dirtyMap, legacy) {
                 await putNote(remoteNote);
                 if (dirty) await dropDirty(dirty);
                 localChanged = true;
+                noteChanges.push({type: local ? "update" : "add", note: remoteNote});
             } else if (info.kind === "pic") {
                 //本地新增或删除了这张图片, 以本地为准
                 if (dirty) return;
@@ -242,8 +265,13 @@ async function pull(state, head, dirtyMap, legacy) {
         //本地有新的修改时保留, 稍后重新推送
         if (dirty && !dirty.deleted) continue;
         if (dirty) await dropDirty(dirty);
-        if (info.kind === "note") await deleteNoteLocal(info.id);
-        else await deletePicLocal(info.id);
+        if (info.kind === "note") {
+            const old = await getNote(info.id);
+            await deleteNoteLocal(info.id);
+            if (old) noteChanges.push({type: "delete", note: old});
+        } else {
+            await deletePicLocal(info.id);
+        }
         localChanged = true;
     }
 
@@ -269,7 +297,7 @@ async function pull(state, head, dirtyMap, legacy) {
     state.baseShas = remote;
     state.headOid = head;
     state.initialized = true;
-    return localChanged;
+    return {changed: localChanged, noteChanges};
 }
 
 // ---------- 推送 ----------
@@ -439,10 +467,15 @@ async function syncOnce() {
     const dirtyList = await getDirtyList();
 
     if (head !== state.headOid || !state.initialized) {
-        const changed = await pull(state, head, new Map(dirtyList.map((entry) => [entry.key, entry])), legacy);
+        const {changed, noteChanges} = await pull(state, head, new Map(dirtyList.map((entry) => [entry.key, entry])), legacy);
         await saveSyncState(state);
         if (changed) {
-            reload.set({tag: Date.now(), action: "neno"});
+            //少量变化逐条更新列表; 首次同步等大量变化时整体刷新
+            if (noteChanges.length <= MAX_INCREMENTAL_CHANGES) {
+                noteChanges.forEach((change) => emitNoteChange(change.type, change.note));
+            } else {
+                reload.set({tag: Date.now(), action: "neno"});
+            }
             reload.set({tag: Date.now(), action: "nenoCount"});
         }
     } else if (dirtyList.length === 0) {
@@ -510,11 +543,35 @@ export async function syncNow() {
     }
 }
 
-let timer = null;
+let pushTimer = null;
 
-export function scheduleSync(delay = 2500) {
-    clearTimeout(timer);
-    timer = setTimeout(syncNow, delay);
+//本地修改后稍等片刻再推送, 把连续的修改合并成一次提交
+export function scheduleSync(delay = PUSH_DELAY) {
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(syncNow, delay);
+}
+
+//远端检查: 页面在前台时轮询, 最近有操作时 3 秒一次, 空闲时 30 秒一次, 后台时暂停
+let pollTimer = null;
+let lastActivity = Date.now();
+
+const isVisible = () => document.visibilityState === "visible";
+const isIdle = () => Date.now() - lastActivity > IDLE_AFTER;
+
+function schedulePoll(delay) {
+    clearTimeout(pollTimer);
+    if (!isVisible()) return;
+    pollTimer = setTimeout(async () => {
+        await syncNow();
+        schedulePoll();
+    }, delay ?? (isIdle() ? IDLE_POLL_INTERVAL : ACTIVE_POLL_INTERVAL));
+}
+
+function markActivity() {
+    const wasIdle = isIdle();
+    lastActivity = Date.now();
+    //从空闲中回来时尽快检查一次, 不用等 30 秒
+    if (wasIdle) schedulePoll(300);
 }
 
 let started = false;
@@ -522,17 +579,26 @@ let started = false;
 export function startSyncEngine() {
     if (started) return;
     started = true;
-    //本地修改后稍等片刻, 把连续的修改合并成一次提交
-    onLocalChange(() => scheduleSync());
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") syncNow();
-        else scheduleSync(300);
+    onLocalChange(() => {
+        markActivity();
+        scheduleSync();
     });
-    window.addEventListener("focus", () => scheduleSync(300));
-    window.addEventListener("online", () => scheduleSync(300));
-    //定时检查其他设备和扩展工具的提交
-    setInterval(syncNow, 60 * 1000);
-    syncNow();
+    for (const type of ["pointerdown", "keydown", "wheel", "touchstart"]) {
+        window.addEventListener(type, markActivity, {passive: true, capture: true});
+    }
+    document.addEventListener("visibilitychange", () => {
+        if (isVisible()) {
+            markActivity();
+            schedulePoll(300);
+        } else {
+            //切到后台: 立即推送本地改动, 停止轮询
+            clearTimeout(pollTimer);
+            syncNow();
+        }
+    });
+    window.addEventListener("focus", () => schedulePoll(300));
+    window.addEventListener("online", () => schedulePoll(300));
+    syncNow().then(() => schedulePoll());
 }
 
 //直接提交若干文本文件(用于写入 notion 同步的 workflow)

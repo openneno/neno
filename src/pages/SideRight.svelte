@@ -49,7 +49,7 @@
             if (change.type === "add") freshIds.add(change.note._id);
             if (change.type === "delete") removingIds.add(change.note._id);
             queue = queue.then(async () => {
-                nenoItems = await applyNoteChange(nenoItems, change, {addToList: true});
+                nenoItems = await applyNoteChange(nenoItems, change, {addToList: true, appendIfOlder: isEnd});
                 searchItems = await applyNoteChange(searchItems, change);
             }).catch((reason) => console.log(reason));
         });

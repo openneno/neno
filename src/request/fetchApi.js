@@ -2,7 +2,7 @@ import {reload} from "../store/store.js";
 import {getObjectId} from "../utils/objetid.js";
 import {getObjectURL} from "../utils/process.js";
 import {notifyLocalChange} from "../lib/sync/signal.js";
-import {emitNoteChange} from "../lib/noteEvents.js";
+import {broadcastDataChange, emitNoteChange} from "../lib/noteEvents.js";
 import {openDB} from 'idb';
 import dayjs from "dayjs";
 
@@ -321,6 +321,7 @@ export const pin = async (data) => {
     }
     await setPinTags(pinTags)
     await markDirty("pinTags", "pinTags")
+    broadcastDataChange()
 
     return {code: 200, message: "BIU", body: [...pinTags]}
 }
