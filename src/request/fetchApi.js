@@ -199,35 +199,24 @@ export const uploadPicIndexedDB = async (imageFile) => {
     return {key: _id, suffixName: suffixName}
 }
 
-export const getAllNeno = async (data) => {
-    let nenos = []
-    let count = 0;
-    let pageing = 0;
-    let cursor = await (await db).transaction("nenoitem").store.openCursor(null, "prev");
-
-    while ((cursor)) {
-
-        if (data.page !== 0 && pageing === 0) {
-            cursor = await (cursor).advance(data.page * 20 + 1)
-            pageing = 1
-        } else {
-            let result = cursor.value;
-
-            nenos = [...nenos, result]
-            if (++count > 20) {
-                for (let neno of nenos) {
-                    await getParentDetail(neno)
-                }
-                return {body: nenos}
-            }
-            cursor = await cursor.continue();
-        }
+//分页读取笔记(按 _id 倒序, 即创建时间倒序)
+//before: 上一页最后一条笔记的 _id, 从它之后继续读取; 用游标而不是偏移量,
+//这样翻页期间新增/删除笔记也不会出现重复或遗漏
+export const getAllNeno = async ({before = null, limit = 20} = {}) => {
+    const range = before ? IDBKeyRange.upperBound(before, true) : null
+    const nenos = []
+    let cursor = await (await db).transaction("nenoitem").store.openCursor(range, "prev")
+    //多读一条用来判断是否还有下一页
+    while (cursor && nenos.length <= limit) {
+        nenos.push(cursor.value)
+        cursor = await cursor.continue()
     }
-    //最后一页(不足 20 条)也要补充批注关系
-    for (let neno of nenos) {
+    const hasMore = nenos.length > limit
+    const page = nenos.slice(0, limit)
+    for (const neno of page) {
         await getParentDetail(neno)
     }
-    return {body: nenos}
+    return {body: page, hasMore}
 }
 
 async function getParentDetail(result) {

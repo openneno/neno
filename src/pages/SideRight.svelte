@@ -1,5 +1,5 @@
 <script>
-    import {onMount} from "svelte";
+    import {onMount, tick} from "svelte";
     import {fly, noteEnter, noteLeave} from "../lib/motion.js";
     import {searchNenoByTag, searchNenoByDate, reload, taskCountTag} from "../store/store.js";
 
@@ -19,7 +19,12 @@
     let isEnd = false; //所有内容加载完毕
     let searchText = "";
     let changeTag = "";
-    let page = 0;
+    const PAGE_SIZE = 20;
+    //已加载的最后一条笔记的 _id, 下一页从它之后开始
+    let lastId = null;
+    //每次重新加载时递增, 丢弃过期请求的结果
+    let loadToken = 0;
+    let sentinel;
     $: {
         if (flowClient !== undefined) {
             let flowClientBoundingClientRect = flowClient.getBoundingClientRect();
@@ -52,9 +57,7 @@
         const offDate = searchNenoByDate.subscribe((value) => {
             console.log("searchNenoByDate", value);
             if (value.date === "refresh") {
-                page = 0;
-                nenoItems = []
-                load();
+                load(true);
             } else if (value.date !== "") {
                 searchNeno("", value.date, "");
             } else {
@@ -73,51 +76,60 @@
         });
         const offReload = reload.subscribe((value) => {
             if (value.tag && value.action === "neno") {
-                page = 0;
-                isEnd = false
-                nenoItems = []
-                load();
+                load(true);
             }
         })
-        flowClient.addEventListener("scroll", function () {
-            if (
-                flowClient.scrollTop ===
-                flowClient.scrollHeight - flowClient.clientHeight &&
-                !isLoding &&
-                !isEnd
-            ) {
-                page += 1;
-                load();
-            }
-        });
+        //列表底部的哨兵进入视野(提前 600px)时加载下一页, 不依赖精确的滚动位置
+        const observer = new IntersectionObserver((entries) => {
+            if (!searching && entries.some((entry) => entry.isIntersecting)) load();
+        }, {root: flowClient, rootMargin: "0px 0px 600px 0px"});
+        observer.observe(sentinel);
         //切换页面时组件会被销毁, 取消订阅
         return () => {
             offNoteChange();
             offDate();
             offTag();
             offReload();
+            observer.disconnect();
         };
     });
 
-    function load() {
+    //reset: 从头重新加载(同步完成, 导入数据等)
+    async function load(reset = false) {
+        if (reset) {
+            lastId = null;
+            isEnd = false;
+            nenoItems = [];
+        } else if (isLoding || isEnd || isLodingError) {
+            return;
+        }
+        const token = ++loadToken;
         isLoding = true;
         isLodingError = false;
-        getAllNeno({page: page})
-            .then((respone) => {
-                let re = respone;
-                if (re.body.length === 0) {
-                    isEnd = true;
-                }
-                re.body.forEach((element) => {
-                    nenoItems = [...nenoItems, element];
-                });
-                isLoding = false;
-            })
-            .catch((reason) => {
-                console.log("reason", reason);
-                isLodingError = true;
-                isLoding = false;
-            });
+        try {
+            const re = await getAllNeno({before: lastId, limit: PAGE_SIZE});
+            if (token !== loadToken) return;
+            //已经在列表中的笔记(例如刚刚新建的)不再重复添加
+            const known = new Set(nenoItems.map((item) => item._id));
+            nenoItems = [...nenoItems, ...re.body.filter((item) => !known.has(item._id))];
+            if (re.body.length > 0) lastId = re.body[re.body.length - 1]._id;
+            isEnd = !re.hasMore;
+        } catch (reason) {
+            console.log("reason", reason);
+            if (token === loadToken) isLodingError = true;
+        } finally {
+            if (token === loadToken) isLoding = false;
+        }
+        if (token === loadToken) await maybeLoadMore();
+    }
+
+    //内容还没有填满屏幕时哨兵一直可见, IntersectionObserver 不会再次触发, 这里主动继续加载
+    async function maybeLoadMore() {
+        await tick();
+        if (searching || isLoding || isEnd || isLodingError) return;
+        const rect = sentinel?.getBoundingClientRect();
+        const box = flowClient?.getBoundingClientRect();
+        if (rect && box && rect.top < box.bottom + 600) load();
     }
 
     function searchNeno(searchText = "", searchDate = "", searchTag = "") {
@@ -155,6 +167,8 @@
         searching = false;
         searchItems = [];
         searchDateText = "";
+        //回到全部笔记时, 如果列表没有填满屏幕就继续加载
+        maybeLoadMore();
     }
 </script>
 
@@ -215,15 +229,15 @@
 
         <QuillEditor/>
 
-        {#if isLoding}
+        {#if isLoding && (searching || nenoItems.length === 0)}
             <div transition:fly={{ y: -8, duration: 200 }} class="mt-3">
                 <ProgressLine/>
             </div>
         {/if}
-        {#if isLodingError}
+        {#if isLodingError && nenoItems.length === 0}
             <div class="mt-3 flex items-center justify-between rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300">
                 读取笔记失败
-                <button class="btn btn-sm btn-ghost" on:click={() => load()}>重新获取</button>
+                <button class="btn btn-sm btn-ghost" on:click={() => load(true)}>重新获取</button>
             </div>
         {/if}
     </div>
@@ -262,8 +276,20 @@
                         <i class="ri-quill-pen-line mb-2 block text-3xl text-ink-3/60"></i>
                         还没有笔记, 在上面写下第一条想法吧
                     </div>
+                {:else if nenoItems.length > 0}
+                    <div class="flex h-12 items-center justify-center text-xs text-ink-3">
+                        {#if isLodingError}
+                            <button class="btn btn-sm btn-ghost" on:click={() => { isLodingError = false; load(); }}>加载失败, 点击重试</button>
+                        {:else if isLoding}
+                            <ProgressLine/>
+                        {:else if isEnd}
+                            已经到底了 · 共 {nenoItems.length} 条
+                        {/if}
+                    </div>
                 {/if}
             {/if}
+            <!-- 滚动到这里附近时加载下一页 -->
+            <div bind:this={sentinel} class="h-px" aria-hidden="true"></div>
         </div>
     </div>
 </div>
