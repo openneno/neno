@@ -1,6 +1,6 @@
 <script>
     import {onMount} from "svelte";
-    import {fly} from "svelte/transition";
+    import {fly, noteEnter, noteLeave} from "../lib/motion.js";
     import {searchNenoByTag, searchNenoByDate, reload, taskCountTag} from "../store/store.js";
 
     import QuillEditor from "../components/QuillEditor.svelte";
@@ -29,12 +29,17 @@
 
     let nenoItems = [];
     let searchItems = [];
+    const freshIds = new Set();
+    const removingIds = new Set();
 
     onMount(() => {
         //新增(包括批注), 修改, 删除都在这里统一更新主列表和搜索结果
         //按顺序处理, 避免连续的改动互相覆盖
         let queue = Promise.resolve();
         const offNoteChange = onNoteChange((change) => {
+            //只有这次新增/删除的笔记播放进出动画
+            if (change.type === "add") freshIds.add(change.note._id);
+            if (change.type === "delete") removingIds.add(change.note._id);
             queue = queue.then(async () => {
                 nenoItems = await applyNoteChange(nenoItems, change, {addToList: true});
                 searchItems = await applyNoteChange(searchItems, change);
@@ -192,7 +197,7 @@
         </div>
 
         <div
-                class="bg-gray-200 rounded-lg h-8 p-2 flex items-center shrink-0"
+                class="bg-gray-200 rounded-lg h-8 p-2 flex items-center shrink-0 transition-shadow duration-150 focus-within:ring-2 focus-within:ring-primary-300"
         >
             <i class="ri-search-2-line text-gray-400"></i>
             <input
@@ -241,16 +246,15 @@
     >
         {#if searchItems.length === 0}
             {#each nenoItems as item (item._id)}
-                <NenoItem
-                        {...item}
-                />
+                <div class="flow-root" in:noteEnter={{active: freshIds.has(item._id)}} out:noteLeave={{active: removingIds.has(item._id)}}>
+                    <NenoItem {...item}/>
+                </div>
             {/each}
         {:else}
             {#each searchItems as item (item._id)}
-                <NenoItem
-                        {...item}
-                        searchContent={searchText}
-                />
+                <div class="flow-root" out:noteLeave={{active: removingIds.has(item._id)}}>
+                    <NenoItem {...item} searchContent={searchText}/>
+                </div>
             {/each}
         {/if}
     </div>

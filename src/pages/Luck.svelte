@@ -1,6 +1,6 @@
 <script>
     import {onMount} from "svelte";
-    import {fly} from "svelte/transition";
+    import {fly} from "../lib/motion.js";
 
     import PageHeader from "../components/PageHeader.svelte";
     import NenoItem from "../components/NenoItem.svelte";

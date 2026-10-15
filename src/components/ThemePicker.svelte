@@ -1,6 +1,7 @@
 <script>
     import {settingStore} from "../store/store.js";
     import {THEME_COLORS, THEME_MODES, normalizeSetting, updateTheme} from "../lib/theme.js";
+    import {scale} from "../lib/motion.js";
 
     $: setting = normalizeSetting($settingStore);
 </script>
@@ -38,12 +39,12 @@
                         on:click={() => updateTheme({themeColor: color.key})}
                 >
                     <span
-                            class="w-9 h-9 rounded-full flex items-center justify-center text-white ring-offset-2 ring-offset-gray-100 dark:ring-offset-black transition-shadow group-hover:ring-2 ring-gray-300"
+                            class="w-9 h-9 rounded-full flex items-center justify-center text-white ring-offset-2 ring-offset-gray-100 dark:ring-offset-black transition-[box-shadow,transform] duration-150 group-hover:ring-2 group-hover:scale-110 ring-gray-300"
                             class:ring-2={setting.themeColor === color.key}
                             style="background:{color.swatch};{setting.themeColor === color.key ? `--tw-ring-color:${color.swatch}` : ''}"
                     >
                         {#if setting.themeColor === color.key}
-                            <i class="ri-check-line ri-lg"></i>
+                            <i class="ri-check-line ri-lg" in:scale={{ start: 0.5, duration: 160 }}></i>
                         {/if}
                     </span>
                     <span class="text-xs mt-1 text-gray-600 dark:text-slate-300">{color.name}</span>

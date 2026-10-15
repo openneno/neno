@@ -7,7 +7,7 @@
 </script>
 
 <script>
-    import { fly, fade } from "svelte/transition";
+    import { fly, fade } from "../lib/motion.js";
     import SideLeft from "./SideLeft.svelte";
     import {currentPage} from "../store/store.js";
 

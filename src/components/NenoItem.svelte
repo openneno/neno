@@ -4,7 +4,7 @@
 
 <script>
     import {createEventDispatcher} from "svelte";
-    import {fade} from "svelte/transition";
+    import {fade, pop} from "../lib/motion.js";
 
     import dayjs from 'dayjs'
     import {showNeno} from "./NenoDetail.svelte";
@@ -32,6 +32,7 @@
     const COLLAPSED_HEIGHT = 240;
     const COLLAPSE_TOLERANCE = 60;
     let overflowing = false;
+    let fullHeight = 0;
     let expanded = false;
     let cardEl;
 
@@ -42,7 +43,8 @@
     //内容高度会随编辑, 窗口宽度变化, 用 ResizeObserver 持续判断是否需要折叠
     function measure(node) {
         const update = () => {
-            overflowing = node.scrollHeight > COLLAPSED_HEIGHT + COLLAPSE_TOLERANCE;
+            fullHeight = node.scrollHeight;
+            overflowing = fullHeight > COLLAPSED_HEIGHT + COLLAPSE_TOLERANCE;
         };
         const observer = new ResizeObserver(update);
         observer.observe(node);
@@ -125,7 +127,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="neno-tag leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="neno-tag transition-colors duration-150 leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -159,7 +161,7 @@
 
 <div
         bind:this={cardEl}
-        class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-xs  transition-shadow duration-2000 ease-in-out   hover:shadow-lg "
+        class="w-full p-4 rounded-lg bg-white dark:bg-gray-600    mb-4 shadow-xs  transition-shadow duration-200 ease-out hover:shadow-md "
 >
     <div class="flex justify-between relative ">
         <div class="text-sm text-gray-500 dark:text-slate-300">
@@ -181,7 +183,7 @@
                             toggleMenu();
                         }, 150);
                     }}
-                        in:fade={{ duration: 100 }}
+                        in:pop
                         out:fade={{ duration: 100 }}
                         bind:this={menuList}
                         class=" absolute w-16  z-10 bg-white dark:bg-gray-900 dark:text-white shadow-xl rounded-lg flex flex-col justify-center   border-solid space-y-1 pt-2 pb-2 focus:outline-hidden"
@@ -253,14 +255,15 @@
         />
     {:else}
         <div
-                class="neno-content list-decimal text-sm text-red-300 relative overflow-hidden"
-                style="max-height:{collapsed ? `${COLLAPSED_HEIGHT}px` : 'none'}"
+                class="neno-content list-decimal text-sm text-red-300 relative overflow-hidden neno-fold"
+                style="max-height:{canCollapse ? `${collapsed ? COLLAPSED_HEIGHT : fullHeight}px` : 'none'}"
         >
             <div use:measure>
                 {@html praseTag(content, tags)}
             </div>
-            {#if collapsed}
-                <div class="absolute inset-x-0 bottom-0 h-16 pointer-events-none bg-linear-to-t from-white dark:from-gray-600"></div>
+            {#if canCollapse}
+                <div class="absolute inset-x-0 bottom-0 h-16 pointer-events-none bg-linear-to-t from-white dark:from-gray-600 transition-opacity duration-300"
+                     class:opacity-0={!collapsed}></div>
             {/if}
         </div>
         {#if canCollapse}
@@ -270,7 +273,7 @@
                     on:click={toggleExpanded}
             >
                 {expanded ? "收起" : "展开全文"}
-                <i class={expanded ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}></i>
+                <i class="ri-arrow-down-s-line inline-block transition-transform duration-300" class:rotate-180={expanded}></i>
             </button>
         {/if}
     {/if}
@@ -282,7 +285,7 @@
                         on:click={() => {
                         showPictureView(images, index);
                     }}
-                        class="w-32 h-32 rounded-md mr-2 mb-2 object-cover"
+                        class="w-32 h-32 rounded-md mr-2 mb-2 object-cover cursor-zoom-in transition-transform duration-200 hover:scale-[1.03]"
                         src={value}
                         alt=""
                 />

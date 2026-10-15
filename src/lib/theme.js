@@ -1,5 +1,6 @@
 import {writable} from "svelte/store";
 import {settingStore} from "../store/store.js";
+import {prefersReducedMotion} from "./motion.js";
 
 //可选的主题色, key 对应 main.css 中的 [data-theme] 色板, swatch 用于设置页预览
 export const THEME_COLORS = [
@@ -38,9 +39,20 @@ function resolveDark(setting) {
     return setting.themeMode === "dark" || (setting.themeMode === "system" && darkQuery.matches);
 }
 
+let appliedKey = null;
+let switchTimer = null;
+
 function applyTheme(setting) {
     const dark = resolveDark(setting);
     const root = document.documentElement;
+    //首次应用时不做渐变, 之后切换主题色或深浅模式时颜色平滑过渡
+    const key = `${setting.themeColor}|${dark}`;
+    if (appliedKey !== null && appliedKey !== key && !prefersReducedMotion()) {
+        root.classList.add("theme-switching");
+        clearTimeout(switchTimer);
+        switchTimer = setTimeout(() => root.classList.remove("theme-switching"), 350);
+    }
+    appliedKey = key;
     root.dataset.theme = setting.themeColor;
     root.classList.toggle("dark", dark);
     root.style.colorScheme = dark ? "dark" : "light";

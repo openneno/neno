@@ -1,6 +1,6 @@
 <script>
     import {onMount} from "svelte";
-    import {fly} from "svelte/transition";
+    import {fly} from "../lib/motion.js";
     import dayjs from "dayjs";
 
     import PageHeader from "../components/PageHeader.svelte";
@@ -138,7 +138,7 @@
                             class="text-sm text-gray-500 hover:text-primary-600 dark:text-slate-300 focus:outline-hidden flex items-center"
                             on:click={nextBatch}
                     >
-                        <i class="ri-refresh-line mr-1"></i>换一批
+                        <i class="ri-refresh-line mr-1 inline-block transition-transform duration-500" style="transform: rotate({batch * 360}deg)"></i>换一批
                     </button>
                 {/if}
             </div>

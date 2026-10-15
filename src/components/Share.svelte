@@ -26,7 +26,7 @@
 </script>
 
 <script>
-    import { fly, fade } from "svelte/transition";
+    import { fly, fade, scale } from "../lib/motion.js";
     import { getObjectURL } from "../utils/process";
     import { getFileFromIndexedDB } from "../request/fetchApi";
     import dayjs from 'dayjs'
@@ -146,6 +146,7 @@
         }}
     >
         <div
+            in:scale={{ start: 0.96, duration: 200 }}
             class=" overflow-scroll bg-gray-100 rounded-sm  shadow-lg"
             style="width:480px"
             bind:this={cardcontainer}

@@ -8,7 +8,7 @@
 </script>
 
 <script>
-    import { fly, fade } from "svelte/transition";
+    import { fly, fade, noteEnter, noteLeave } from "../lib/motion.js";
     import QuillEditor from "./QuillEditor.svelte";
     import NenoItem from "./NenoItem.svelte";
     import ProgressLine from "./ProgressLine.svelte";
@@ -117,8 +117,9 @@
 
                 <div class=" pl-6 ">
                     {#each nenoDetail.children as item (item._id)}
-                        <!-- content here -->
-                        <NenoItem {...item}/>
+                        <div class="flow-root" in:noteEnter={{active: true}} out:noteLeave={{active: true}}>
+                            <NenoItem {...item}/>
+                        </div>
                     {/each}
                 </div>
                 <QuillEditor parentId={nenoDetail._id}/>

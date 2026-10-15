@@ -7,7 +7,7 @@
 </script>
 
 <script>
-    import { fade } from "svelte/transition";
+    import { fade, scale } from "../lib/motion.js";
     import { getObjectURL } from "../utils/process";
     import { getFileFromIndexedDB } from "../request/fetchApi";
 
@@ -62,6 +62,7 @@
         >
             {#await getPIcUrl(showImageInfo) then value}
                 <img
+                    in:scale={{ start: 0.96, duration: 200 }}
                     class=" w-full  max-h-full object-cover  shadow-lg"
                     src={value}
                     alt=""
@@ -75,7 +76,8 @@
         >
             {#each imageFilesIn as item, index}
                 <div
-                    class="w-16 h-16 box-border  border-2 rounded-sm mr-2 mb-2 relative overflow-hidden"
+                    class="w-16 h-16 box-border  border-2 rounded-sm mr-2 mb-2 relative overflow-hidden cursor-pointer transition-transform duration-150 hover:scale-105"
+                    class:border-primary-400={showImageInfo === item}
                     on:click|stopPropagation={() => {
                         showImageInfo = imageFilesIn[index];
                     }}

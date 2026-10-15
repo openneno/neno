@@ -1,6 +1,7 @@
 <script>
     import dayjs from "dayjs";
     import { createEventDispatcher } from "svelte";
+    import { fade } from "../lib/motion.js";
     export let countDate = {};
     const dispatch = createEventDispatcher();
     let weekCount = 12;
@@ -55,7 +56,7 @@
                                 day.date === toDay ? "" : day.date
                             );
                         }}
-                            class="rounded-xs w-4 h-4  overflow-visible  "
+                            class="rounded-xs w-4 h-4 overflow-visible cursor-pointer transition-transform duration-150 hover:scale-125"
                             class:border-primary-500={day.date === toDay}
                             class:border-soild={day.date === toDay}
                             class:bg-gray-300={day.count === 0}
@@ -71,6 +72,7 @@
                         }}></div>
                     {#if day.hover}
                         <div
+                            transition:fade={{ duration: 120 }}
                             class="absolute  bg-gray-800 text-white text-sm rounded-xs pl-2 pr-2 pt-1 pb-1 z-50 w-48 flex justify-center items-center"
                             style="top:-2rem;z-index: 9999; overflow: visible;"
                         >

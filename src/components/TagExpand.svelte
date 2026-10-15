@@ -1,6 +1,7 @@
 <script>
     import { createEventDispatcher} from "svelte";
     import TagExpand from "./TagExpand.svelte";
+    import {slide} from "../lib/motion.js";
     export let tag = "";
     export let selectionTag = "";
     export let parentTag = "";
@@ -70,11 +71,7 @@
                         showSub = !showSub;
                     }}
                 >
-                    {#if showSub}
-                        <i class="ri-arrow-right-s-line"></i>
-                    {:else}
-                        <i class="ri-arrow-down-s-line"></i>
-                    {/if}
+                    <i class="ri-arrow-right-s-line inline-block transition-transform duration-200" class:rotate-90={showSub}></i>
                 </button>
             {/if}
         </div>
@@ -118,6 +115,7 @@
         </div>
     {/if}
     {#if children.length !== 0 && showSub}
+        <div transition:slide={{duration: 180}}>
         {#each children as item}
             <div class="ml-2">
                 <TagExpand
@@ -139,5 +137,6 @@
                 />
             </div>
         {/each}
+        </div>
     {/if}
 </div>

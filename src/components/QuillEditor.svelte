@@ -1,7 +1,7 @@
 <script>
     import {onMount} from "svelte";
     import {createEventDispatcher} from "svelte";
-    import {fly} from "svelte/transition";
+    import {fly} from "../lib/motion.js";
     import {cubicOut} from "svelte/easing";
 
     import Quill from "quill";
@@ -358,7 +358,7 @@
 </script>
 
 <div
-        class="border-gray-200 border-solid dark:border-gray-500 border-4 rounded-lg mt-2 flex flex-col justify-start  pb-2 bg-white dark:bg-gray-600 dark:text-slate-100 relative"
+        class="border-gray-200 border-solid dark:border-gray-500 border-4 rounded-lg mt-2 transition-colors duration-200 focus-within:border-primary-200 dark:focus-within:border-primary-800 flex flex-col justify-start  pb-2 bg-white dark:bg-gray-600 dark:text-slate-100 relative"
 >
     <div bind:this={editor} id="editor" class="list-decimal list-inside"></div>
     {#if tagTips.length > 0 && showTip}

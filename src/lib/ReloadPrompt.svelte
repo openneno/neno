@@ -1,5 +1,6 @@
 <script lang="ts">
     import { useRegisterSW } from 'virtual:pwa-register/svelte'
+    import { fly } from './motion.js'
 
     // replaced dynamically
     const buildDate = '__DATE__'
@@ -39,6 +40,7 @@
     <div
             class="pwa-toast"
             role="alert"
+            transition:fly={{ y: 20, duration: 200 }}
     >
         <div class="message">
             {#if $offlineReady}

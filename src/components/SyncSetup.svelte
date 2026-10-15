@@ -1,6 +1,6 @@
 <script>
     import {onMount} from "svelte";
-    import {fade} from "svelte/transition";
+    import {fade} from "../lib/motion.js";
     import dayjs from "dayjs";
     import {githubStore, syncStatus} from "../store/store.js";
     import {
@@ -281,7 +281,7 @@
 
         <div class="flex flex-wrap gap-2">
             <button class={secondaryButton} disabled={$syncStatus.syncing || $syncStatus.authError} on:click={syncNow}>
-                <i class="ri-refresh-line mr-1"></i>立即同步
+                <i class="ri-refresh-line mr-1 inline-block" class:animate-spin={$syncStatus.syncing}></i>立即同步
             </button>
             <button class={secondaryButton} on:click={() => (showShare = !showShare)}>
                 <i class="ri-qr-code-line mr-1"></i>同步到其他设备

@@ -10,6 +10,7 @@
   import Share from "../components/Share.svelte";
 
   import { currentPage } from "../store/store.js";
+  import { fade } from "../lib/motion.js";
 </script>
 
 <div class=" overflow-visible">
@@ -23,15 +24,19 @@
       >
         <SideLeft />
       </div>
-      {#if $currentPage === "neno"}
-        <SideRight />
-      {:else if $currentPage === "setting"}
-        <Setting />
-      {:else if $currentPage === "luck"}
-        <Luck />
-      {:else}
-        <Daily />
-      {/if}
+      {#key $currentPage}
+        <div class="flex-1 flex min-w-0" in:fade={{ duration: 160 }}>
+          {#if $currentPage === "neno"}
+            <SideRight />
+          {:else if $currentPage === "setting"}
+            <Setting />
+          {:else if $currentPage === "luck"}
+            <Luck />
+          {:else}
+            <Daily />
+          {/if}
+        </div>
+      {/key}
     </div>
     <NenoDetail />
     <SettingSlide />
