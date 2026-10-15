@@ -93,7 +93,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="  whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="neno-tag leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -220,12 +220,12 @@
         />
     {:else}
         <div
-                class="list-decimal text-sm text-red-300  whitespace-nowrap "
+                class="neno-content list-decimal text-sm text-red-300"
                 style="height:revert"
         >
-            <p class="whitespace-nowrap ">
+            <div>
                 {@html praseTag(content, tags)}
-            </p>
+            </div>
         </div>
     {/if}
 
@@ -245,15 +245,15 @@
     </div>
     {#if parent !== undefined && parent != null}
         <button
-                class="flex items-center space-x-1  hover:shadow-xs focus:outline-hidden"
+                class="flex items-center space-x-1 max-w-full min-w-0 text-left hover:shadow-xs focus:outline-hidden"
                 on:click={() => {
                 showNeno(parent._id, false);
             }}
         >
             <i
-                    class="ri-arrow-up-circle-fill transform  -rotate-45 text-gray-500"></i>
+                    class="ri-arrow-up-circle-fill transform -rotate-45 text-gray-500 shrink-0"></i>
             <div
-                    class="text-gray-500 text-sm"
+                    class="text-gray-500 text-sm min-w-0 break-all"
                     style="-webkit-line-clamp: 1;
         text-overflow: ellipsis;
         display: -webkit-box;
@@ -267,15 +267,15 @@
 
     {#each children as item}
         <button
-                class="flex items-center  space-x-1   hover:shadow-xs focus:outline-hidden"
+                class="flex items-center space-x-1 max-w-full min-w-0 text-left hover:shadow-xs focus:outline-hidden"
                 on:click={() => {
                 showNeno(item._id, false);
             }}
         >
             <i
-                    class="ri-arrow-down-circle-fill transform  -rotate-45 text-gray-500"></i>
+                    class="ri-arrow-down-circle-fill transform -rotate-45 text-gray-500 shrink-0"></i>
             <div
-                    class="text-gray-500 text-sm"
+                    class="text-gray-500 text-sm min-w-0 break-all"
                     style="-webkit-line-clamp: 1;
             text-overflow: ellipsis;
             display: -webkit-box;

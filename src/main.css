@@ -175,3 +175,26 @@ h1, h2, h3, h4, h5, h6 {
     list-style-type: decimal;
     padding-left: 0;
 }
+
+/* 笔记内容: 正常换行, 过长的链接/英文/数字也能在任意位置折行, 不会撑出卡片 */
+.neno-content {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.neno-content pre {
+    white-space: pre-wrap;
+}
+.neno-content img,
+.neno-content video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 标签整体换到下一行, 只有比一行还长时才在标签内部折行 */
+.neno-tag {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: bottom;
+    overflow-wrap: anywhere;
+}

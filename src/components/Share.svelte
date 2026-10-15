@@ -115,7 +115,7 @@
                 //截取前段的字符
                 pContent += rawContent.substring(0, breakIndex);
                 //加上替换的内容
-                pContent += `<span  style="padding:2px" class="whitespace-nowrap leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
+                pContent += `<span  style="padding:2px" class="neno-tag leading-6 mr-1 cursor-pointer rounded-xs bg-primary-500 text-white text-sm  hover:bg-primary-600" id="tagtag" onclick="tagClick(this)">
 	${rawtag}
 	</span>`;
                 rawContent = rawContent.substring(breakIndex + rawtag.length);
@@ -159,11 +159,11 @@
                     {dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")}
                 </div>
                 <div
-                    class="list-decimal text-sm text-red-300  ql-editor max-w-lg "
+                    class="neno-content list-decimal text-sm text-red-300  ql-editor max-w-lg "
                 >
-                    <p class="whitespace-normal">
+                    <div>
                         {@html praseTag(content, tags)}
-                    </p>
+                    </div>
                 </div>
                 <div>
                     {#each images as {  key }, index (index)}
