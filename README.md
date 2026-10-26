@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/neno.png" width="200" alt="NENO" />
+  <img src="readmepic/hero.jpg" alt="NENO: 记下此刻, 与未来的自己重逢" />
 </p>
 
 <h1 align="center">NENO</h1>
@@ -10,7 +10,9 @@
 </p>
 
 <p align="center">
-  <a href="https://neno.pages.dev/"><b>立即体验</b></a>
+  <a href="https://neno.pages.dev/"><b>立即体验</b></a> ·
+  <a href="https://github.com/openneno/neno-chrome-plugin">浏览器插件</a> ·
+  <a href="#自己部署">自己部署</a>
 </p>
 
 ---
@@ -28,6 +30,10 @@
 - **备份**: 完整导出所有笔记和图片, 也可以从备份恢复
 - **Notion 同步**: 通过 GitHub Action 把笔记同步到 Notion
 
+<p align="center">
+  <img src="readmepic/mobile.jpg" alt="手机端: 随手记录、那年今日、分享卡片" />
+</p>
+
 ## 开始使用
 
 1. 打开 [neno.pages.dev](https://neno.pages.dev/), 进入 **设置 → 同步**
@@ -39,6 +45,10 @@
 > 二维码、同步链接和 neno token 中包含你的 GitHub Token, 请不要分享给他人。
 
 ## 扩展工具
+
+<p align="center">
+  <img src="readmepic/extension.jpg" alt="浏览器插件: 选中文字一键保存到 neno" />
+</p>
 
 在 **设置 → 同步** 中点击「复制 neno token」, 即可在以下工具中使用同一个笔记仓库:
 
