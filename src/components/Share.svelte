@@ -36,6 +36,9 @@
     let show = false;
     let created_at = "";
     let html = "";
+    //卡片固定 400px 宽, 窄屏时按预览区域的宽度(去掉左右各 20px 内边距)整体缩小
+    let previewArea = 0;
+    $: previewZoom = previewArea ? Math.min(1, (previewArea - 40) / 400) : 1;
     let imageUrls = [];
     let template = "paper";
     let card;
@@ -181,9 +184,9 @@
                 </button>
             </header>
 
-            <div class="min-h-0 flex-1 overflow-y-auto bg-surface-2 px-5 py-6">
+            <div class="min-h-0 flex-1 overflow-y-auto bg-surface-2 px-5 py-6" bind:clientWidth={previewArea}>
                 <!-- 预览按容器宽度缩放, 导出时使用原始尺寸 -->
-                <div class="share-preview mx-auto">
+                <div class="share-preview mx-auto" style:zoom={previewZoom}>
                     <ShareCard
                             bind:card
                             {created_at}
@@ -240,13 +243,7 @@
 {/if}
 
 <style>
-    /* 卡片固定 400px 宽, 窄屏时整体缩小预览 */
     .share-preview {
         width: 400px;
-    }
-    @media (max-width: 460px) {
-        .share-preview {
-            zoom: calc((100vw - 72px) / 400px);
-        }
     }
 </style>
