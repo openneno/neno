@@ -1,6 +1,7 @@
 <script>
-    import {onMount, tick} from "svelte";
+    import {onDestroy, onMount, tick} from "svelte";
     import {shortUrl} from "../lib/renderContent.js";
+    import {highlightTags} from "../lib/tagHighlight.js";
     import {createEventDispatcher} from "svelte";
     import {fly} from "../lib/motion.js";
     import {cubicOut} from "svelte/easing";
@@ -33,6 +34,8 @@
     let toolbar = "";
 
     let quillEditor;
+    let stopTagHighlight = () => {};
+    onDestroy(() => stopTagHighlight());
     let showTip = false;
     let tipClient = "";
 
@@ -89,6 +92,7 @@
         quillEditor = new Quill(editor, options);
         const delta = quillEditor.clipboard.convert({html: content});
         quillEditor.setContents(delta, "silent");
+        stopTagHighlight = highlightTags(quillEditor);
         quillEditor.focus();
         if (content.length !== 0) {
             isContentEmpty = false;

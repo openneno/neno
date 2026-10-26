@@ -545,6 +545,16 @@ html.theme-switching *::after {
     border-left: 2.5px solid color-mix(in oklab, var(--primary-500) 50%, transparent);
     color: var(--ink-2);
 }
+/* 编辑器中已经形成的 #标签, 由 lib/tagHighlight.js 标记, 配色与笔记中的标签一致 */
+::highlight(neno-tag) {
+    color: var(--primary-700);
+    background-color: var(--primary-50);
+}
+/* 部分浏览器的 ::highlight 不支持 color-mix, 深色模式直接使用色板中的深色 */
+.dark ::highlight(neno-tag) {
+    color: var(--primary-300);
+    background-color: var(--primary-950);
+}
 /* 编辑器的链接浮层 */
 .link-pop .link-url {
     display: inline-flex;
