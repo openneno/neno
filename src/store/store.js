@@ -25,7 +25,8 @@ export const notionStore = writable({
 
 });
 export const countStore = writable({ tagCount: 0, nenoCount: 0, dayCount: 0, dateCount: {} });
-export const tagStore = writable({ pinTags: [], allTags: [] });
+//icons: 标签图标 {"#读书": "📚"}
+export const tagStore = writable({ pinTags: [], allTags: [], icons: {} });
 export const searchNenoByDate = writable({ date: "" });
 export const searchNenoByTag = writable({ tag: "" });
 export const reload = writable({ tag: 0, action: "" });

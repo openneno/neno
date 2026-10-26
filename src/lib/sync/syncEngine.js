@@ -17,13 +17,13 @@ import {
     getDirtyList,
     getNote,
     getPic,
-    getPinTags,
     getSyncState,
+    getTagSettings,
     markDirty,
     putNote,
     putPic,
     saveSyncState,
-    setPinTags,
+    setTagSettings,
     takeLegacyTasks,
 } from "../../request/fetchApi.js";
 import {
@@ -41,6 +41,7 @@ import {
     notePath,
     noteSummary,
     noteTime,
+    parsePinTags,
     picPath,
     serializeNote,
     serializePinTags,
@@ -243,12 +244,20 @@ async function pull(state, head, dirtyMap, legacy) {
                 localChanged = true;
             } else if (info.kind === "pinTags") {
                 if (!dirty && base[path] === undefined
-                    && await gitBlobSha(textToBytes(serializePinTags(await getPinTags()))) === sha) {
+                    && await gitBlobSha(textToBytes(serializePinTags(await getTagSettings()))) === sha) {
                     return;
                 }
-                const remoteTags = JSON.parse(bytesToText(await fetchBlob(sha))).tags || [];
-                //两端都修改了置顶标签时取并集
-                await setPinTags(dirty ? new Set([...(await getPinTags()), ...remoteTags]) : remoteTags);
+                const remoteSettings = parsePinTags(bytesToText(await fetchBlob(sha)));
+                if (dirty) {
+                    //两端都修改了标签设置时: 置顶标签取并集, 同一个标签的图标以本地为准
+                    const local = await getTagSettings();
+                    await setTagSettings({
+                        tags: new Set([...local.tags, ...remoteSettings.tags]),
+                        icons: {...remoteSettings.icons, ...local.icons},
+                    });
+                } else {
+                    await setTagSettings(remoteSettings);
+                }
                 localChanged = true;
             }
         });
@@ -289,7 +298,8 @@ async function pull(state, head, dirtyMap, legacy) {
                 }
             }
         }
-        if (!(PIN_TAGS_PATH in remote) && (await getPinTags()).length > 0) {
+        const settings = await getTagSettings();
+        if (!(PIN_TAGS_PATH in remote) && (settings.tags.length > 0 || Object.keys(settings.icons).length > 0)) {
             await markDirty("pinTags", "pinTags");
         }
     }
@@ -381,7 +391,7 @@ async function collectChanges(state) {
                 }
             }
         } else if (entry.kind === "pinTags") {
-            const bytes = textToBytes(serializePinTags(await getPinTags()));
+            const bytes = textToBytes(serializePinTags(await getTagSettings()));
             const sha = await gitBlobSha(bytes);
             if (base[PIN_TAGS_PATH] !== sha) change = {entry, path: PIN_TAGS_PATH, bytes, sha};
         }

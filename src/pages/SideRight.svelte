@@ -10,6 +10,7 @@
     import {applyNoteChange, onNoteChange} from "../lib/noteEvents.js";
     import ProgressLine from "../components/ProgressLine.svelte";
     import PageHeader from "../components/PageHeader.svelte";
+    import TagIcon from "../components/TagIcon.svelte";
 
     let flowClient;
     let innerHeight = 0;
@@ -179,7 +180,7 @@
             <svelte:fragment slot="title">
                 {#if changeTag !== ""}
                     <span class="inline-flex h-7 min-w-0 items-center gap-1 rounded-lg bg-primary-500/10 pr-1 pl-2.5 text-[15px] font-semibold text-primary-700 dark:text-primary-300">
-                        <i class="ri-hashtag text-[13px]"></i>
+                        <TagIcon tag={$searchNenoByTag.tag} iconClass="text-[13px]"/>
                         <span class="truncate">{changeTag}</span>
                         <button
                                 class="flex size-5 items-center justify-center rounded-md hover:bg-primary-500/15"

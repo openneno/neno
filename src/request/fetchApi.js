@@ -3,6 +3,7 @@ import {getObjectId} from "../utils/objetid.js";
 import {getObjectURL} from "../utils/process.js";
 import {notifyLocalChange} from "../lib/sync/signal.js";
 import {broadcastDataChange, emitNoteChange} from "../lib/noteEvents.js";
+import {normalizeIcons} from "../lib/sync/repoLayout.js";
 import {openDB} from 'idb';
 import dayjs from "dayjs";
 
@@ -95,17 +96,36 @@ export const putPic = async (_id, file) => (await db).put('nenoPic', {_id, file,
 
 export const deletePicLocal = async (_id) => (await db).delete('nenoPic', _id)
 
-export const getPinTags = async () => {
+//标签设置(置顶标签和标签图标)只保存一条记录: {_id: "pinTags", tags, icons}
+//旧版本的记录没有 icons, 读取时补上空对象
+export const getTagSettings = async () => {
     const records = await (await db).getAll('nenoPinTags')
-    return records.length > 0 ? (records[0].tags || []) : []
+    const record = records[0] || {}
+    return {tags: record.tags || [], icons: normalizeIcons(record.icons)}
 }
 
-//置顶标签只保存一条记录
-export const setPinTags = async (tags) => {
+export const setTagSettings = async ({tags, icons}) => {
     const tx = (await db).transaction('nenoPinTags', 'readwrite')
     await tx.store.clear()
-    await tx.store.put({_id: "pinTags", tags: [...tags]})
+    await tx.store.put({_id: "pinTags", tags: [...tags], icons: normalizeIcons(icons)})
     await tx.done
+}
+
+export const getPinTags = async () => (await getTagSettings()).tags
+
+//只修改置顶标签, 保留标签图标
+export const setPinTags = async (tags) => setTagSettings({...(await getTagSettings()), tags})
+
+//设置或清除(icon 为空)标签的图标
+export const setTagIcon = async (tag, icon) => {
+    const settings = await getTagSettings()
+    const icons = {...settings.icons}
+    if (icon) icons[tag] = icon
+    else delete icons[tag]
+    await setTagSettings({...settings, icons})
+    await markDirty("pinTags", "pinTags")
+    broadcastDataChange()
+    return icons
 }
 
 
@@ -169,11 +189,18 @@ export const imporFileTotIndexedDB = async (allData) => {
         }
     }
     const importedPins = new Set()
+    let importedIcons = {}
     for (const element of allData.allNenoPinTags || []) {
         (element.tags || []).forEach((tag) => importedPins.add(tag))
+        importedIcons = {...importedIcons, ...normalizeIcons(element.icons)}
     }
-    if (importedPins.size > 0) {
-        await setPinTags(new Set([...(await getPinTags()), ...importedPins]))
+    if (importedPins.size > 0 || Object.keys(importedIcons).length > 0) {
+        //已有的图标优先, 备份里的只补充没有设置过的
+        const settings = await getTagSettings()
+        await setTagSettings({
+            tags: new Set([...settings.tags, ...importedPins]),
+            icons: {...importedIcons, ...settings.icons},
+        })
         await markDirty("pinTags", "pinTags")
     }
     for (const element of allData.allNenoPic || []) {
@@ -414,6 +441,15 @@ export const renameTag = async (data) => {
     for (const _id of changed) {
         await markDirty("note", _id)
         emitNoteChange("update", await getNote(_id))
+    }
+    //图标跟着标签走
+    const settings = await getTagSettings()
+    if (settings.icons[data.oldTag] && data.oldTag !== data.newTag) {
+        const icons = {...settings.icons, [data.newTag]: settings.icons[data.oldTag]}
+        delete icons[data.oldTag]
+        await setTagSettings({...settings, icons})
+        await markDirty("pinTags", "pinTags")
+        broadcastDataChange()
     }
     reload.set({tag: Date.now(), action: "nenoCount"})
     return {code: 200, message: "BIU", body: {}}

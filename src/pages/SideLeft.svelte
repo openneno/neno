@@ -1,5 +1,5 @@
 <script>
-    import {count, pin, pins, renameTag, tags} from "../request/fetchApi";
+    import {count, getTagSettings, pin, pins, renameTag, setTagIcon, tags} from "../request/fetchApi";
     import {
         countStore,
         currentPage,
@@ -10,6 +10,8 @@
     } from "../store/store.js";
     import GreenMap from "../components/GreenMap.svelte";
     import TagExpand from "../components/TagExpand.svelte";
+    import TagIcon from "../components/TagIcon.svelte";
+    import TagIconPicker from "../components/TagIconPicker.svelte";
 
     import {onMount} from "svelte";
     import dayjs from "dayjs";
@@ -85,6 +87,16 @@
             .catch((reason) => {
                 console.log(reason);
             });
+        getTagSettings().then((settings) => {
+            $tagStore.icons = settings.icons;
+        });
+    }
+
+    //正在选择图标的置顶标签
+    let iconPicking = "";
+
+    async function changeIcon(tag, icon) {
+        $tagStore.icons = await setTagIcon(tag, icon);
     }
 
     function pinNeno(tag, isPin) {
@@ -232,7 +244,7 @@
     {#if pinTags.length !== 0}
         <div class="section-label mt-6 mb-1">置顶</div>
         <div class="flex flex-col gap-0.5">
-            {#each pinTags as { _id, tag }}
+            {#each pinTags as { _id, tag } (tag)}
                 <div
                         role="button"
                         tabindex="0"
@@ -251,20 +263,43 @@
                         }}
                 >
                     <span class="flex min-w-0 items-center gap-2">
-                        <span class="flex size-4 shrink-0 items-center justify-center"><i class="ri-pushpin-2-line text-[13px] text-ink-3"></i></span>
+                        <span class="flex size-4 shrink-0 items-center justify-center"><TagIcon {tag} fallback="ri-pushpin-2-line"/></span>
                         <span class="truncate">{tag.indexOf("#") === 0 ? tag.substring(1) : tag}</span>
                     </span>
-                    <button
-                            class="flex size-6 shrink-0 items-center justify-center rounded-md text-ink-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-surface-3 hover:text-ink"
-                            title="取消置顶"
-                            aria-label="取消置顶"
-                            on:click|stopPropagation={() => {
-                                pinNeno(tag, false);
-                            }}
-                    >
-                        <i class="ri-unpin-line text-[13px]"></i>
-                    </button>
+                    <span class="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                        <button
+                                class="flex size-6 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
+                                title="设置图标"
+                                aria-label="设置图标"
+                                aria-expanded={iconPicking === tag}
+                                on:click|stopPropagation={() => {
+                                    iconPicking = iconPicking === tag ? "" : tag;
+                                }}
+                        >
+                            <i class="ri-emotion-line text-[13px]"></i>
+                        </button>
+                        <button
+                                class="flex size-6 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
+                                title="取消置顶"
+                                aria-label="取消置顶"
+                                on:click|stopPropagation={() => {
+                                    pinNeno(tag, false);
+                                }}
+                        >
+                            <i class="ri-unpin-line text-[13px]"></i>
+                        </button>
+                    </span>
                 </div>
+                {#if iconPicking === tag}
+                    <TagIconPicker
+                            icon={$tagStore.icons[tag] || ""}
+                            on:pick={(event) => {
+                                changeIcon(tag, event.detail);
+                                iconPicking = "";
+                            }}
+                            on:close={() => (iconPicking = "")}
+                    />
+                {/if}
             {/each}
         </div>
     {/if}
@@ -285,6 +320,9 @@
                         }}
                         on:renameTag={(event) => {
                             renameName(event.detail);
+                        }}
+                        on:changeIcon={(event) => {
+                            changeIcon(event.detail.tag, event.detail.icon);
                         }}
                 />
             {/each}

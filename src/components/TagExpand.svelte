@@ -2,6 +2,9 @@
     import { createEventDispatcher} from "svelte";
     import TagExpand from "./TagExpand.svelte";
     import {slide} from "../lib/motion.js";
+    import TagIcon from "./TagIcon.svelte";
+    import TagIconPicker from "./TagIconPicker.svelte";
+    import {tagStore} from "../store/store.js";
     export let tag = "";
     export let selectionTag = "";
     export let parentTag = "";
@@ -12,6 +15,7 @@
     let selfTag = "";
 
     let isChangeTaging = false;
+    let isPickingIcon = false;
 
     const dispatch = createEventDispatcher();
 
@@ -33,29 +37,27 @@
                 }
             }}
     >
-        <span class="flex min-w-0 items-center gap-2">
-            {#if children.length !== 0}
-                <button
-                        class="flex size-4 shrink-0 items-center justify-center text-ink-3 hover:text-ink"
-                        aria-label={showSub ? "收起子标签" : "展开子标签"}
-                        aria-expanded={showSub}
-                        on:click|stopPropagation={() => {
-                            showSub = !showSub;
-                        }}
-                >
-                    <i class="ri-arrow-right-s-line inline-block transition-transform duration-200" class:rotate-90={showSub}></i>
-                </button>
-            {:else}
-                <span class="flex size-4 shrink-0 items-center justify-center"><i class="ri-hashtag text-[13px] text-ink-3"></i></span>
-            {/if}
+        <span class="flex min-w-0 flex-1 items-center gap-2">
+            <span class="flex size-4 shrink-0 items-center justify-center"><TagIcon {tag}/></span>
             <span class="truncate">{showTag.indexOf("#") === 0 ? showTag.substring(1) : showTag}</span>
         </span>
         <span class="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
             <button
                     class="flex size-6 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
+                    title="设置图标" aria-label="设置图标" aria-expanded={isPickingIcon}
+                    on:click|stopPropagation={() => {
+                        isPickingIcon = !isPickingIcon;
+                        isChangeTaging = false;
+                    }}
+            >
+                <i class="ri-emotion-line text-[13px]"></i>
+            </button>
+            <button
+                    class="flex size-6 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
                     title="重命名" aria-label="重命名"
                     on:click|stopPropagation={() => {
                         isChangeTaging = !isChangeTaging;
+                        isPickingIcon = false;
                         selfTag = tag.substring(1);
                     }}
             >
@@ -71,7 +73,29 @@
                 <i class="ri-pushpin-line text-[13px]"></i>
             </button>
         </span>
+        {#if children.length !== 0}
+            <button
+                    class="-mr-1 flex size-6 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-surface-3 hover:text-ink"
+                    aria-label={showSub ? "收起子标签" : "展开子标签"}
+                    aria-expanded={showSub}
+                    on:click|stopPropagation={() => {
+                        showSub = !showSub;
+                    }}
+            >
+                <i class="ri-arrow-right-s-line inline-block transition-transform duration-200" class:rotate-90={showSub}></i>
+            </button>
+        {/if}
     </div>
+    {#if isPickingIcon}
+        <TagIconPicker
+                icon={$tagStore.icons[tag] || ""}
+                on:pick={(event) => {
+                    dispatch("changeIcon", {tag, icon: event.detail});
+                    isPickingIcon = false;
+                }}
+                on:close={() => (isPickingIcon = false)}
+        />
+    {/if}
     {#if isChangeTaging}
         <div class="my-1 flex flex-col gap-2 rounded-lg bg-surface-2 p-2" transition:slide={{duration: 160}}>
             <div class="relative">
@@ -110,6 +134,9 @@
                         }}
                         on:renameTag={(event) => {
                             dispatch("renameTag", event.detail);
+                        }}
+                        on:changeIcon={(event) => {
+                            dispatch("changeIcon", event.detail);
                         }}
                         {...item}
                         {selectionTag}

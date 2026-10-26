@@ -32,8 +32,28 @@ export function serializeNote(note) {
     return JSON.stringify(data, null, "\t");
 }
 
-export function serializePinTags(tags) {
-    return JSON.stringify({_id: "pinTags", created_at: "pinTags", tags}, null, "\t");
+//标签设置: tags 置顶标签; icons 标签图标 {"#读书": "📚"}, 是后来新增的可选字段
+//没有图标时不写 icons, 文件内容与旧版本完全一致; 旧版本和扩展工具只读取 tags, 不受影响
+export function serializePinTags({tags = [], icons = {}} = {}) {
+    const data = {_id: "pinTags", created_at: "pinTags", tags: [...tags]};
+    if (Object.keys(icons).length > 0) data.icons = icons;
+    return JSON.stringify(data, null, "\t");
+}
+
+export function parsePinTags(text) {
+    const data = JSON.parse(text);
+    return {tags: Array.isArray(data.tags) ? data.tags : [], icons: normalizeIcons(data.icons)};
+}
+
+//只保留 "标签 -> 非空字符串" 的条目, 忽略格式不对的数据
+export function normalizeIcons(icons) {
+    const result = {};
+    if (icons && typeof icons === "object") {
+        for (const [tag, icon] of Object.entries(icons)) {
+            if (typeof icon === "string" && icon.trim() !== "") result[tag] = icon.trim();
+        }
+    }
+    return result;
 }
 
 //笔记的修改时间, 用于两端都修改时决定保留哪一份
