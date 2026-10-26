@@ -262,6 +262,17 @@
 .neno-content li::marker {
     color: var(--ink-3);
 }
+/* 摘录(浏览器插件保存的网页文字, 编辑器中的引用) */
+.neno-content blockquote {
+    margin: 0;
+    padding: 0.1em 0 0.1em 0.85em;
+    border-left: 2.5px solid color-mix(in oklab, var(--primary-500) 50%, transparent);
+    color: var(--ink-2);
+}
+/* 编辑器把引用中的空行保存为空的 blockquote, 保留一行的高度 */
+.neno-content blockquote:empty::before {
+    content: "\200b";
+}
 .neno-content strong {
     font-weight: 600;
 }
@@ -276,6 +287,19 @@
 }
 .neno-content a:hover {
     text-decoration-color: currentColor;
+}
+/* 外部链接后面的小箭头, 提示会在新窗口打开 */
+.neno-content a.neno-link::after {
+    content: "";
+    display: inline-block;
+    width: 0.72em;
+    height: 0.72em;
+    margin-left: 0.15em;
+    vertical-align: -0.02em;
+    background: currentColor;
+    opacity: 0.6;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 16L17 7M9 7h8v8'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 16L17 7M9 7h8v8'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .neno-content pre {
     white-space: pre-wrap;
@@ -504,6 +528,54 @@ html.theme-switching *::after {
 }
 .dark .neno-toolbar .editor-tool.ql-active {
     color: var(--primary-300);
+}
+/* 编辑器中的链接和引用与笔记展示保持一致 */
+.ql-editor a {
+    color: var(--primary-600);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--primary-500) 35%, transparent);
+    text-underline-offset: 3px;
+}
+.dark .ql-editor a {
+    color: var(--primary-300);
+}
+.ql-editor blockquote {
+    margin: 0;
+    padding: 0.1em 0 0.1em 0.85em;
+    border-left: 2.5px solid color-mix(in oklab, var(--primary-500) 50%, transparent);
+    color: var(--ink-2);
+}
+/* 编辑器的链接浮层 */
+.link-pop .link-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 260px;
+    padding: 0 6px;
+    color: var(--primary-600);
+    line-height: 28px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dark .link-pop .link-url {
+    color: var(--primary-300);
+}
+.link-pop .link-url:hover {
+    text-decoration: underline;
+}
+.link-pop .link-action {
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.link-pop .link-action:not([class*="text-primary"]) {
+    color: var(--ink-2);
+}
+.link-pop .link-action:hover {
+    background: var(--surface-2);
 }
 
 /* 下拉菜单项 */

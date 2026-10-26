@@ -18,6 +18,7 @@
 <script>
     import {onMount, tick} from "svelte";
     import dayjs from "dayjs";
+    import {renderContent} from "../lib/renderContent.js";
     import html2canvas from "html2canvas-pro";
     import {fade, scale} from "../lib/motion.js";
     import {getFileFromIndexedDB} from "../request/fetchApi";
@@ -59,7 +60,7 @@
 
     async function open(_id, created, content, images, tags) {
         created_at = created;
-        html = renderTags(content, tags);
+        html = renderContent(content, {tags});
         imageUrls = [];
         message = "";
         show = true;
@@ -77,21 +78,6 @@
         } catch (e) {
             console.log(e);
         }
-    }
-
-    function renderTags(rawContent, tags) {
-        let pContent = "";
-        let pIndex = 0;
-        const copyRawContent = rawContent;
-        for (const rawtag of tags || []) {
-            const breakIndex = rawContent.indexOf(rawtag);
-            if (breakIndex === -1) continue;
-            pContent += rawContent.substring(0, breakIndex);
-            pContent += `<span class="neno-tag">${rawtag}</span>`;
-            rawContent = rawContent.substring(breakIndex + rawtag.length);
-            pIndex += breakIndex + rawtag.length;
-        }
-        return pContent + copyRawContent.substring(pIndex);
     }
 
     //按 3 倍分辨率导出, 圆角之外保持透明

@@ -1,5 +1,6 @@
 <script>
-    import {onMount} from "svelte";
+    import {onMount, tick} from "svelte";
+    import {shortUrl} from "../lib/renderContent.js";
     import {createEventDispatcher} from "svelte";
     import {fly} from "../lib/motion.js";
     import {cubicOut} from "svelte/easing";
@@ -55,10 +56,21 @@
         const options = {
             // debug: "info",
             modules: {
-                toolbar: toolbar,
+                toolbar: {
+                    container: toolbar,
+                    handlers: {link: () => editLink()},
+                },
                 keyboard: {
                     //Ctrl/Cmd + Enter 快速发送, 必须通过配置注册, 否则会被 quill 默认的 Enter 绑定拦截
                     bindings: {
+                        link: {
+                            key: "k",
+                            shortKey: true,
+                            handler: () => {
+                                editLink();
+                                return false;
+                            },
+                        },
                         quickSend: {
                             key: "Enter",
                             shortKey: true,
@@ -110,6 +122,7 @@
             // console.log("text-change", delta, oldDelta, source);
 
             toolTip();
+            updateLink();
         });
         quillEditor.root.addEventListener(
             "paste",
@@ -137,6 +150,7 @@
             if (range) {
                 toolTip();
             }
+            updateLink();
         });
         quillEditor.setSelection(quillEditor.getText().length);
         quillEditor.clipboard.addMatcher("IMG", (node, delta) => {
@@ -272,6 +286,90 @@
         });
     }
 
+    //链接浮层: 光标在链接上时显示网址(可打开/修改/移除); 编辑时输入网址
+    //linkPop: {index, length, href, editing, top, left}
+    let linkPop = null;
+    let linkValue = "";
+    let linkInput;
+
+    function linkAt(index) {
+        const [leaf] = quillEditor.getLeaf(index);
+        let blot = leaf;
+        while (blot && blot.statics.blotName !== "link" && blot !== quillEditor.scroll) blot = blot.parent;
+        if (!blot || blot.statics.blotName !== "link") return null;
+        return {index: quillEditor.getIndex(blot), length: blot.length(), href: blot.domNode.getAttribute("href") || ""};
+    }
+
+    function placeLink(target, editing) {
+        const bounds = quillEditor.getBounds(target.index, target.length || 0);
+        const width = editor.clientWidth;
+        linkPop = {
+            ...target,
+            editing,
+            top: bounds.bottom + 6,
+            left: Math.max(8, Math.min(bounds.left, width - 300)),
+        };
+    }
+
+    function updateLink() {
+        if (!quillEditor || (linkPop && linkPop.editing)) return;
+        const range = quillEditor.getSelection();
+        if (!range) {
+            linkPop = null;
+            return;
+        }
+        //光标在链接中间或末尾时都显示
+        const link = linkAt(range.index) || (range.index > 0 && range.length === 0 ? linkAt(range.index - 1) : null);
+        linkPop = null;
+        if (link) placeLink(link, false);
+    }
+
+    async function editLink() {
+        const range = quillEditor.getSelection(true);
+        const link = linkAt(range.index) || (range.index > 0 && range.length === 0 ? linkAt(range.index - 1) : null);
+        const target = link || {index: range.index, length: range.length, href: ""};
+        linkValue = target.href;
+        placeLink(target, true);
+        await tick();
+        linkInput && linkInput.focus();
+        linkInput && linkInput.select();
+    }
+
+    function normalizeHref(value) {
+        const text = value.trim();
+        if (!text) return "";
+        return /^(https?:|mailto:)/i.test(text) ? text : `https://${text}`;
+    }
+
+    function saveLink() {
+        const href = normalizeHref(linkValue);
+        const {index, length} = linkPop;
+        linkPop = null;
+        if (!href) {
+            if (length > 0) quillEditor.formatText(index, length, "link", false, "user");
+        } else if (length > 0) {
+            quillEditor.formatText(index, length, "link", href, "user");
+        } else {
+            //没有选中文字时插入网址本身
+            quillEditor.insertText(index, href, {link: href}, "user");
+            quillEditor.insertText(index + href.length, " ", {link: false}, "user");
+        }
+        quillEditor.focus();
+        quillEditor.setSelection(index + (length || href.length + 1), 0, "api");
+    }
+
+    function removeLink() {
+        const {index, length} = linkPop;
+        quillEditor.formatText(index, length, "link", false, "user");
+        linkPop = null;
+        quillEditor.focus();
+    }
+
+    function cancelLink() {
+        linkPop = null;
+        quillEditor.focus();
+    }
+
     function insertHashTag() {
         const range = quillEditor.getSelection(true);
         let index = 0;
@@ -363,6 +461,43 @@
         class="card relative flex flex-col transition-[border-color,box-shadow] duration-200 focus-within:border-primary-400/60 focus-within:ring-3 focus-within:ring-primary-500/10"
 >
     <div bind:this={editor} id="editor"></div>
+    {#if linkPop}
+        <div
+                class="link-pop absolute z-20 flex items-center gap-0.5 rounded-lg border border-line bg-surface p-1 text-sm shadow-pop"
+                style="top:{linkPop.top}px;left:{linkPop.left}px"
+                on:mousedown={(event) => event.target !== linkInput && event.preventDefault()}
+                role="dialog"
+                aria-label="链接"
+        >
+            {#if linkPop.editing}
+                <input
+                        bind:this={linkInput}
+                        bind:value={linkValue}
+                        class="h-7 w-56 rounded-md border border-line-strong bg-surface px-2 text-sm text-ink outline-none focus:border-primary-500"
+                        placeholder="粘贴或输入网址"
+                        spellcheck="false"
+                        on:keydown={(event) => {
+                            if (event.key === "Enter") {
+                                event.preventDefault();
+                                saveLink();
+                            } else if (event.key === "Escape") {
+                                event.preventDefault();
+                                cancelLink();
+                            }
+                        }}
+                        on:blur={() => setTimeout(() => linkPop && linkPop.editing && document.activeElement !== linkInput && (linkPop = null), 150)}
+                />
+                <button class="link-action text-primary-600 dark:text-primary-300" on:click={saveLink}>{linkPop.length > 0 || linkPop.href ? "保存" : "插入"}</button>
+            {:else}
+                <a class="link-url" href={linkPop.href} target="_blank" rel="noopener noreferrer" title={linkPop.href}>
+                    <i class="ri-external-link-line"></i>{shortUrl(linkPop.href, 36)}
+                </a>
+                <span class="mx-0.5 h-4 w-px bg-line-strong"></span>
+                <button class="link-action" on:click={editLink}>修改</button>
+                <button class="link-action" on:click={removeLink}>移除</button>
+            {/if}
+        </div>
+    {/if}
     {#if tagTips.length > 0 && showTip}
         <div
                 bind:this={tipClient}
@@ -420,6 +555,8 @@
             <button class="editor-tool ql-list" value="bullet" title="无序列表" aria-label="无序列表"><i class="ri-list-unordered"></i></button>
             <button class="editor-tool ql-list" value="ordered" title="有序列表" aria-label="有序列表"><i class="ri-list-ordered"></i></button>
             <button class="editor-tool ql-underline" title="下划线" aria-label="下划线"><i class="ri-underline"></i></button>
+            <button class="editor-tool ql-blockquote" title="引用" aria-label="引用"><i class="ri-double-quotes-l"></i></button>
+            <button class="editor-tool ql-link" title="链接(先选中文字)" aria-label="链接"><i class="ri-link"></i></button>
             <button class="editor-tool" title="添加图片" aria-label="添加图片" on:click={selectImages}><i class="ri-image-line"></i></button>
             <input
                     bind:this={uploadimageNode}

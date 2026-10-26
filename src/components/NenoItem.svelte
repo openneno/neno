@@ -5,6 +5,7 @@
 <script>
     import {createEventDispatcher} from "svelte";
     import {fade, pop} from "../lib/motion.js";
+    import {renderContent} from "../lib/renderContent.js";
 
     import dayjs from 'dayjs'
     import {showNeno} from "./NenoDetail.svelte";
@@ -126,39 +127,6 @@
         console.log("tagClick", tag.innerText);
     };
 
-    function praseTag(rawContent, tags) {
-        let pContent = "";
-        let pIndex = 0;
-        let copyRawContent = rawContent;
-        if (tags != null) {
-            for (let index = 0; index < tags.length; index++) {
-                let rawtag = tags[index];
-                let breakIndex = rawContent.indexOf(rawtag);
-                //截取前段的字符
-                pContent += rawContent.substring(0, breakIndex);
-                //加上替换的内容
-                pContent += `<span class="neno-tag" id="tagtag" onclick="tagClick(this)">${rawtag}</span>`;
-                rawContent = rawContent.substring(breakIndex + rawtag.length);
-                pIndex += breakIndex + rawtag.length;
-            }
-        }
-        pContent += copyRawContent.substring(pIndex);
-        const keyword = searchContent.trim();
-        if (keyword.length !== 0) {
-            //忽略大小写高亮, 且只替换标签之外的文本, 避免破坏 html 结构
-            const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            pContent = pContent.replace(
-                new RegExp(`(${escaped})(?![^<]*>)`, "gi"),
-                `<span class="neno-highlight">$1</span>`
-            );
-        }
-        pContent = pContent.replaceAll(
-            /(https?:\/\/?[^\s<)）\]]*)/g,
-            '<a href="$1" target="_blank" rel="noreferrer">$1</a>'
-        );
-        return pContent;
-    }
-
     async function getImageurl(key) {
         console.log(key)
         console.log(content)
@@ -249,7 +217,7 @@
                 style="max-height:{canCollapse ? `${collapsed ? COLLAPSED_HEIGHT : fullHeight}px` : 'none'}"
         >
             <div use:measure>
-                {@html praseTag(content, tags)}
+                {@html renderContent(content, {tags, keyword: searchContent, clickableTags: true})}
             </div>
             {#if canCollapse}
                 <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-surface transition-opacity duration-300"
