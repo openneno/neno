@@ -3,7 +3,7 @@
     import {shortUrl} from "../lib/renderContent.js";
     import {highlightTags} from "../lib/tagHighlight.js";
     import {createEventDispatcher} from "svelte";
-    import {fly} from "../lib/motion.js";
+    import {fade, fly} from "../lib/motion.js";
     import {cubicOut} from "svelte/easing";
 
     import Quill from "quill";
@@ -12,11 +12,18 @@
         addNeno,
         uploadPicIndexedDB,
         getFileFromIndexedDB,
+        getAudio,
+        saveAudioIndexedDB,
+        removeAudioIndexedDB,
     } from "../request/fetchApi";
     import {getObjectURL} from "../utils/process";
     import {showPictureView} from "./ViewPicture.svelte";
+    import AudioClip from "./AudioClip.svelte";
+    import {alertDialog} from "./ConfirmDialog.svelte";
+    import {isRecordingSupported, MAX_DURATION_MS, startRecording} from "../lib/voice/recorder.js";
+    import {transcribe} from "../lib/voice/asr.js";
 
-    import {tagStore} from "../store/store.js";
+    import {asrStore, tagStore} from "../store/store.js";
 
     import ProgressLine from "./ProgressLine.svelte";
 
@@ -24,6 +31,8 @@
     export let _id = "";
     export let parentId = "";
     export let images = [];
+    //语音输入: [{key, suffixName, duration_ms, text}], text 是识别出的原文
+    export let audios = [];
 
     export let canCancle = false;
     export let placeholder = "现在的想法是...";
@@ -35,7 +44,10 @@
 
     let quillEditor;
     let stopTagHighlight = () => {};
-    onDestroy(() => stopTagHighlight());
+    onDestroy(() => {
+        stopTagHighlight();
+        cancelRecording();
+    });
     let showTip = false;
     let tipClient = "";
 
@@ -78,7 +90,7 @@
                             key: "Enter",
                             shortKey: true,
                             handler: () => {
-                                if (!isContentEmpty && !isSending) {
+                                if ((!isContentEmpty || audioClips.length > 0) && !isSending && !transcribing && !recorder) {
                                     sendBiu();
                                 }
                                 return false;
@@ -177,7 +189,131 @@
             ];
         });
         imageFiles = tempfiles;
+        audioClips = (audios || []).map((clip) => ({uid: Math.random(), clip: {...clip}, file: null, status: "", error: ""}));
     });
+
+    // ---------- 语音输入 ----------
+    //audioClips: [{uid, clip: {key, suffixName, duration_ms, text}, file: 新录的 Blob, status, error}]
+    let audioClips = [];
+    let recorder = null;
+    let recordingStarting = false;
+    let recordStart = 0;
+    let recordMs = 0;
+    let recordTimer = null;
+    //最近的音量, 用于录音时的波形
+    const LEVEL_COUNT = 32;
+    let levels = new Array(LEVEL_COUNT).fill(0);
+    //开始录音时光标的位置, 识别出的文字插入到这里
+    let recordInsertIndex = null;
+
+    $: transcribing = audioClips.some((item) => item.status === "transcribing");
+
+    function formatMs(ms) {
+        const total = Math.floor(ms / 1000);
+        return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+    }
+
+    async function toggleRecording() {
+        if (recorder) {
+            await finishRecording();
+            return;
+        }
+        if (recordingStarting) return;
+        if (!isRecordingSupported()) {
+            alertDialog({title: "无法录音", message: "当前浏览器不支持录音, 请使用最新版的 Chrome, Edge, Safari 或 Firefox。", icon: "ri-mic-off-line"});
+            return;
+        }
+        const range = quillEditor.getSelection();
+        recordInsertIndex = range ? range.index + range.length : null;
+        recordingStarting = true;
+        try {
+            recorder = await startRecording({
+                onLevel: (level) => (levels = [...levels.slice(1), level]),
+                onLimit: () => finishRecording(),
+            });
+            recordStart = Date.now();
+            recordMs = 0;
+            recordTimer = setInterval(() => (recordMs = Date.now() - recordStart), 200);
+        } catch (error) {
+            console.log("录音失败", error);
+            const denied = error && (error.name === "NotAllowedError" || error.name === "SecurityError");
+            alertDialog({
+                title: "无法使用麦克风",
+                message: denied ? "麦克风权限被拒绝, 请在浏览器的网站设置中允许使用麦克风。" : "没有找到可用的麦克风。",
+                icon: "ri-mic-off-line",
+            });
+        } finally {
+            recordingStarting = false;
+        }
+    }
+
+    function stopTimer() {
+        clearInterval(recordTimer);
+        recordTimer = null;
+        levels = levels.map(() => 0);
+    }
+
+    function cancelRecording() {
+        if (!recorder) return;
+        recorder.cancel();
+        recorder = null;
+        stopTimer();
+    }
+
+    async function finishRecording() {
+        if (!recorder) return;
+        const current = recorder;
+        recorder = null;
+        stopTimer();
+        const {blob, durationMs} = await current.stop();
+        if (durationMs < 500) {
+            //误触, 不保存
+            return;
+        }
+        const item = {uid: Math.random(), clip: {key: "", suffixName: "wav", duration_ms: durationMs, text: ""}, file: blob, status: "", error: ""};
+        audioClips = [...audioClips, item];
+        runTranscribe(item.uid, recordInsertIndex);
+    }
+
+    function updateClip(uid, patch) {
+        audioClips = audioClips.map((item) => (item.uid === uid ? {...item, ...patch, clip: {...item.clip, ...(patch.clip || {})}} : item));
+    }
+
+    async function runTranscribe(uid, insertIndex = null) {
+        const item = audioClips.find((value) => value.uid === uid);
+        if (!item) return;
+        if (!$asrStore.apiKey) {
+            updateClip(uid, {status: "error", error: "录音已保留。在 设置 → 语音输入 中填写 DeepSeek API Key 后, 可以重新识别为文字"});
+            return;
+        }
+        updateClip(uid, {status: "transcribing", error: ""});
+        try {
+            const blob = item.file || (await getAudio(item.clip.key))?.file;
+            if (!blob) throw new Error("语音还没有同步到这台设备");
+            const text = await transcribe(blob, $asrStore.apiKey, `speech.${item.clip.suffixName || "wav"}`);
+            //识别期间录音可能已被移除
+            if (!audioClips.some((value) => value.uid === uid)) return;
+            updateClip(uid, {status: text ? "" : "error", error: text ? "" : "没有识别到文字", clip: {text}});
+            if (text) insertTranscript(text, insertIndex);
+        } catch (error) {
+            console.log("语音识别失败", error);
+            updateClip(uid, {status: "error", error: error.message || "识别失败"});
+        }
+    }
+
+    function insertTranscript(text, index) {
+        const length = quillEditor.getLength();
+        const at = index === null || index === undefined || index > length - 1 ? length - 1 : index;
+        //与前面的文字之间留一个空格, 避免和 #标签 连在一起
+        const before = at > 0 ? quillEditor.getText(at - 1, 1) : "\n";
+        const insert = /\s/.test(before) ? text : ` ${text}`;
+        quillEditor.insertText(at, insert, "user");
+        quillEditor.setSelection(at + insert.length, 0, "api");
+    }
+
+    function deleteClip(uid) {
+        audioClips = audioClips.filter((item) => item.uid !== uid);
+    }
 
     function toolTip() {
         let selection = quillEditor.getSelection();
@@ -272,7 +408,9 @@
     }
 
     function cancelInput() {
+        cancelRecording();
         imageFiles = [];
+        audioClips = [];
         dispatch("cancle", {});
     }
 
@@ -427,6 +565,20 @@
 
         }
 
+        if (recorder) await finishRecording();
+        const audiosInfo = [];
+        for (const item of audioClips) {
+            let key = item.clip.key;
+            if (item.file) {
+                key = (await saveAudioIndexedDB(item.file, item.clip.suffixName)).key;
+            }
+            audiosInfo.push({key, suffixName: item.clip.suffixName, duration_ms: item.clip.duration_ms, text: item.clip.text || ""});
+        }
+        //编辑时移除的语音
+        for (const old of audios || []) {
+            if (!audiosInfo.some((item) => item.key === old.key)) await removeAudioIndexedDB(old);
+        }
+
         addNeno({
             content: sContent,
             pureContent: editor.childNodes[0].innerText,
@@ -435,6 +587,7 @@
             source: "web",
             tags: tags,
             images: imagesInfo,
+            audios: audiosInfo,
         })
             .then((respone) => {
                 console.log(respone);
@@ -552,8 +705,41 @@
         </div>
     {/if}
 
+    {#if audioClips.length > 0}
+        <div class="flex flex-col gap-2 px-4 pt-1 pb-2">
+            {#each audioClips as item (item.uid)}
+                <div in:fly={{ y: 8, duration: 200, easing: cubicOut }}>
+                    <AudioClip
+                            clip={item.clip}
+                            file={item.file}
+                            status={item.status}
+                            error={item.error}
+                            editable={true}
+                            on:retry={() => runTranscribe(item.uid)}
+                            on:delete={() => deleteClip(item.uid)}
+                    />
+                </div>
+            {/each}
+        </div>
+    {/if}
+
     <div class="flex items-center justify-between gap-2 border-t border-line px-2 py-1.5">
-        <div id="toolbar" class="neno-toolbar flex items-center gap-0.5" bind:this={toolbar}>
+        {#if recorder}
+            <!-- 录音时用一条安静的状态栏替换工具栏, 高度不变, 颜色跟随主题色 -->
+            <div class="flex min-w-0 flex-1 items-center gap-2.5 pl-2" role="status" aria-label="正在录音" in:fade={{ duration: 150 }}>
+                <span class="recording-dot size-2 shrink-0 rounded-full bg-primary-500"></span>
+                <span class="w-9 shrink-0 text-[13px] text-ink-2 tabular-nums">{formatMs(recordMs)}</span>
+                <span class="flex h-6 min-w-0 flex-1 items-center gap-[2px] overflow-hidden" aria-hidden="true">
+                    {#each levels as level}
+                        <span class="w-[2px] shrink-0 rounded-full bg-primary-500/60" style="height:{3 + level * 15}px"></span>
+                    {/each}
+                </span>
+                {#if MAX_DURATION_MS - recordMs < 20000}
+                    <span class="shrink-0 text-xs text-ink-3 tabular-nums">剩余 {formatMs(MAX_DURATION_MS - recordMs + 999)}</span>
+                {/if}
+            </div>
+        {/if}
+        <div id="toolbar" class="neno-toolbar flex items-center gap-0.5" bind:this={toolbar} style:display={recorder ? "none" : null}>
             <button class="editor-tool" title="插入标签" aria-label="插入标签" on:click={insertHashTag}><i class="ri-hashtag"></i></button>
             <button class="editor-tool ql-bold" title="加粗" aria-label="加粗"><i class="ri-bold"></i></button>
             <button class="editor-tool ql-list" value="bullet" title="无序列表" aria-label="无序列表"><i class="ri-list-unordered"></i></button>
@@ -562,6 +748,9 @@
             <button class="editor-tool ql-blockquote" title="引用" aria-label="引用"><i class="ri-double-quotes-l"></i></button>
             <button class="editor-tool ql-link" title="链接(先选中文字)" aria-label="链接"><i class="ri-link"></i></button>
             <button class="editor-tool" title="添加图片" aria-label="添加图片" on:click={selectImages}><i class="ri-image-line"></i></button>
+            <button class="editor-tool" title="语音输入" aria-label="语音输入" on:click={toggleRecording}>
+                <i class="ri-mic-line"></i>
+            </button>
             <input
                     bind:this={uploadimageNode}
                     on:change={onImagesSelected}
@@ -571,14 +760,22 @@
                     multiple
             />
         </div>
-        <div class="flex items-center gap-2">
+        {#if recorder}
+            <div class="flex shrink-0 items-center gap-1">
+                <button class="btn btn-sm btn-ghost" on:click={cancelRecording}>取消</button>
+                <button class="btn btn-sm btn-ghost text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200" on:click={finishRecording}>
+                    <i class="ri-check-line"></i>完成
+                </button>
+            </div>
+        {/if}
+        <div class="flex items-center gap-2" style:display={recorder ? "none" : null}>
             <span class="hidden text-xs text-ink-3 sm:inline">{shortcutHint} 发送</span>
             {#if canCancle}
                 <button class="btn btn-sm btn-ghost" on:click={cancelInput}>取消</button>
             {/if}
             <button
                     class="btn btn-sm btn-primary min-w-16"
-                    disabled={isContentEmpty || isSending}
+                    disabled={(isContentEmpty && audioClips.length === 0) || isSending || transcribing || !!recorder}
                     title="发送 ({shortcutHint})"
                     on:click={() => {
                         sendBiu();
@@ -593,3 +790,21 @@
         </div>
     </div>
 </div>
+
+<style>
+    .recording-dot {
+        animation: recording-breathe 1.6s ease-in-out infinite;
+    }
+
+    @keyframes recording-breathe {
+        50% {
+            opacity: 0.35;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .recording-dot {
+            animation: none;
+        }
+    }
+</style>

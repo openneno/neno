@@ -2,7 +2,7 @@
     import HelloWorld from "./pages/Main.svelte";
     import Router from "./components/Router.svelte";
     import ReloadPrompt from './lib/ReloadPrompt.svelte'
-    import {githubStore, notionStore, currentPage, settingStore} from "./store/store.js";
+    import {asrStore, githubStore, notionStore, currentPage, settingStore} from "./store/store.js";
     import {onMount} from "svelte";
     import {startSyncEngine, syncNow} from "./lib/sync/syncEngine.js";
     import {initTheme, normalizeSetting} from "./lib/theme.js";
@@ -14,6 +14,15 @@
         let setting = window.localStorage.getItem("settingStore");
         let github = window.localStorage.getItem("githubStore");
         let notion = window.localStorage.getItem("notionStore");
+        let asr = window.localStorage.getItem("asrStore");
+        if (asr) {
+            try {
+                $asrStore = {...$asrStore, ...JSON.parse(asr)};
+            } catch (e) {
+                console.log("语音设置无效", e);
+            }
+        }
+        asrStore.subscribe((value) => window.localStorage.setItem("asrStore", JSON.stringify(value)));
 
         github && ($githubStore = JSON.parse(github));
         //已不再支持 Gitee: 保留本地笔记, 清除同步配置, 在设置页提示用户

@@ -11,22 +11,23 @@ import {githubStore, reload, syncStatus, taskCountTag} from "../../store/store.j
 import {graphql, rest} from "../../request/githubClient.js";
 import {
     clearDirty,
+    deleteMediaLocal,
     deleteNoteLocal,
-    deletePicLocal,
     getAllNotes,
     getDirtyList,
+    getMedia,
     getNote,
-    getPic,
     getSyncState,
     getTagSettings,
     markDirty,
+    putMedia,
     putNote,
-    putPic,
     saveSyncState,
     setTagSettings,
     takeLegacyTasks,
 } from "../../request/fetchApi.js";
 import {
+    audioType,
     base64ToBytes,
     blobToBytes,
     bytesToBase64,
@@ -38,11 +39,11 @@ import {
 import {
     PIN_TAGS_PATH,
     classifyPath,
+    mediaPath,
     notePath,
     noteSummary,
     noteTime,
     parsePinTags,
-    picPath,
     serializeNote,
     serializePinTags,
 } from "./repoLayout.js";
@@ -234,13 +235,14 @@ async function pull(state, head, dirtyMap, legacy) {
                 if (dirty) await dropDirty(dirty);
                 localChanged = true;
                 noteChanges.push({type: local ? "update" : "add", note: remoteNote});
-            } else if (info.kind === "pic") {
-                //本地新增或删除了这张图片, 以本地为准
+            } else if (info.kind === "pic" || info.kind === "audio") {
+                //本地新增或删除了这个文件(图片/语音), 以本地为准
                 if (dirty) return;
-                const local = await getPic(info.id);
+                const local = await getMedia(info.kind, info.id);
                 if (local && await gitBlobSha(await blobToBytes(local.file)) === sha) return;
                 const bytes = await fetchBlob(sha);
-                await putPic(info.id, new Blob([bytes], {type: imageType(info.suffix)}));
+                const type = info.kind === "audio" ? audioType(info.suffix) : imageType(info.suffix);
+                await putMedia(info.kind, info.id, new Blob([bytes], {type}));
                 localChanged = true;
             } else if (info.kind === "pinTags") {
                 if (!dirty && base[path] === undefined
@@ -279,7 +281,7 @@ async function pull(state, head, dirtyMap, legacy) {
             await deleteNoteLocal(info.id);
             if (old) noteChanges.push({type: "delete", note: old});
         } else {
-            await deletePicLocal(info.id);
+            await deleteMediaLocal(info.kind, info.id);
         }
         localChanged = true;
     }
@@ -291,10 +293,14 @@ async function pull(state, head, dirtyMap, legacy) {
             if (!(notePath(note) in remote) && !dirtyMap.has(`note:${note._id}`)) {
                 await markDirty("note", note._id);
             }
-            for (const image of note.images || []) {
-                if (!(picPath(image.key, image.suffixName) in remote) && !dirtyMap.has(`pic:${image.key}`)
-                    && await getPic(image.key)) {
-                    await markDirty("pic", image.key, {suffix: image.suffixName});
+            const media = [
+                ...(note.images || []).map((file) => ["pic", file]),
+                ...(note.audios || []).map((file) => ["audio", file]),
+            ];
+            for (const [kind, file] of media) {
+                if (!(mediaPath(kind, file.key, file.suffixName) in remote) && !dirtyMap.has(`${kind}:${file.key}`)
+                    && await getMedia(kind, file.key)) {
+                    await markDirty(kind, file.key, {suffix: file.suffixName});
                 }
             }
         }
@@ -349,7 +355,8 @@ function commitMessage(changes) {
         return "[DELETE] 删除 1 条笔记";
     }
     if (notes.length === 0) {
-        return changes.some((change) => change.entry.kind === "pinTags") ? "update pinTags" : "update pictures";
+        if (changes.some((change) => change.entry.kind === "pinTags")) return "update pinTags";
+        return changes.every((change) => change.entry.kind === "audio") ? "update audio" : "update pictures";
     }
     const parts = [];
     if (added.length) parts.push(`新增 ${added.length} 条`);
@@ -378,14 +385,14 @@ async function collectChanges(state) {
                     if (base[path] !== sha) change = {entry, path, bytes, sha, note, isNew: !base[path]};
                 }
             }
-        } else if (entry.kind === "pic") {
-            const path = picPath(entry.id, entry.suffix);
+        } else if (entry.kind === "pic" || entry.kind === "audio") {
+            const path = mediaPath(entry.kind, entry.id, entry.suffix);
             if (entry.deleted) {
                 if (base[path]) change = {entry, path, deletion: true};
             } else {
-                const pic = await getPic(entry.id);
-                if (pic) {
-                    const bytes = await blobToBytes(pic.file);
+                const media = await getMedia(entry.kind, entry.id);
+                if (media) {
+                    const bytes = await blobToBytes(media.file);
                     const sha = await gitBlobSha(bytes);
                     if (base[path] !== sha) change = {entry, path, bytes, sha};
                 }

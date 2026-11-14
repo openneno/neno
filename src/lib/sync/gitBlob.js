@@ -57,3 +57,16 @@ const IMAGE_TYPES = {
 export function imageType(suffix) {
     return IMAGE_TYPES[(suffix || "").toLowerCase()] || "application/octet-stream";
 }
+
+const AUDIO_TYPES = {
+    wav: "audio/wav",
+    ogg: "audio/ogg",
+    opus: "audio/ogg",
+    m4a: "audio/mp4",
+    mp3: "audio/mpeg",
+    webm: "audio/webm",
+};
+
+export function audioType(suffix) {
+    return AUDIO_TYPES[(suffix || "").toLowerCase()] || "application/octet-stream";
+}

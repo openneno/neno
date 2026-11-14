@@ -108,6 +108,7 @@
                             parentId={nenoDetail.parentId}
                             parent={nenoDetail.parent}
                             images={nenoDetail.images}
+                            audios={nenoDetail.audios || []}
                             tags={nenoDetail.tags}
                             collapsible={false}
                     />

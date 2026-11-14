@@ -24,6 +24,8 @@ export const notionStore = writable({
     databaseId: "",
 
 });
+//语音输入: DeepSeek 语音识别的 API Key, 只保存在本机(不同步到仓库, 也不包含在同步链接中)
+export const asrStore = writable({ apiKey: "" });
 export const countStore = writable({ tagCount: 0, nenoCount: 0, dayCount: 0, dateCount: {} });
 //icons: 标签图标 {"#读书": "📚"}
 export const tagStore = writable({ pinTags: [], allTags: [], icons: {} });

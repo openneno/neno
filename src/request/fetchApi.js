@@ -8,7 +8,7 @@ import {openDB} from 'idb';
 import dayjs from "dayjs";
 
 
-const db = openDB("neno", 5, {
+const db = openDB("neno", 6, {
     upgrade(db, oldVersion, newVersion, transaction) {
         console.log('数据库新建成功');
 
@@ -35,6 +35,10 @@ const db = openDB("neno", 5, {
         }
         if (!db.objectStoreNames.contains('syncState')) {
             db.createObjectStore('syncState', {keyPath: 'id'});
+        }
+        //v6: 语音输入的原始录音
+        if (!db.objectStoreNames.contains('nenoAudio')) {
+            db.createObjectStore('nenoAudio', {keyPath: '_id'});
         }
     },
 })
@@ -95,6 +99,19 @@ export const getPic = async (_id) => (await db).get('nenoPic', _id)
 export const putPic = async (_id, file) => (await db).put('nenoPic', {_id, file, created_at: "picData"})
 
 export const deletePicLocal = async (_id) => (await db).delete('nenoPic', _id)
+
+export const getAudio = async (_id) => (await db).get('nenoAudio', _id)
+
+export const putAudio = async (_id, file) => (await db).put('nenoAudio', {_id, file, created_at: "audioData"})
+
+export const deleteAudioLocal = async (_id) => (await db).delete('nenoAudio', _id)
+
+//图片和语音在同步时的处理方式相同, kind: "pic" | "audio"
+export const getMedia = (kind, _id) => (kind === "audio" ? getAudio(_id) : getPic(_id))
+
+export const putMedia = (kind, _id, file) => (kind === "audio" ? putAudio(_id, file) : putPic(_id, file))
+
+export const deleteMediaLocal = (kind, _id) => (kind === "audio" ? deleteAudioLocal(_id) : deletePicLocal(_id))
 
 //标签设置(置顶标签和标签图标)只保存一条记录: {_id: "pinTags", tags, icons}
 //旧版本的记录没有 icons, 读取时补上空对象
@@ -167,6 +184,10 @@ export const exportIndexedDBToFile = async () => {
         let picbase64 = await readUploadedFileAsText(blob)
         allNenopicBase64 = [...allNenopicBase64, {_id: element._id, file: picbase64}]
     }
+    const allNenoAudio = []
+    for (const element of await (await db).getAll("nenoAudio")) {
+        allNenoAudio.push({_id: element._id, file: await readUploadedFileAsText(element.file)})
+    }
 
     return {
         body: {
@@ -174,6 +195,7 @@ export const exportIndexedDBToFile = async () => {
             allNenoCount: allNenoCount,
             allNenoPinTags: allNenoPinTags,
             allNenoPic: allNenopicBase64,
+            allNenoAudio: allNenoAudio,
         }
     }
 }
@@ -181,11 +203,15 @@ export const exportIndexedDBToFile = async () => {
 //导入的数据会同步到仓库, 内容与仓库一致的文件不会产生提交
 export const imporFileTotIndexedDB = async (allData) => {
     const suffixes = {}
+    const audioSuffixes = {}
     for (const element of allData.allNeno || []) {
         await (await db).put('nenoitem', element);
         await markDirty("note", element._id)
         for (const image of element.images || []) {
             suffixes[image.key] = image.suffixName
+        }
+        for (const audio of element.audios || []) {
+            audioSuffixes[audio.key] = audio.suffixName
         }
     }
     const importedPins = new Set()
@@ -210,6 +236,12 @@ export const imporFileTotIndexedDB = async (allData) => {
             await markDirty("pic", element._id, {suffix: suffixes[element._id]})
         }
     }
+    for (const element of allData.allNenoAudio || []) {
+        await putAudio(element._id, await (await fetch(element.file)).blob())
+        if (audioSuffixes[element._id]) {
+            await markDirty("audio", element._id, {suffix: audioSuffixes[element._id]})
+        }
+    }
     reload.set({tag: Date.now(), action: "neno"})
     reload.set({tag: Date.now(), action: "nenoCount"})
     return {body: {}}
@@ -224,6 +256,26 @@ export const uploadPicIndexedDB = async (imageFile) => {
     await putPic(_id, imageFile)
     await markDirty("pic", _id, {suffix: suffixName})
     return {key: _id, suffixName: suffixName}
+}
+
+//语音的播放地址, 本地没有(还没有同步下来)时返回 null
+export const getAudioURL = async (key) => {
+    const result = await getAudio(key)
+    return result ? getObjectURL(result.file) : null
+}
+
+//保存一段录音, 返回笔记 audios 中引用它的信息
+export const saveAudioIndexedDB = async (blob, suffixName) => {
+    const _id = getObjectId().toString();
+    await putAudio(_id, blob)
+    await markDirty("audio", _id, {suffix: suffixName})
+    return {key: _id, suffixName}
+}
+
+//编辑笔记时移除的语音
+export const removeAudioIndexedDB = async ({key, suffixName}) => {
+    await deleteAudioLocal(key)
+    await markDirty("audio", key, {suffix: suffixName, deleted: true})
 }
 
 //分页读取笔记(按 _id 倒序, 即创建时间倒序)
@@ -315,6 +367,9 @@ export const deleteOne = async (data) => {
         await deletePicLocal(datum.key)
         //删除笔记的同时删除笔记中携带的图片
         await markDirty("pic", datum.key, {suffix: datum.suffixName, deleted: true})
+    }
+    for (const datum of result.audios || []) {
+        await removeAudioIndexedDB(datum)
     }
     await (await db).delete('nenoitem', data._id);
     //记录删除前的创建时间, 推送时据此找到仓库中的文件

@@ -10,6 +10,7 @@
     import dayjs from 'dayjs'
     import {showNeno} from "./NenoDetail.svelte";
     import QuillEditor from "./QuillEditor.svelte";
+    import AudioClip from "./AudioClip.svelte";
     import {showPictureView} from "./ViewPicture.svelte";
     import {deleteOne, getFileFromIndexedDB} from "../request/fetchApi";
     import {searchNenoByTag} from "../store/store.js";
@@ -22,6 +23,8 @@
     export let created_at = "2021-02-01 11:12:24";
     export let content = "";
     export let images = [];
+    //语音输入保存的原始录音和识别出的原文
+    export let audios = [];
     export let parent = null;
     export let parentId = "";
     export let children = [];
@@ -198,6 +201,7 @@
             <QuillEditor
                     {content}
                     {images}
+                    audios={audios || []}
                     {_id}
                     {parentId}
                     canCancle={true}
@@ -206,6 +210,7 @@
                     }}
                     on:update={(event) => {
                         images = event.detail.images;
+                        audios = event.detail.audios || [];
                         content = event.detail.content;
                         tags = event.detail.tags;
                     }}
@@ -248,6 +253,14 @@
                         />
                     </button>
                 {/await}
+            {/each}
+        </div>
+    {/if}
+
+    {#if !editMode && audios && audios.length > 0}
+        <div class="mt-3 flex flex-col items-start gap-2">
+            {#each audios as clip (clip.key)}
+                <AudioClip {clip}/>
             {/each}
         </div>
     {/if}

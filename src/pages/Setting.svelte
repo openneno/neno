@@ -9,10 +9,13 @@
         syncNenoToNotion,
     } from "../request/notionSyncAction";
     import {
+        asrStore,
         currentPage,
         githubStore,
         notionStore,
     } from "../store/store.js";
+    import {transcribe} from "../lib/voice/asr.js";
+    import {encodeWav, SAMPLE_RATE} from "../lib/voice/recorder.js";
     import ThemePicker from "../components/ThemePicker.svelte";
     import SyncSetup from "../components/SyncSetup.svelte";
     import PageHeader from "../components/PageHeader.svelte";
@@ -45,6 +48,36 @@
             JSON.stringify($notionStore)
         );
         window.location.reload();
+    }
+
+    //语音输入: API Key 修改后自动保存(App.svelte 中持久化)
+    let asrKeyInput = $asrStore.apiKey;
+    let showAsrKey = false;
+    let asrChecking = false;
+    //"" | "ok" | 错误信息
+    let asrCheckResult = "";
+
+    function saveAsrKey() {
+        const apiKey = asrKeyInput.trim();
+        if (apiKey !== $asrStore.apiKey) {
+            $asrStore = {...$asrStore, apiKey};
+            asrCheckResult = "";
+        }
+    }
+
+    //发送一段很短的静音, 检查 API Key 是否可用(按秒计费, 约 1 秒)
+    async function checkAsrKey() {
+        saveAsrKey();
+        asrChecking = true;
+        asrCheckResult = "";
+        try {
+            await transcribe(encodeWav(new Float32Array(SAMPLE_RATE / 2)), $asrStore.apiKey);
+            asrCheckResult = "ok";
+        } catch (error) {
+            asrCheckResult = error.message || "检测失败";
+        } finally {
+            asrChecking = false;
+        }
     }
 
     async function exportData() {
@@ -105,6 +138,50 @@
                 <h2 class="text-[15px] font-semibold text-ink">同步</h2>
                 <p class="mt-1 mb-5 text-[13px] text-ink-3">笔记保存在你自己的 GitHub 私有仓库中, 无需服务器, 也可以完全离线使用。</p>
                 <SyncSetup/>
+            </section>
+
+            <section class="card p-5">
+                <h2 class="text-[15px] font-semibold text-ink">语音输入</h2>
+                <p class="mt-1 mb-4 text-[13px] leading-relaxed text-ink-3">
+                    点击编辑器中的 <i class="ri-mic-line"></i> 录音(每段最长 2 分钟), 由 DeepSeek 识别为文字, 自动识别语言。
+                    原始录音和识别出的原文会随笔记一起保存和同步。API Key 只保存在这台设备上。
+                </p>
+                <label class="flex flex-col gap-1.5">
+                    <span class="flex items-center justify-between text-[13px] font-medium text-ink-2">
+                        DeepSeek API Key
+                        <a class="text-xs font-normal text-primary-600 hover:underline dark:text-primary-300" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">获取 API Key</a>
+                    </span>
+                    <div class="relative">
+                        <input
+                                class="input pr-10"
+                                type={showAsrKey ? "text" : "password"}
+                                placeholder="sk-..."
+                                autocomplete="off"
+                                spellcheck="false"
+                                bind:value={asrKeyInput}
+                                on:change={saveAsrKey}
+                                on:blur={saveAsrKey}
+                        />
+                        <button
+                                class="icon-btn absolute top-0.5 right-0.5 size-8 text-[15px]"
+                                type="button"
+                                aria-label={showAsrKey ? "隐藏" : "显示"}
+                                on:click={() => (showAsrKey = !showAsrKey)}
+                        >
+                            <i class={showAsrKey ? "ri-eye-off-line" : "ri-eye-line"}></i>
+                        </button>
+                    </div>
+                </label>
+                <div class="mt-3 flex flex-wrap items-center justify-end gap-3">
+                    {#if asrCheckResult === "ok"}
+                        <span class="flex items-center gap-1 text-[13px] text-primary-600 dark:text-primary-300"><i class="ri-check-line"></i>API Key 可用</span>
+                    {:else if asrCheckResult}
+                        <span class="flex items-center gap-1 text-[13px] text-red-600 dark:text-red-400"><i class="ri-error-warning-line"></i>{asrCheckResult}</span>
+                    {/if}
+                    <button class="btn btn-secondary" disabled={asrChecking || !asrKeyInput.trim()} on:click={checkAsrKey}>
+                        {#if asrChecking}<i class="ri-loader-4-line animate-spin"></i>{/if}检测
+                    </button>
+                </div>
             </section>
 
             {#if $githubStore.access_token !== ""}
