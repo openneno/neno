@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="readmepic/hero.jpg" alt="NENO: 记下此刻, 与未来的自己重逢" />
+  <img src="readmepic/hero.jpg" alt="NENO: 记下此刻, 支援未来的自己" />
 </p>
 
 <h1 align="center">NENO</h1>
