@@ -223,14 +223,14 @@
 }
 
 /* quill 2 默认隐藏 li 的列表符号, 为 getSemanticHTML 输出及旧版数据中的标准列表恢复样式 */
-.ql-editor ul {
-    padding-left: 1.5em;
+.neno-editor .ql-editor ul {
+    padding-left: 1.4em;
 }
-.ql-editor ul > li:not([data-list]) {
+.neno-editor .ql-editor ul > li:not([data-list]) {
     list-style-type: disc;
     padding-left: 0;
 }
-.ql-editor ol > li:not([data-list]) {
+.neno-editor .ql-editor ol > li:not([data-list]) {
     list-style-type: decimal;
     padding-left: 0;
 }
@@ -248,9 +248,14 @@
 .neno-content p {
     margin: 0;
 }
+/* 编辑器把空行保存为空的 <p></p>, 保留一行的高度, 与编辑时的空行一致 */
+.neno-content :is(p, li, h1, h2, h3, h4, h5, h6):empty::before {
+    content: "\200b";
+}
+/* 列表与编辑器一致: 没有额外的上下间距, 缩进 1.4em */
 .neno-content ul,
 .neno-content ol {
-    margin: 0.2em 0;
+    margin: 0;
     padding-left: 1.4em;
 }
 .neno-content ul {
@@ -310,6 +315,37 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px;
     line-height: 1.6;
+}
+
+/* 标题与行内代码(Markdown 模式可以写出), 编辑器中使用相同的样式 */
+:is(.neno-content, .neno-editor .ql-editor) :is(h1, h2, h3, h4, h5, h6) {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.75;
+}
+:is(.neno-content, .neno-editor .ql-editor) h1 {
+    font-size: 1.3em;
+}
+:is(.neno-content, .neno-editor .ql-editor) h2 {
+    font-size: 1.15em;
+}
+:is(.neno-content, .neno-editor .ql-editor) :is(h3, h4, h5, h6) {
+    font-size: 1em;
+}
+:is(.neno-content, .neno-editor .ql-editor) em {
+    font-style: italic;
+}
+:is(.neno-content, .neno-editor .ql-editor) code {
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    background: var(--surface-2);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.87em;
+}
+.neno-content pre code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
 }
 
 /* 搜索命中的文字 */
@@ -490,15 +526,81 @@ html.theme-switching *::after {
 .ql-toolbar.ql-snow {
     padding: 0 !important;
 }
-.ql-container {
+/* 编辑器没有使用 snow 主题, quill 的基础样式(13px, Helvetica, 列表 3em 缩进等)在 main.css 之后加载,
+   同优先级的覆盖会失效, 所以统一加上 .neno-editor 前缀; 字号字体与笔记展示一致 */
+.neno-editor.ql-container {
+    font-family: inherit;
     font-size: 15px;
 }
-.ql-editor {
+.neno-editor .ql-editor {
     min-height: 72px;
     max-height: 50vh;
     padding: 14px 16px 8px !important;
     color: var(--ink);
     line-height: 1.75 !important;
+    /* 与笔记展示(.neno-content)保持相同的字距和折行, 避免编辑时和发送后的排版不同 */
+    letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
+}
+
+/* 编辑器的列表: quill 默认 ol 和 li 各缩进 1.5em(共 3em), 统一成展示时的 1.4em */
+.neno-editor .ql-editor ol {
+    margin: 0;
+    padding-left: 0;
+}
+.neno-editor .ql-editor li[data-list] {
+    padding-left: 1.4em;
+}
+.neno-editor .ql-editor li[data-list] > .ql-ui::before {
+    width: 1.1em;
+    margin-left: -1.4em;
+    margin-right: 0.3em;
+    color: var(--ink-3);
+}
+.neno-editor .ql-editor li[data-list].ql-indent-1 {
+    padding-left: 2.8em;
+}
+.neno-editor .ql-editor li[data-list].ql-indent-2 {
+    padding-left: 4.2em;
+}
+.neno-editor .ql-editor li[data-list].ql-indent-3 {
+    padding-left: 5.6em;
+}
+
+/* 编辑器的代码块与展示时的 <pre> 一致 */
+.neno-editor .ql-editor .ql-code-block-container {
+    margin: 0.4em 0;
+    padding: 0.75em 1em;
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Markdown 模式的输入框, 字号行高与编辑器相同 */
+.md-editor {
+    display: block;
+    width: 100%;
+    min-height: 72px;
+    max-height: 50vh;
+    padding: 14px 16px 8px;
+    border: 0;
+    outline: none;
+    resize: none;
+    overflow-y: auto;
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.75;
+    letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
+    tab-size: 4;
+}
+.md-editor::placeholder {
+    color: var(--ink-3);
 }
 .ql-editor.ql-blank::before {
     left: 16px !important;
@@ -507,6 +609,7 @@ html.theme-switching *::after {
 .neno-toolbar .editor-tool,
 .ql-toolbar.ql-snow .neno-toolbar .editor-tool {
     float: none;
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -530,16 +633,16 @@ html.theme-switching *::after {
     color: var(--primary-300);
 }
 /* 编辑器中的链接和引用与笔记展示保持一致 */
-.ql-editor a {
+.neno-editor .ql-editor a {
     color: var(--primary-600);
     text-decoration: underline;
     text-decoration-color: color-mix(in oklab, var(--primary-500) 35%, transparent);
     text-underline-offset: 3px;
 }
-.dark .ql-editor a {
+.dark .neno-editor .ql-editor a {
     color: var(--primary-300);
 }
-.ql-editor blockquote {
+.neno-editor .ql-editor blockquote {
     margin: 0;
     padding: 0.1em 0 0.1em 0.85em;
     border-left: 2.5px solid color-mix(in oklab, var(--primary-500) 50%, transparent);

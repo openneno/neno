@@ -2,6 +2,7 @@
     import {onDestroy, onMount, tick} from "svelte";
     import {shortUrl} from "../lib/renderContent.js";
     import {highlightTags} from "../lib/tagHighlight.js";
+    import {htmlToMarkdown, markdownToHtml} from "../lib/markdown.js";
     import {createEventDispatcher} from "svelte";
     import {fade, fly} from "../lib/motion.js";
     import {cubicOut} from "svelte/easing";
@@ -67,6 +68,191 @@
     let isSending = false;
     const shortcutHint = /Mac|iPhone|iPad/i.test(navigator.platform) ? "⌘ ↵" : "Ctrl ↵";
 
+    // ---------- Markdown 模式 ----------
+    //笔记仍以 html 保存: 切换模式和发送时在 Markdown 与编辑器内容之间转换; 模式只记在本机
+    const MODE_KEY = "neno.editorMode";
+    let mdMode = readMode();
+    let mdText = "";
+    let mdArea;
+
+    function readMode() {
+        try {
+            return localStorage.getItem(MODE_KEY) === "markdown";
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function quillHtml() {
+        // quill 2 的 root.innerHTML 会把无序列表输出为 <ol><li data-list="bullet">,
+        // 使用 getSemanticHTML 得到标准的 <ul>/<ol>, 并还原 quill 2 转换出的 &nbsp; 以保持 tag 的解析
+        return quillEditor.getSemanticHTML().replaceAll("&nbsp;", " ");
+    }
+
+    //把 Markdown 写回编辑器, 由 quill 统一生成保存用的 html
+    function markdownToQuill() {
+        quillEditor.setContents(quillEditor.clipboard.convert({html: markdownToHtml(mdText)}), "silent");
+        isContentEmpty = quillEditor.getText().trim().length === 0;
+    }
+
+    async function toggleMarkdown() {
+        showTip = false;
+        linkPop = null;
+        if (mdMode) {
+            markdownToQuill();
+            mdMode = false;
+            await tick();
+            quillEditor.focus();
+            quillEditor.setSelection(quillEditor.getLength(), 0, "api");
+        } else {
+            mdText = quillEditor.getText().trim() ? htmlToMarkdown(quillHtml()) : "";
+            mdMode = true;
+            await tick();
+            focusMarkdown(mdText.length);
+        }
+        try {
+            localStorage.setItem(MODE_KEY, mdMode ? "markdown" : "rich");
+        } catch (e) {
+            //无痕模式等无法保存时, 只在本次生效
+        }
+    }
+
+    function focusMarkdown(index) {
+        if (!mdArea) return;
+        autosize();
+        mdArea.focus();
+        mdArea.setSelectionRange(index, index);
+    }
+
+    function autosize() {
+        if (!mdArea) return;
+        mdArea.style.height = "auto";
+        mdArea.style.height = `${mdArea.scrollHeight + 2}px`;
+    }
+
+    $: if (mdMode) isContentEmpty = mdText.trim().length === 0;
+
+    //在 Markdown 中替换 [start, end) 并把光标放到 caret
+    async function mdReplace(start, end, insert, caretStart, caretEnd = caretStart) {
+        mdText = mdText.slice(0, start) + insert + mdText.slice(end);
+        await tick();
+        autosize();
+        mdArea.focus();
+        mdArea.setSelectionRange(caretStart, caretEnd);
+    }
+
+    //工具栏: 用 Markdown 语法包裹选中的文字
+    function mdWrap(before, after = before) {
+        const {selectionStart: start, selectionEnd: end} = mdArea;
+        const selected = mdText.slice(start, end);
+        mdReplace(start, end, before + selected + after, start + before.length, start + before.length + selected.length);
+    }
+
+    //工具栏: 给光标所在(或选中)的每一行加上行首标记, 已有时去掉
+    function mdPrefix(kind) {
+        const {selectionStart: start, selectionEnd: end} = mdArea;
+        const lineStart = mdText.lastIndexOf("\n", start - 1) + 1;
+        let lineEnd = mdText.indexOf("\n", end);
+        if (lineEnd === -1) lineEnd = mdText.length;
+        const lines = mdText.slice(lineStart, lineEnd).split("\n");
+        const marks = {bullet: /^- /, ordered: /^\d+\. /, quote: /^> ?/};
+        const all = lines.every((line) => marks[kind].test(line));
+        const next = lines
+            .map((line, i) => {
+                const bare = line.replace(/^(- |\d+\. |> ?)/, "");
+                if (all) return bare;
+                return (kind === "bullet" ? "- " : kind === "ordered" ? `${i + 1}. ` : "> ") + bare;
+            })
+            .join("\n");
+        mdReplace(lineStart, lineEnd, next, lineStart + next.length);
+    }
+
+    function mdLink() {
+        const {selectionStart: start, selectionEnd: end} = mdArea;
+        const selected = mdText.slice(start, end);
+        if (/^(https?:\/\/|www\.)\S+$/i.test(selected)) {
+            mdReplace(start, end, `[](${selected})`, start + 1);
+        } else {
+            const insert = `[${selected}](https://)`;
+            const urlAt = start + selected.length + 3;
+            mdReplace(start, end, insert, urlAt, urlAt + "https://".length);
+        }
+    }
+
+    function onMarkdownKeydown(event) {
+        if (event.isComposing) return;
+        if (tagTips.length > 0 && showTip && ["ArrowUp", "ArrowDown", "Enter", "Escape"].includes(event.key)) {
+            event.preventDefault();
+            if (event.key === "ArrowUp" && tagTipsFocusIndex > 0) tagTipsFocusIndex--;
+            if (event.key === "ArrowDown" && tagTipsFocusIndex < tagTips.length - 1) tagTipsFocusIndex++;
+            if (event.key === "Enter") tipTagInsert(tagTips[tagTipsFocusIndex]);
+            if (event.key === "Enter" || event.key === "Escape") showTip = false;
+            return;
+        }
+        const shortKey = event.metaKey || event.ctrlKey;
+        if (event.key === "Enter" && shortKey) {
+            event.preventDefault();
+            if ((!isContentEmpty || audioClips.length > 0) && !isSending && !transcribing && !recorder) sendBiu();
+        } else if (shortKey && event.key.toLowerCase() === "b") {
+            event.preventDefault();
+            mdWrap("**");
+        } else if (shortKey && event.key.toLowerCase() === "k") {
+            event.preventDefault();
+            mdLink();
+        } else if (event.key === "Enter" && !event.shiftKey) {
+            continueList(event);
+        }
+    }
+
+    //列表/引用中回车自动续上标记, 空的一项回车结束列表
+    function continueList(event) {
+        const {selectionStart: start, selectionEnd: end} = mdArea;
+        if (start !== end) return;
+        const lineStart = mdText.lastIndexOf("\n", start - 1) + 1;
+        const line = mdText.slice(lineStart, start);
+        const match = line.match(/^(\s*)([-*+]|\d+\.|>) (.*)$/);
+        if (!match) return;
+        event.preventDefault();
+        if (!match[3].trim()) {
+            mdReplace(lineStart, start, "", lineStart);
+            return;
+        }
+        const marker = /\d/.test(match[2]) ? `${parseInt(match[2]) + 1}.` : match[2];
+        const insert = `\n${match[1]}${marker} `;
+        mdReplace(start, start, insert, start + insert.length);
+    }
+
+    //textarea 中某个位置的坐标(相对卡片), 用于显示标签提示
+    function textareaBounds(index) {
+        const style = getComputedStyle(mdArea);
+        const mirror = document.createElement("div");
+        for (const prop of ["boxSizing", "width", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "borderTopWidth", "borderLeftWidth", "fontFamily", "fontSize", "fontWeight", "lineHeight", "letterSpacing", "wordSpacing", "tabSize"]) {
+            mirror.style[prop] = style[prop];
+        }
+        Object.assign(mirror.style, {position: "absolute", visibility: "hidden", top: "0", left: "0", whiteSpace: "pre-wrap", overflowWrap: "anywhere"});
+        mirror.textContent = mdText.slice(0, index);
+        const marker = document.createElement("span");
+        marker.textContent = "​";
+        mirror.append(marker);
+        mdArea.parentElement.append(mirror);
+        const bounds = {
+            left: mdArea.offsetLeft + marker.offsetLeft,
+            top: mdArea.offsetTop + marker.offsetTop - mdArea.scrollTop,
+            height: marker.offsetHeight,
+        };
+        mirror.remove();
+        return bounds;
+    }
+
+    function onMarkdownPaste(evt) {
+        const files = evt.clipboardData && evt.clipboardData.files;
+        if (!files || !files.length) return;
+        evt.preventDefault();
+        [].forEach.call(files, (file) => {
+            if (file.type.match(/^image\/(gif|jpe?g|a?png|bmp)/i)) imageFiles = joinFile([file]);
+        });
+    }
+
     onMount(() => {
         const options = {
             // debug: "info",
@@ -105,7 +291,12 @@
         const delta = quillEditor.clipboard.convert({html: content});
         quillEditor.setContents(delta, "silent");
         stopTagHighlight = highlightTags(quillEditor);
-        quillEditor.focus();
+        if (mdMode) {
+            mdText = content.length !== 0 ? htmlToMarkdown(content) : "";
+            tick().then(() => focusMarkdown(mdText.length));
+        } else {
+            quillEditor.focus();
+        }
         if (content.length !== 0) {
             isContentEmpty = false;
         }
@@ -168,7 +359,7 @@
             }
             updateLink();
         });
-        quillEditor.setSelection(quillEditor.getText().length);
+        if (!mdMode) quillEditor.setSelection(quillEditor.getText().length);
         quillEditor.clipboard.addMatcher("IMG", (node, delta) => {
             const Delta = Quill.import("delta");
             return new Delta().insert("");
@@ -223,8 +414,12 @@
             alertDialog({title: "无法录音", message: "当前浏览器不支持录音, 请使用最新版的 Chrome, Edge, Safari 或 Firefox。", icon: "ri-mic-off-line"});
             return;
         }
-        const range = quillEditor.getSelection();
-        recordInsertIndex = range ? range.index + range.length : null;
+        if (mdMode) {
+            recordInsertIndex = mdArea && document.activeElement === mdArea ? mdArea.selectionEnd : null;
+        } else {
+            const range = quillEditor.getSelection();
+            recordInsertIndex = range ? range.index + range.length : null;
+        }
         recordingStarting = true;
         try {
             recorder = await startRecording({
@@ -302,6 +497,13 @@
     }
 
     function insertTranscript(text, index) {
+        if (mdMode) {
+            const at = index === null || index === undefined || index > mdText.length ? mdText.length : index;
+            const before = at > 0 ? mdText.charAt(at - 1) : "\n";
+            const insert = /\s/.test(before) ? text : ` ${text}`;
+            mdReplace(at, at, insert, at + insert.length);
+            return;
+        }
         const length = quillEditor.getLength();
         const at = index === null || index === undefined || index > length - 1 ? length - 1 : index;
         //与前面的文字之间留一个空格, 避免和 #标签 连在一起
@@ -316,21 +518,31 @@
     }
 
     function toolTip() {
-        let selection = quillEditor.getSelection();
-        if (selection == null) {
-            showTip = false;
-            return;
+        let cIndex;
+        let text;
+        if (mdMode) {
+            if (!mdArea || document.activeElement !== mdArea || mdArea.selectionStart !== mdArea.selectionEnd) {
+                showTip = false;
+                return;
+            }
+            cIndex = mdArea.selectionStart;
+            text = mdText + "\n";
+        } else {
+            let selection = quillEditor.getSelection();
+            if (selection == null) {
+                showTip = false;
+                return;
+            }
+            cIndex = selection.index;
+            text = quillEditor.getText();
         }
-
-        let cIndex = selection.index;
-        const text = quillEditor.getText();
         // console.log(text.length);
         if (text.length === 1) {
             showTip = false;
             return;
         }
         let sIndex = text.lastIndexOf("#", cIndex);
-        if (sIndex !== -1) {
+        if (sIndex !== -1 && !(mdMode && /\s/.test(text.substring(sIndex, cIndex)))) {
             let tagMay = text.substring(sIndex, cIndex);
 
             tagTips = [];
@@ -348,7 +560,7 @@
                 if (tagTips.length <= tagTipsFocusIndex) {
                     tagTipsFocusIndex = tagTips.length - 1;
                 }
-                let getBounds = quillEditor.getBounds(sIndex);
+                let getBounds = mdMode ? textareaBounds(sIndex) : quillEditor.getBounds(sIndex);
                 selectionIndex = cIndex;
                 tagStartIndex = sIndex;
                 showTip = true;
@@ -362,6 +574,13 @@
     }
 
     function tipTagInsert(tag) {
+        if (mdMode) {
+            const after = mdText.charAt(selectionIndex);
+            const insert = !after || /\s/.test(after) ? tag : `${tag} `;
+            mdReplace(tagStartIndex, selectionIndex, insert, tagStartIndex + insert.length);
+            showTip = false;
+            return;
+        }
         let deletelength = selectionIndex - tagStartIndex;
 
         let updateContents = {
@@ -513,6 +732,10 @@
     }
 
     function insertHashTag() {
+        if (mdMode) {
+            mdReplace(mdArea.selectionStart, mdArea.selectionEnd, "#", mdArea.selectionStart + 1);
+            return;
+        }
         const range = quillEditor.getSelection(true);
         let index = 0;
         if (range) {
@@ -527,14 +750,14 @@
 
 
     async function sendBiu() {
-        // quill 2 的 root.innerHTML 会把无序列表输出为 <ol><li data-list="bullet">,
-        // 使用 getSemanticHTML 得到标准的 <ul>/<ol>, 并还原 quill 2 转换出的 &nbsp; 以保持 tag 的解析
-        let sContent = quillEditor.getSemanticHTML().replaceAll("&nbsp;", " ");
+        if (mdMode) markdownToQuill();
+        let sContent = quillHtml();
         isSending = true;
-        let cc = quillEditor.getContents();
         let tags = [];
+        //Markdown 模式下编辑器是隐藏的, 隐藏元素的 innerText 没有换行, 改用 quill 的纯文本
+        const pureContent = mdMode ? quillEditor.getText().replace(/\n$/, "") : editor.childNodes[0].innerText;
 
-        let mt = editor.childNodes[0].innerText.match(/#\S*/g);
+        let mt = pureContent.match(/#\S*/g);
         if (mt != null) {
             tags = [...tags, ...mt];
         }
@@ -581,7 +804,7 @@
 
         addNeno({
             content: sContent,
-            pureContent: editor.childNodes[0].innerText,
+            pureContent: pureContent,
             _id: _id,
             parentId: parentId,
             source: "web",
@@ -595,6 +818,7 @@
                 isSending = false;
                 if (re.errorMessage === undefined) {
                     quillEditor.setContents([]);
+                    mdText = "";
                     dispatch("update", re.body);
                     cancelInput();
                 }
@@ -617,7 +841,27 @@
 <div
         class="card relative flex flex-col transition-[border-color,box-shadow] duration-200 focus-within:border-primary-400/60 focus-within:ring-3 focus-within:ring-primary-500/10"
 >
-    <div bind:this={editor} id="editor"></div>
+    <div bind:this={editor} id="editor" class="neno-editor" style:display={mdMode ? "none" : null}></div>
+    {#if mdMode}
+        <textarea
+                bind:this={mdArea}
+                bind:value={mdText}
+                class="md-editor"
+                {placeholder}
+                rows="3"
+                spellcheck="false"
+                aria-label="Markdown 编辑"
+                on:input={() => {
+                    autosize();
+                    toolTip();
+                }}
+                on:keydown={onMarkdownKeydown}
+                on:click={toolTip}
+                on:keyup={(event) => !["ArrowUp", "ArrowDown", "Enter", "Escape"].includes(event.key) && toolTip()}
+                on:blur={() => setTimeout(() => document.activeElement !== mdArea && (showTip = false), 150)}
+                on:paste={onMarkdownPaste}
+        ></textarea>
+    {/if}
     {#if linkPop}
         <div
                 class="link-pop absolute z-20 flex items-center gap-0.5 rounded-lg border border-line bg-surface p-1 text-sm shadow-pop"
@@ -739,17 +983,39 @@
                 {/if}
             </div>
         {/if}
-        <div id="toolbar" class="neno-toolbar flex items-center gap-0.5" bind:this={toolbar} style:display={recorder ? "none" : null}>
+        <div id="toolbar" class="neno-toolbar flex min-w-0 items-center gap-0.5 overflow-x-auto [scrollbar-width:none]" bind:this={toolbar} style:display={recorder ? "none" : null}>
             <button class="editor-tool" title="插入标签" aria-label="插入标签" on:click={insertHashTag}><i class="ri-hashtag"></i></button>
-            <button class="editor-tool ql-bold" title="加粗" aria-label="加粗"><i class="ri-bold"></i></button>
-            <button class="editor-tool ql-list" value="bullet" title="无序列表" aria-label="无序列表"><i class="ri-list-unordered"></i></button>
-            <button class="editor-tool ql-list" value="ordered" title="有序列表" aria-label="有序列表"><i class="ri-list-ordered"></i></button>
-            <button class="editor-tool ql-underline" title="下划线" aria-label="下划线"><i class="ri-underline"></i></button>
-            <button class="editor-tool ql-blockquote" title="引用" aria-label="引用"><i class="ri-double-quotes-l"></i></button>
-            <button class="editor-tool ql-link" title="链接(先选中文字)" aria-label="链接"><i class="ri-link"></i></button>
+            <!-- 富文本模式的格式按钮由 quill 接管; Markdown 模式下换成插入 Markdown 语法的按钮 -->
+            <span class="contents" style:display={mdMode ? "none" : null}>
+                <button class="editor-tool ql-bold" title="加粗" aria-label="加粗"><i class="ri-bold"></i></button>
+                <button class="editor-tool ql-list" value="bullet" title="无序列表" aria-label="无序列表"><i class="ri-list-unordered"></i></button>
+                <button class="editor-tool ql-list" value="ordered" title="有序列表" aria-label="有序列表"><i class="ri-list-ordered"></i></button>
+                <button class="editor-tool ql-underline" title="下划线" aria-label="下划线"><i class="ri-underline"></i></button>
+                <button class="editor-tool ql-blockquote" title="引用" aria-label="引用"><i class="ri-double-quotes-l"></i></button>
+                <button class="editor-tool ql-link" title="链接(先选中文字)" aria-label="链接"><i class="ri-link"></i></button>
+            </span>
+            {#if mdMode}
+                <button class="editor-tool" title="加粗 **文字**" aria-label="加粗" on:click={() => mdWrap("**")}><i class="ri-bold"></i></button>
+                <button class="editor-tool" title="无序列表 - " aria-label="无序列表" on:click={() => mdPrefix("bullet")}><i class="ri-list-unordered"></i></button>
+                <button class="editor-tool" title="有序列表 1. " aria-label="有序列表" on:click={() => mdPrefix("ordered")}><i class="ri-list-ordered"></i></button>
+                <button class="editor-tool" title="代码 `代码`" aria-label="行内代码" on:click={() => mdWrap("`")}><i class="ri-code-line"></i></button>
+                <button class="editor-tool" title="引用 > " aria-label="引用" on:click={() => mdPrefix("quote")}><i class="ri-double-quotes-l"></i></button>
+                <button class="editor-tool" title="链接 [文字](网址)" aria-label="链接" on:click={mdLink}><i class="ri-link"></i></button>
+            {/if}
             <button class="editor-tool" title="添加图片" aria-label="添加图片" on:click={selectImages}><i class="ri-image-line"></i></button>
             <button class="editor-tool" title="语音输入" aria-label="语音输入" on:click={toggleRecording}>
                 <i class="ri-mic-line"></i>
+            </button>
+            <span class="mx-0.5 h-4 w-px shrink-0 bg-line-strong" aria-hidden="true"></span>
+            <button
+                    class="editor-tool"
+                    class:ql-active={mdMode}
+                    title={mdMode ? "切换到富文本模式" : "切换到 Markdown 模式"}
+                    aria-label="Markdown 模式"
+                    aria-pressed={mdMode}
+                    on:click={toggleMarkdown}
+            >
+                <i class="ri-markdown-line"></i>
             </button>
             <input
                     bind:this={uploadimageNode}
@@ -768,7 +1034,7 @@
                 </button>
             </div>
         {/if}
-        <div class="flex items-center gap-2" style:display={recorder ? "none" : null}>
+        <div class="flex shrink-0 items-center gap-2" style:display={recorder ? "none" : null}>
             <span class="hidden text-xs text-ink-3 sm:inline">{shortcutHint} 发送</span>
             {#if canCancle}
                 <button class="btn btn-sm btn-ghost" on:click={cancelInput}>取消</button>
